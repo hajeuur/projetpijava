@@ -1,22 +1,24 @@
 package com.esprit;
 
-import com.esprit.dao.UtilisateurDAO;
-import com.esprit.models.Utilisateur;
-import java.util.List;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-public class Main {
+public class Main extends Application {
+
+    @Override
+    public void start(Stage stage) throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/views/Login.fxml"));
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+        stage.setTitle("MentorAI");
+        stage.setScene(scene);
+        stage.show();
+    }
+
     public static void main(String[] args) {
-
-        UtilisateurDAO dao = new UtilisateurDAO();
-
-        // TEST 1 : Ajouter un utilisateur
-        Utilisateur u = new Utilisateur("Ben Ali", "Ahmed", "ahmed@esprit.tn", "1234", "etudiant");
-        dao.ajouter(u);
-
-        // TEST 2 : Afficher tous les utilisateurs
-        List<Utilisateur> liste = dao.getAll();
-        for (Utilisateur user : liste) {
-            System.out.println(user);
-        }
+        launch(args);
     }
 }

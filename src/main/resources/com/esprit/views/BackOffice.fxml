@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.esprit.controllers.BackOfficeController"
+            prefHeight="650.0" prefWidth="1100.0">
+
+    <!-- Sidebar gauche -->
+    <left>
+        <VBox spacing="0" style="-fx-background-color: #1a2a4a; -fx-min-width: 200;">
+            <Label text="MentorAI"
+                   style="-fx-text-fill: white; -fx-font-size: 20; -fx-font-weight: bold; -fx-padding: 30 20 20 20;"/>
+            <Button text="Gestion Utilisateurs" maxWidth="Infinity"
+                    style="-fx-background-color: #2a3a5a; -fx-text-fill: white; -fx-padding: 15 20; -fx-alignment: CENTER-LEFT;"/>
+            <VBox VBox.vgrow="ALWAYS"/>
+            <Button text="Déconnexion" maxWidth="Infinity"
+                    onAction="#handleLogout"
+                    style="-fx-background-color: transparent; -fx-text-fill: #ff6b6b; -fx-padding: 15 20; -fx-alignment: CENTER-LEFT;"/>
+        </VBox>
+    </left>
+
+    <!-- Contenu principal -->
+    <center>
+        <VBox spacing="20" style="-fx-padding: 30;">
+
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Label text="Gestion des utilisateurs"
+                       style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #1a2a4a;"/>
+                <HBox HBox.hgrow="ALWAYS"/>
+                <Button text="+ Ajouter utilisateur"
+                        onAction="#handleAjouter"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 16;"/>
+            </HBox>
+
+            <!-- Barre de recherche -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="searchField"
+                           promptText="Rechercher par nom, email ou rôle..."
+                           prefWidth="400"
+                           onKeyReleased="#handleSearch"
+                           style="-fx-border-color: #cccccc; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8;"/>
+            </HBox>
+
+            <!-- TableView -->
+            <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colId" text="#" prefWidth="50"/>
+                    <TableColumn fx:id="colNom" text="Nom" prefWidth="120"/>
+                    <TableColumn fx:id="colPrenom" text="Prénom" prefWidth="120"/>
+                    <TableColumn fx:id="colEmail" text="Email" prefWidth="200"/>
+                    <TableColumn fx:id="colRole" text="Rôle" prefWidth="100"/>
+                    <TableColumn fx:id="colStatus" text="Status" prefWidth="100"/>
+                    <TableColumn fx:id="colActions" text="Actions" prefWidth="200"/>
+                </columns>
+            </TableView>
+
+        </VBox>
+    </center>
+
+</BorderPane>

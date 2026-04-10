@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.esprit.controllers.InscriptionController"
+      spacing="15" style="-fx-padding: 30; -fx-background-color: white;"
+      prefWidth="600" prefHeight="550">
+
+    <!-- Header -->
+    <VBox style="-fx-background-color: #1d8a6e; -fx-background-radius: 8; -fx-padding: 15;">
+        <Label text="Créer un nouvel utilisateur"
+               style="-fx-text-fill: white; -fx-font-size: 18; -fx-font-weight: bold;"/>
+        <Label text="Remplissez le formulaire pour ajouter un nouveau membre"
+               style="-fx-text-fill: #cceecc; -fx-font-size: 12;"/>
+    </VBox>
+
+    <!-- Formulaire -->
+    <HBox spacing="15">
+        <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <Label text="Prénom *" style="-fx-font-weight: bold;"/>
+            <TextField fx:id="prenomField"
+                       promptText="Entrez le prénom"
+                       style="-fx-border-color: #cccccc; -fx-border-radius: 6;
+                              -fx-background-radius: 6; -fx-padding: 8;"/>
+        </VBox>
+        <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <Label text="Nom *" style="-fx-font-weight: bold;"/>
+            <TextField fx:id="nomField"
+                       promptText="Entrez le nom"
+                       style="-fx-border-color: #cccccc; -fx-border-radius: 6;
+                              -fx-background-radius: 6; -fx-padding: 8;"/>
+        </VBox>
+    </HBox>
+
+    <VBox spacing="8">
+        <Label text="Adresse email *" style="-fx-font-weight: bold;"/>
+        <TextField fx:id="emailField"
+                   promptText="exemple@email.com"
+                   style="-fx-border-color: #cccccc; -fx-border-radius: 6;
+                          -fx-background-radius: 6; -fx-padding: 8;"/>
+    </VBox>
+
+    <VBox spacing="8">
+        <Label text="Mot de passe *" style="-fx-font-weight: bold;"/>
+        <PasswordField fx:id="mdpField"
+                       promptText="Minimum 8 caractères"
+                       style="-fx-border-color: #cccccc; -fx-border-radius: 6;
+                              -fx-background-radius: 6; -fx-padding: 8;"/>
+    </VBox>
+
+    <VBox spacing="8">
+        <Label text="Rôle *" style="-fx-font-weight: bold;"/>
+        <ComboBox fx:id="roleCombo" maxWidth="Infinity"
+                  promptText="Sélectionnez un rôle"
+                  style="-fx-border-color: #cccccc; -fx-border-radius: 6;
+                         -fx-background-radius: 6;"/>
+    </VBox>
+
+    <Label fx:id="errorLabel" style="-fx-text-fill: red; -fx-font-size: 12;"/>
+    <Label fx:id="successLabel" style="-fx-text-fill: green; -fx-font-size: 12;"/>
+
+    <!-- Boutons -->
+    <HBox spacing="10">
+        <Button text="Créer l'utilisateur"
+                onAction="#handleCreer"
+                HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                style="-fx-background-color: #1a2a4a; -fx-text-fill: white;
+                       -fx-background-radius: 6; -fx-padding: 12;"/>
+        <Button text="Tout effacer"
+                onAction="#handleEffacer"
+                style="-fx-background-color: #e74c3c; -fx-text-fill: white;
+                       -fx-background-radius: 6; -fx-padding: 12;"/>
+        <Button text="Retour"
+                onAction="#handleRetour"
+                style="-fx-background-color: #95a5a6; -fx-text-fill: white;
+                       -fx-background-radius: 6; -fx-padding: 12;"/>
+    </HBox>
+
+</VBox>

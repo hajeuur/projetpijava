@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.esprit.controllers.FrontOfficeController"
+            prefHeight="650.0" prefWidth="900.0">
+
+    <!-- Navbar -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20"
+              style="-fx-background-color: #b0c4d8; -fx-padding: 15 30;">
+            <Label text="MentorAI"
+                   style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1a2a4a;"/>
+            <HBox HBox.hgrow="ALWAYS"/>
+            <Label fx:id="userNameLabel"
+                   style="-fx-background-color: #e74c3c; -fx-text-fill: white;
+                          -fx-background-radius: 20; -fx-padding: 6 14; -fx-font-weight: bold;"/>
+            <Button text="Déconnexion"
+                    onAction="#handleLogout"
+                    style="-fx-background-color: #1a2a4a; -fx-text-fill: white;
+                           -fx-background-radius: 20; -fx-padding: 6 14;"/>
+        </HBox>
+    </top>
+
+    <!-- Contenu -->
+    <center>
+        <VBox spacing="30" style="-fx-padding: 40;">
+
+            <!-- Message bienvenue -->
+            <HBox spacing="40" alignment="CENTER_LEFT">
+                <VBox spacing="15" HBox.hgrow="ALWAYS">
+                    <Label fx:id="welcomeLabel"
+                           style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #1a2a4a;"/>
+                    <Label fx:id="emailInfoLabel"
+                           style="-fx-font-size: 13; -fx-text-fill: #555;"/>
+                    <Label fx:id="roleInfoLabel"
+                           style="-fx-background-color: #e8f4fd; -fx-text-fill: #1a2a4a;
+                                  -fx-background-radius: 20; -fx-padding: 6 14; -fx-font-size: 13;"/>
+                    <Button text="Mon profil"
+                            onAction="#handleMonProfil"
+                            style="-fx-background-color: transparent; -fx-border-color: #e74c3c;
+                                   -fx-text-fill: #e74c3c; -fx-background-radius: 20;
+                                   -fx-border-radius: 20; -fx-padding: 8 20;"/>
+                </VBox>
+            </HBox>
+
+            <!-- Cards infos -->
+            <HBox spacing="20">
+                <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                      style="-fx-background-color: #f9f9f9; -fx-border-color: #eeeeee;
+                             -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 20;">
+                    <Label fx:id="nomCardLabel"
+                           style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1a2a4a;"/>
+                    <Label text="Votre nom" style="-fx-text-fill: #888; -fx-font-size: 12;"/>
+                </VBox>
+                <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                      style="-fx-background-color: #f9f9f9; -fx-border-color: #eeeeee;
+                             -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 20;">
+                    <Label fx:id="emailCardLabel"
+                           style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #1a2a4a;"/>
+                    <Label text="Votre email" style="-fx-text-fill: #888; -fx-font-size: 12;"/>
+                </VBox>
+                <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                      style="-fx-background-color: #f9f9f9; -fx-border-color: #eeeeee;
+                             -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 20;">
+                    <Label fx:id="roleCardLabel"
+                           style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1a2a4a;"/>
+                    <Label text="Votre rôle" style="-fx-text-fill: #888; -fx-font-size: 12;"/>
+                </VBox>
+            </HBox>
+
+        </VBox>
+    </center>
+
+</BorderPane>
