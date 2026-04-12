@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.UtilisateurFormController"
+      spacing="15">
+    <padding><Insets top="20" right="25" bottom="20" left="25"/></padding>
+
+    <Label fx:id="formTitle" text="Nouvel Utilisateur" styleClass="section-title"/>
+
+    <HBox spacing="15">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="Prénom *" style="-fx-font-weight: bold;"/>
+            <TextField fx:id="tfPrenom" promptText="Ex: Ali"/>
+            <Label fx:id="errPrenom" styleClass="error-label" managed="false" visible="false"/>
+        </VBox>
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="Nom *" style="-fx-font-weight: bold;"/>
+            <TextField fx:id="tfNom" promptText="Ex: Ben Salah"/>
+            <Label fx:id="errNom" styleClass="error-label" managed="false" visible="false"/>
+        </VBox>
+    </HBox>
+
+    <VBox spacing="3">
+        <Label text="Email *" style="-fx-font-weight: bold;"/>
+        <TextField fx:id="tfEmail" promptText="Ex: ali.bensalah@esprit.tn"/>
+        <Label fx:id="errEmail" styleClass="error-label" managed="false" visible="false"/>
+    </VBox>
+
+    <VBox spacing="3">
+        <Label text="Mot de passe *" style="-fx-font-weight: bold;"/>
+        <PasswordField fx:id="tfMdp" promptText="Mot de passe"/>
+        <Label fx:id="errMdp" styleClass="error-label" managed="false" visible="false"/>
+    </VBox>
+
+    <HBox spacing="15">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="Rôle *" style="-fx-font-weight: bold;"/>
+            <ComboBox fx:id="cbRole" maxWidth="Infinity"/>
+        </VBox>
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="Statut *" style="-fx-font-weight: bold;"/>
+            <ComboBox fx:id="cbStatus" maxWidth="Infinity"/>
+        </VBox>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Annuler" onAction="#handleCancel" styleClass="btn-secondary"/>
+        <Button text="💾 Sauvegarder" onAction="#handleSave" styleClass="btn-success"/>
+    </HBox>
+
+</VBox>

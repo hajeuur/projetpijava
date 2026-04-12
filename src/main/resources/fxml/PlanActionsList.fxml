@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.PlanActionsListController"
+      spacing="15">
+
+    <!-- ===== HEADER ===== -->
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Label text="📋 Plans d'Actions" styleClass="section-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnNewPlan" text="+ Nouveau Plan" onAction="#handleAdd" styleClass="btn-success"/>
+    </HBox>
+
+    <!-- ===== BARRE DE RECHERCHE & FILTRES ===== -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField" promptText="🔍 Rechercher (décision, description...)"
+                   prefWidth="280" styleClass="search-bar" onAction="#handleSearch"/>
+        <ComboBox fx:id="statutFilter" promptText="Filtrer par statut" prefWidth="160"/>
+        <ComboBox fx:id="categorieFilter" promptText="Filtrer par catégorie" prefWidth="180"/>
+        <Button text="Rechercher" onAction="#handleSearch" styleClass="btn-primary"/>
+        <Button text="Réinitialiser" onAction="#handleReset" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- ===== STATISTIQUES RAPIDES ===== -->
+    <HBox fx:id="statsBar" spacing="15">
+        <Label fx:id="lblTotal" text="Total: 0" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+        <Label fx:id="lblEnAttente" text="⏳ En attente: 0" style="-fx-text-fill: #f39c12; -fx-font-size: 13px;"/>
+        <Label fx:id="lblEnCours" text="🔄 En cours: 0" style="-fx-text-fill: #3498db; -fx-font-size: 13px;"/>
+        <Label fx:id="lblFini" text="✅ Fini: 0" style="-fx-text-fill: #27ae60; -fx-font-size: 13px;"/>
+        <Label fx:id="lblRejete" text="❌ Rejeté: 0" style="-fx-text-fill: #e74c3c; -fx-font-size: 13px;"/>
+    </HBox>
+
+    <!-- ===== TABLE ===== -->
+    <TableView fx:id="tablePlans" VBox.vgrow="ALWAYS" styleClass="table-view">
+        <columns>
+            <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
+            <TableColumn fx:id="colDecision" text="Décision" prefWidth="250"/>
+            <TableColumn fx:id="colStatut" text="Statut" prefWidth="110"/>
+            <TableColumn fx:id="colCategorie" text="Catégorie" prefWidth="130"/>
+            <TableColumn fx:id="colDate" text="Date" prefWidth="140"/>
+            <TableColumn fx:id="colActions" text="Actions" prefWidth="200"/>
+        </columns>
+    </TableView>
+
+    <!-- ===== ACTIONS BAS DE PAGE ===== -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="📄 Export PDF" onAction="#handleExportPdf" styleClass="btn-warning"/>
+    </HBox>
+
+</VBox>

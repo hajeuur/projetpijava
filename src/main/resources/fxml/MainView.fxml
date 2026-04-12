@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="edu.connection3a36.controllers.MainController"
+            styleClass="main-container">
+
+    <!-- ===== SIDEBAR (LEFT) ===== -->
+    <left>
+        <VBox styleClass="sidebar" spacing="5" prefWidth="240" alignment="TOP_CENTER">
+            <padding><Insets top="20" right="10" bottom="20" left="10"/></padding>
+
+            <!-- Logo / Titre -->
+            <Label text="🎓 MentorAI" styleClass="sidebar-title"/>
+            <Separator/>
+
+            <!-- Switcher Box pour basculer facilement -->
+            <VBox fx:id="boxSwitcher" spacing="10" alignment="CENTER" style="-fx-padding: 0 0 15 0;">
+                <Button text="🌐 Mode FRONT" onAction="#switchToFront" styleClass="sidebar-btn" maxWidth="Infinity" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Button text="⚙️ Mode BACK" onAction="#switchToBack" styleClass="sidebar-btn" maxWidth="Infinity" style="-fx-background-color: #8e44ad; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            </VBox>
+
+            <!-- Bloc ADMIN (Gestion des Users) -->
+            <VBox fx:id="boxAdmin" spacing="5">
+                <Label text="👑 ADMINISTRATION" styleClass="sidebar-section"/>
+                <Button fx:id="btnUtilisateurs" text="👥 Gestion des Users" onAction="#showUtilisateurs"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Bloc BACK ADMIN (Seulement Superadmin) -->
+            <VBox fx:id="boxBackAdmin" spacing="5">
+                <Separator/>
+                <Label text="⚙️ BACK ADMIN (CRUD)" styleClass="sidebar-section"/>
+                <Button text="📋 Plans d'Actions (CRUD)" onAction="#showPlanActions" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button text="📝 Articles (CRUD)" onAction="#showArticles" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnCategories" text="📂 Catégories d'Articles" onAction="#showCategories"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Bloc FRONT MODULE -->
+            <VBox fx:id="boxFront" spacing="5">
+                <Separator/>
+                <Label text="🎓 FRONT MODULE" styleClass="sidebar-section"/>
+                
+                <!-- Dashboard varie selon Enseignant ou Superadmin -->
+                <Button fx:id="btnDashboardEnseignant" text="📊 Dashboard Pédagogique" onAction="#showDashboardEnseignant"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnDashboardAdmin" text="📊 Dashboard Stratégique" onAction="#showAIDecisionnel"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+                
+                <Button fx:id="btnPlanActions" text="📋 Liste Plans d'Actions" onAction="#showPlanActions"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnArticles" text="📝 Liste Articles" onAction="#showArticles"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+                
+                <!-- IA varie selon le rôle -->
+                <Button fx:id="btnAIPedagogique" text="🤖 IA Pédagogique" onAction="#showAIPedagogique"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnAIDecisionnel" text="📈 IA Stratégique" onAction="#showAIDecisionnel"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Spacer -->
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Separator/>
+            <VBox alignment="CENTER" spacing="5">
+                <Label fx:id="lblUser" text="👤 User" styleClass="sidebar-user"/>
+                <Button text="🚪 Se déconnecter" onAction="#handleLogout" styleClass="btn-danger" style="-fx-font-size: 11px;"/>
+            </VBox>
+        </VBox>
+    </left>
+
+
+    <!-- ===== CONTENU PRINCIPAL (CENTER) ===== -->
+    <center>
+        <StackPane fx:id="contentArea" styleClass="content-area">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <!-- Les vues seront chargées dynamiquement ici -->
+            <VBox alignment="CENTER" spacing="15">
+                <Label text="Bienvenue sur MentorAI" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Sélectionnez une section dans le menu à gauche" style="-fx-font-size: 16px; -fx-text-fill: #7f8c8d;"/>
+            </VBox>
+        </StackPane>
+    </center>
+
+</BorderPane>

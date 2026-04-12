@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.LoginController"
+      alignment="CENTER" spacing="20" styleClass="main-container">
+    <padding><Insets top="40" right="60" bottom="40" left="60"/></padding>
+
+    <VBox alignment="CENTER" spacing="10" styleClass="card" maxWidth="400">
+        <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
+
+        <Label text="🎓 MentorAI" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+        <Label text="Connexion à l'espace de gestion" style="-fx-text-fill: #7f8c8d;"/>
+
+        <Separator/>
+
+        <VBox spacing="5" alignment="CENTER_LEFT" maxWidth="Infinity">
+            <Label text="Adresse Email" style="-fx-font-weight: bold;"/>
+            <TextField fx:id="tfEmail" promptText="admin@esprit.tn" maxWidth="Infinity"/>
+        </VBox>
+
+        <VBox spacing="5" alignment="CENTER_LEFT" maxWidth="Infinity">
+            <Label text="Mot de passe" style="-fx-font-weight: bold;"/>
+            <PasswordField fx:id="tfMdp" promptText="Votre mot de passe" maxWidth="Infinity"/>
+        </VBox>
+
+        <Label fx:id="lblError" text="" styleClass="error-label" visible="false" managed="false"/>
+
+        <Button text="Se connecter" onAction="#handleLogin" styleClass="btn-primary" maxWidth="Infinity" style="-fx-padding: 10; -fx-font-size: 14px;"/>
+        
+        <!-- Aide au test rapide en dev -->
+		<Label text="Info: Dans cette version de test, la validation stricte du mot de passe peut être bypassée si le BCrypt n'est pas dispo." 
+               style="-fx-font-size: 10px; -fx-text-fill: #bdc3c7;" wrapText="true" textAlignment="CENTER"/>
+    </VBox>
+
+</VBox>

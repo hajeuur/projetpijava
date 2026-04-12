@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.ArticleFormController"
+      spacing="15">
+    <padding><Insets top="20" right="25" bottom="20" left="25"/></padding>
+
+    <Label fx:id="formTitle" text="Nouvel Article" styleClass="section-title"/>
+
+    <VBox spacing="3">
+        <Label text="Titre *" style="-fx-font-weight: bold;"/>
+        <TextField fx:id="tfTitre" promptText="Titre de l'article (min 5 car., max 255)"/>
+        <Label fx:id="errTitre" styleClass="error-label" text="" managed="false" visible="false"/>
+    </VBox>
+
+    <VBox spacing="3" VBox.vgrow="ALWAYS">
+        <Label text="Contenu *" style="-fx-font-weight: bold;"/>
+        <TextArea fx:id="taContenu" promptText="Contenu de l'article (min 20 car.)"
+                  prefRowCount="8" wrapText="true" VBox.vgrow="ALWAYS"/>
+        <Label fx:id="errContenu" styleClass="error-label" text="" managed="false" visible="false"/>
+    </VBox>
+
+    <HBox spacing="15">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="Catégorie *" style="-fx-font-weight: bold;"/>
+            <ComboBox fx:id="cbCategorie" maxWidth="Infinity" promptText="Choisir une catégorie"/>
+            <Label fx:id="errCategorie" styleClass="error-label" text="" managed="false" visible="false"/>
+        </VBox>
+        <VBox spacing="3" alignment="CENTER_LEFT">
+            <Label text="Publication" style="-fx-font-weight: bold;"/>
+            <CheckBox fx:id="chkPublished" text="Publier l'article"/>
+        </VBox>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Annuler" onAction="#handleCancel" styleClass="btn-secondary"/>
+        <Button text="💾 Sauvegarder" onAction="#handleSave" styleClass="btn-success"/>
+    </HBox>
+
+</VBox>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.ArticleListController"
+      spacing="15">
+
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Label text="📝 Articles de Référence" styleClass="section-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnNewArticle" text="+ Nouvel Article" onAction="#handleAdd" styleClass="btn-success"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField" promptText="🔍 Rechercher par titre ou contenu..."
+                   prefWidth="280" styleClass="search-bar" onAction="#handleSearch"/>
+        <ComboBox fx:id="categorieFilter" promptText="Catégorie" prefWidth="160"/>
+        <ComboBox fx:id="publishedFilter" promptText="Publication" prefWidth="130"/>
+        <Button text="Rechercher" onAction="#handleSearch" styleClass="btn-primary"/>
+        <Button text="Réinitialiser" onAction="#handleReset" styleClass="btn-secondary"/>
+    </HBox>
+
+    <HBox spacing="15">
+        <Label fx:id="lblTotal" text="Total: 0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblPublished" text="📗 Publiés: 0" style="-fx-text-fill: #27ae60;"/>
+        <Label fx:id="lblDraft" text="📝 Brouillons: 0" style="-fx-text-fill: #95a5a6;"/>
+    </HBox>
+
+    <TableView fx:id="tableArticles" VBox.vgrow="ALWAYS" styleClass="table-view">
+        <columns>
+            <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
+            <TableColumn fx:id="colTitre" text="Titre" prefWidth="250"/>
+            <TableColumn fx:id="colCategorie" text="Catégorie" prefWidth="140"/>
+            <TableColumn fx:id="colPublished" text="Statut" prefWidth="100"/>
+            <TableColumn fx:id="colDate" text="Créé le" prefWidth="110"/>
+            <TableColumn fx:id="colActions" text="Actions" prefWidth="230"/>
+        </columns>
+    </TableView>
+
+</VBox>

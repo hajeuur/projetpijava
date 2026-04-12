@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.CategorieFormController"
+      spacing="15">
+    <padding><Insets top="20" right="25" bottom="20" left="25"/></padding>
+
+    <Label fx:id="formTitle" text="Nouvelle Catégorie" styleClass="section-title"/>
+
+    <VBox spacing="3">
+        <Label text="Nom de la catégorie *" style="-fx-font-weight: bold;"/>
+        <TextField fx:id="tfNom" promptText="Ex: Intelligence Artificielle (min 3 car.)"/>
+        <Label fx:id="errNom" styleClass="error-label" text="" managed="false" visible="false"/>
+    </VBox>
+
+    <VBox spacing="3">
+        <Label text="Description" style="-fx-font-weight: bold;"/>
+        <TextArea fx:id="taDescription" promptText="Description de la catégorie (optionnel, max 1000 car.)"
+                  prefRowCount="3" wrapText="true"/>
+        <Label fx:id="errDescription" styleClass="error-label" text="" managed="false" visible="false"/>
+    </VBox>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Annuler" onAction="#handleCancel" styleClass="btn-secondary"/>
+        <Button text="💾 Sauvegarder" onAction="#handleSave" styleClass="btn-success"/>
+    </HBox>
+
+</VBox>

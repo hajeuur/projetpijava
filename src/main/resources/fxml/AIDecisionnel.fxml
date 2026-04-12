@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.AIDecisionnelController"
+      spacing="15">
+
+    <Label text="📊 Dashboard IA Décisionnelle" styleClass="section-title"/>
+    <Label text="Vue globale des statistiques et analyse IA pour l'administrateur" styleClass="section-subtitle"/>
+
+    <!-- Cartes statistiques -->
+    <HBox spacing="15">
+        <VBox styleClass="stat-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+            <Label fx:id="lblTotalPlans" text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #3498db;"/>
+            <Label text="Plans d'Actions" style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;"/>
+        </VBox>
+        <VBox styleClass="stat-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+            <Label fx:id="lblTotalArticles" text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+            <Label text="Articles Publiés" style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;"/>
+        </VBox>
+        <VBox styleClass="stat-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+            <Label fx:id="lblTotalCategories" text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #f39c12;"/>
+            <Label text="Catégories" style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;"/>
+        </VBox>
+        <VBox styleClass="stat-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+            <Label fx:id="lblRecentArticles" text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
+            <Label text="Articles récents (7j)" style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Graphiques -->
+    <HBox spacing="15" VBox.vgrow="ALWAYS">
+        <VBox styleClass="card" HBox.hgrow="ALWAYS">
+            <Label text="Répartition des Plans par Statut" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+            <PieChart fx:id="pieStatut" prefHeight="250" legendSide="BOTTOM"/>
+        </VBox>
+        <VBox styleClass="card" HBox.hgrow="ALWAYS">
+            <Label text="Plans par Catégorie" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+            <BarChart fx:id="barCategorie" prefHeight="250">
+                <xAxis><CategoryAxis label="Catégorie"/></xAxis>
+                <yAxis><NumberAxis label="Nombre"/></yAxis>
+            </BarChart>
+        </VBox>
+    </HBox>
+
+    <!-- Bouton analyse IA -->
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="🤖 Lancer une analyse IA globale" onAction="#handleAnalyse" styleClass="btn-primary"
+                style="-fx-font-size: 15px; -fx-padding: 10 30;"/>
+        <Button text="🔄 Rafraîchir" onAction="#handleRefresh" styleClass="btn-secondary"/>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+        <VBox fx:id="boxAnalyse" spacing="10" style="-fx-padding: 10;">
+            <Label text="" wrapText="true" style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"/>
+        </VBox>
+    </ScrollPane>
+
+</VBox>
