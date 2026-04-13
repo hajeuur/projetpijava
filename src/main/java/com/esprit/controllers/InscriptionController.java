@@ -8,6 +8,10 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class InscriptionController implements Initializable {
@@ -32,6 +36,34 @@ public class InscriptionController implements Initializable {
         this.backOfficeController = controller;
     }
 
+    // Méthode de hachage SHA-256
+    private String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            return password;
+        }
+    }
+
+    // Vérification unicité email
+    private boolean emailExiste(String email) {
+        List<Utilisateur> tous = dao.getAll();
+        for (Utilisateur u : tous) {
+            if (u.getEmail().equalsIgnoreCase(email)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @FXML
     public void handleCreer() {
         String prenom = prenomField.getText().trim();
@@ -43,23 +75,35 @@ public class InscriptionController implements Initializable {
         errorLabel.setText("");
         successLabel.setText("");
 
+        // Champs vides
         if (prenom.isEmpty() || nom.isEmpty() || email.isEmpty()
                 || mdp.isEmpty() || role == null) {
             errorLabel.setText("Veuillez remplir tous les champs !");
             return;
         }
 
+        // Validation email
+        if (!email.matches("^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$")) {
+            errorLabel.setText("Adresse email invalide !");
+            return;
+        }
+
+        // Unicité email
+        if (emailExiste(email)) {
+            errorLabel.setText("Cet email est déjà utilisé !");
+            return;
+        }
+
+        // Longueur mot de passe
         if (mdp.length() < 8) {
             errorLabel.setText("Le mot de passe doit contenir au moins 8 caractères !");
             return;
         }
 
-        if (!email.contains("@")) {
-            errorLabel.setText("Adresse email invalide !");
-            return;
-        }
+        // Hachage mot de passe
+        String mdpHache = hashPassword(mdp);
 
-        Utilisateur u = new Utilisateur(nom, prenom, email, mdp, role);
+        Utilisateur u = new Utilisateur(nom, prenom, email, mdpHache, role);
         dao.ajouter(u);
         successLabel.setText("Utilisateur créé avec succès !");
 

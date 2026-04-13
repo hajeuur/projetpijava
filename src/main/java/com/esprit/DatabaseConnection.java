@@ -10,17 +10,12 @@ public class DatabaseConnection {
     private static final String USER = "root";
     private static final String PASSWORD = "";
 
-    private static Connection connection = null;
-
     public static Connection getInstance() {
-        if (connection == null) {
-            try {
-                connection = DriverManager.getConnection(URL, USER, PASSWORD);
-                System.out.println("Connexion réussie !");
-            } catch (SQLException e) {
-                System.out.println("Erreur de connexion : " + e.getMessage());
-            }
+        try {
+            return DriverManager.getConnection(URL, USER, PASSWORD);
+        } catch (SQLException e) {
+            System.out.println("Erreur de connexion : " + e.getMessage());
+            return null;
         }
-        return connection;
     }
 }

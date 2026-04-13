@@ -2,16 +2,34 @@ package com.esprit.dao;
 
 import com.esprit.models.Utilisateur;
 import com.esprit.DatabaseConnection;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UtilisateurDAO implements IUtilisateur {
 
-    Connection cnx = DatabaseConnection.getInstance();
+    private String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            return password;
+        }
+    }
 
     @Override
     public void ajouter(Utilisateur u) {
+        Connection cnx = DatabaseConnection.getInstance();
         String sql = "INSERT INTO utilisateur (nom, prenom, email, mdp, role, status, trust_score, risk_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
@@ -32,6 +50,7 @@ public class UtilisateurDAO implements IUtilisateur {
 
     @Override
     public void modifier(Utilisateur u) {
+        Connection cnx = DatabaseConnection.getInstance();
         String sql = "UPDATE utilisateur SET nom=?, prenom=?, email=?, role=?, status=?, trust_score=?, risk_level=? WHERE id=?";
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
@@ -52,6 +71,7 @@ public class UtilisateurDAO implements IUtilisateur {
 
     @Override
     public void supprimer(int id) {
+        Connection cnx = DatabaseConnection.getInstance();
         String sql = "DELETE FROM utilisateur WHERE id=?";
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
@@ -65,6 +85,7 @@ public class UtilisateurDAO implements IUtilisateur {
 
     @Override
     public Utilisateur getOne(int id) {
+        Connection cnx = DatabaseConnection.getInstance();
         String sql = "SELECT * FROM utilisateur WHERE id=?";
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
@@ -91,6 +112,7 @@ public class UtilisateurDAO implements IUtilisateur {
 
     @Override
     public List<Utilisateur> getAll() {
+        Connection cnx = DatabaseConnection.getInstance();
         List<Utilisateur> list = new ArrayList<>();
         String sql = "SELECT * FROM utilisateur";
         try {
@@ -117,11 +139,13 @@ public class UtilisateurDAO implements IUtilisateur {
 
     @Override
     public Utilisateur login(String email, String mdp) {
+        Connection cnx = DatabaseConnection.getInstance();
+        String mdpHache = hashPassword(mdp);
         String sql = "SELECT * FROM utilisateur WHERE email=? AND mdp=?";
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, email);
-            ps.setString(2, mdp);
+            ps.setString(2, mdpHache);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 Utilisateur u = new Utilisateur();

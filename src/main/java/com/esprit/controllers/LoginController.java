@@ -36,6 +36,12 @@ public class LoginController {
             return;
         }
 
+        // Vérification compte désactivé
+        if (u.getStatus().equals("desactiver")) {
+            errorLabel.setText("Votre compte est désactivé. Contactez l'administrateur !");
+            return;
+        }
+
         try {
             String role = u.getRole();
             String fxmlPath;
@@ -68,7 +74,8 @@ public class LoginController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/views/Inscription.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) emailField.getScene().getWindow();
+            Stage stage = new Stage();
+            stage.setTitle("Inscription");
             stage.setScene(new Scene(root));
             stage.show();
         } catch (Exception e) {
