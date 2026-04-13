@@ -8,7 +8,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -16,13 +15,10 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
-
     @FXML
     private BorderPane mainContainer;
     @FXML
-    private Label lblUserName;
-    @FXML
-    private Label lblUserRole;
+    private Label lblUserName, lblUserRole;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -30,18 +26,21 @@ public class DashboardController implements Initializable {
             lblUserName.setText(SessionManager.getInstance().getCurrentUser().getEmail());
             lblUserRole.setText(SessionManager.getInstance().getCurrentUser().getRole());
         }
-
-        // Charger le Back-Office par défaut
-        loadView("/AfficherParcours.fxml");
+        loadBackOffice();
     }
 
     @FXML
-    private void loadBackOffice() {
-        loadView("/AfficherParcours.fxml");
+    public void loadBackOffice() {
+        loadView("/BackOfficeParcours.fxml");
     }
 
     @FXML
-    private void loadStats() {
+    public void loadProjets() {
+        loadView("/BackOfficeProjets.fxml");
+    }
+
+    @FXML
+    public void loadStats() {
         loadView("/Statistiques.fxml");
     }
 
@@ -65,10 +64,9 @@ public class DashboardController implements Initializable {
             Parent view = loader.load();
             mainContainer.setCenter(view);
         } catch (IOException e) {
-            System.err.println("Erreur de chargement de la vue : " + fxml);
+            System.err.println("Erreur : " + fxml);
             e.printStackTrace();
-            Label err = new Label("Erreur de chargement : " + fxml + "\nVeuillez créer le fichier.");
-            mainContainer.setCenter(err);
+            mainContainer.setCenter(new Label("Erreur : " + fxml));
         }
     }
 }
