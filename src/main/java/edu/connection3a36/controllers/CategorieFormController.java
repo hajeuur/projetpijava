@@ -56,6 +56,20 @@ public class CategorieFormController {
 
         if (hasError) return;
 
+        // Check Uniqueness
+        try {
+            boolean exists = (categorieToEdit != null)
+                ? service.existsByNomExcluding(nom.trim(), categorieToEdit.getId())
+                : service.existsByNom(nom.trim());
+            if (exists) {
+                showError(errNom, "Une catégorie avec ce nom existe déjà.");
+                return;
+            }
+        } catch(SQLException ex) {
+            showError(errNom, "Erreur BdD lors de la vérification de l'unicité.");
+            return;
+        }
+
         try {
             CategorieArticle cat = categorieToEdit != null ? categorieToEdit : new CategorieArticle();
             cat.setNomCategorie(nom.trim());

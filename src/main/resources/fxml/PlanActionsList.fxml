@@ -6,49 +6,60 @@
 
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="edu.connection3a36.controllers.PlanActionsListController"
-      spacing="15">
+      spacing="16">
 
-    <!-- ===== HEADER ===== -->
-    <HBox alignment="CENTER_LEFT" spacing="15">
-        <Label text="📋 Plans d'Actions" styleClass="section-title"/>
-        <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="btnNewPlan" text="+ Nouveau Plan" onAction="#handleAdd" styleClass="btn-success"/>
+    <!-- ===== PAGE HEADER ===== -->
+    <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="15">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="📋 Plans d'Actions" styleClass="section-title"/>
+            <Label text="Gérez les plans d'actions pédagogiques et stratégiques"
+                   styleClass="section-subtitle"/>
+        </VBox>
+        <Button fx:id="btnNewPlan" text="＋ Nouveau Plan" onAction="#handleAdd"
+                styleClass="btn-success"/>
+        <Button text="📄 Export PDF" onAction="#handleExportPdf" styleClass="btn-warning"/>
     </HBox>
 
-    <!-- ===== BARRE DE RECHERCHE & FILTRES ===== -->
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <TextField fx:id="searchField" promptText="🔍 Rechercher (décision, description...)"
+    <!-- ===== BARRE DE RECHERCHE &amp; FILTRES ===== -->
+    <HBox styleClass="card" spacing="10" alignment="CENTER_LEFT"
+          style="-fx-padding: 12 18;">
+        <TextField fx:id="searchField"
+                   promptText="🔍 Rechercher (décision, description...)"
                    prefWidth="280" styleClass="search-bar" onAction="#handleSearch"/>
-        <ComboBox fx:id="statutFilter" promptText="Filtrer par statut" prefWidth="160"/>
-        <ComboBox fx:id="categorieFilter" promptText="Filtrer par catégorie" prefWidth="180"/>
+        <ComboBox fx:id="statutFilter" promptText="Statut" prefWidth="150"/>
+        <ComboBox fx:id="categorieFilter" promptText="Catégorie" prefWidth="175"/>
         <Button text="Rechercher" onAction="#handleSearch" styleClass="btn-primary"/>
         <Button text="Réinitialiser" onAction="#handleReset" styleClass="btn-secondary"/>
     </HBox>
 
-    <!-- ===== STATISTIQUES RAPIDES ===== -->
-    <HBox fx:id="statsBar" spacing="15">
-        <Label fx:id="lblTotal" text="Total: 0" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
-        <Label fx:id="lblEnAttente" text="⏳ En attente: 0" style="-fx-text-fill: #f39c12; -fx-font-size: 13px;"/>
-        <Label fx:id="lblEnCours" text="🔄 En cours: 0" style="-fx-text-fill: #3498db; -fx-font-size: 13px;"/>
-        <Label fx:id="lblFini" text="✅ Fini: 0" style="-fx-text-fill: #27ae60; -fx-font-size: 13px;"/>
-        <Label fx:id="lblRejete" text="❌ Rejeté: 0" style="-fx-text-fill: #e74c3c; -fx-font-size: 13px;"/>
+    <!-- ===== BARRE STATISTIQUES RAPIDES ===== -->
+    <HBox fx:id="statsBar" styleClass="stats-bar" spacing="25" alignment="CENTER_LEFT">
+        <Label fx:id="lblTotal" text="Total: 0"
+               style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #1a1a2e;"/>
+        <Label fx:id="lblEnAttente" text="⏳ En attente: 0"
+               style="-fx-text-fill: #e67e22; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+        <Label fx:id="lblEnCours"   text="🔄 En cours: 0"
+               style="-fx-text-fill: #3498db; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+        <Label fx:id="lblFini"      text="✅ Terminé: 0"
+               style="-fx-text-fill: #27ae60; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+        <Label fx:id="lblRejete"    text="❌ Rejeté: 0"
+               style="-fx-text-fill: #e74c3c; -fx-font-size: 13px; -fx-font-weight: bold;"/>
     </HBox>
 
     <!-- ===== TABLE ===== -->
     <TableView fx:id="tablePlans" VBox.vgrow="ALWAYS" styleClass="table-view">
         <columns>
-            <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
-            <TableColumn fx:id="colDecision" text="Décision" prefWidth="250"/>
-            <TableColumn fx:id="colStatut" text="Statut" prefWidth="110"/>
-            <TableColumn fx:id="colCategorie" text="Catégorie" prefWidth="130"/>
-            <TableColumn fx:id="colDate" text="Date" prefWidth="140"/>
-            <TableColumn fx:id="colActions" text="Actions" prefWidth="200"/>
+            <TableColumn fx:id="colId"       text="ID"        prefWidth="55"/>
+            <TableColumn fx:id="colDecision" text="Décision"  prefWidth="260"/>
+            <TableColumn fx:id="colStatut"   text="Statut"    prefWidth="115"/>
+            <TableColumn fx:id="colCategorie" text="Catégorie" prefWidth="140"/>
+            <TableColumn fx:id="colDate"     text="Date"      prefWidth="135"/>
+            <TableColumn fx:id="colActions"  text="Actions"   prefWidth="210"/>
         </columns>
+        <placeholder>
+            <Label text="Aucun plan d'action trouvé. Cliquez sur «Nouveau Plan» pour en créer un."
+                   style="-fx-text-fill: #8e92a9; -fx-font-style: italic;"/>
+        </placeholder>
     </TableView>
-
-    <!-- ===== ACTIONS BAS DE PAGE ===== -->
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Button text="📄 Export PDF" onAction="#handleExportPdf" styleClass="btn-warning"/>
-    </HBox>
 
 </VBox>

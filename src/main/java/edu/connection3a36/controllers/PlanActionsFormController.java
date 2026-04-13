@@ -70,6 +70,20 @@ public class PlanActionsFormController {
             return;
         }
 
+        // Check Uniqueness
+        try {
+            boolean exists = (planToEdit != null)
+                ? service.existsByDecisionExcluding(plan.getDecision(), planToEdit.getId())
+                : service.existsByDecision(plan.getDecision());
+            if (exists) {
+                showError(errDecision, "Un Plan d'Action avec cette décision existe déjà.");
+                return;
+            }
+        } catch(SQLException ex) {
+            showError(errDecision, "Erreur BdD lors de la vérification de l'unicité.");
+            return;
+        }
+
         try {
             if (planToEdit != null) {
                 // Modification

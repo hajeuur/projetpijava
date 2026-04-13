@@ -16,8 +16,6 @@ import java.util.Map;
 /**
  * Service CRUD pour PlanActions.
  * Fonctionnalités : CRUD complet + validation métier + recherche/tri/filtre + statistiques.
- *
- * Logique métier migrée de PlanActionsManager.php + PlanActionsController.php
  */
 public class PlanActionsService implements IService<PlanActions> {
 
@@ -29,16 +27,9 @@ public class PlanActionsService implements IService<PlanActions> {
 
     // ======================== VALIDATION MÉTIER ========================
 
-    /**
-     * Valide un plan d'actions avant insertion/modification.
-     * Reproduit la logique de PlanActionsManager::validate() côté Symfony.
-     *
-     * @return Liste d'erreurs (vide si tout est OK)
-     */
     public List<String> validate(PlanActions plan) {
         List<String> errors = new ArrayList<>();
 
-        // Décision : obligatoire, min 5 chars, max 200 chars
         if (plan.getDecision() == null || plan.getDecision().trim().isEmpty()) {
             errors.add("La décision est obligatoire");
         } else if (plan.getDecision().trim().length() < 5) {
@@ -47,19 +38,16 @@ public class PlanActionsService implements IService<PlanActions> {
             errors.add("La décision ne peut pas dépasser 200 caractères");
         }
 
-        // Description : obligatoire, min 10 chars
         if (plan.getDescription() == null || plan.getDescription().trim().isEmpty()) {
             errors.add("La description est obligatoire");
         } else if (plan.getDescription().trim().length() < 10) {
             errors.add("La description doit contenir au moins 10 caractères");
         }
 
-        // Statut : obligatoire
         if (plan.getStatut() == null) {
             errors.add("Le statut est obligatoire");
         }
 
-        // Catégorie : obligatoire
         if (plan.getCategorie() == null) {
             errors.add("La catégorie est obligatoire");
         }
@@ -67,14 +55,33 @@ public class PlanActionsService implements IService<PlanActions> {
         return errors;
     }
 
+    public boolean existsByDecision(String decision) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM plan_actions WHERE LOWER(decision) = LOWER(?)";
+        PreparedStatement pst = cnx.prepareStatement(sql);
+        pst.setString(1, decision.trim());
+        ResultSet rs = pst.executeQuery();
+        return rs.next() && rs.getInt(1) > 0;
+    }
+
+    public boolean existsByDecisionExcluding(String decision, int id) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM plan_actions WHERE LOWER(decision) = LOWER(?) AND id != ?";
+        PreparedStatement pst = cnx.prepareStatement(sql);
+        pst.setString(1, decision.trim());
+        pst.setInt(2, id);
+        ResultSet rs = pst.executeQuery();
+        return rs.next() && rs.getInt(1) > 0;
+    }
+
     // ======================== CRUD ========================
 
     @Override
     public void addEntity(PlanActions plan) throws SQLException {
-        // Validation avant insertion
         List<String> errors = validate(plan);
         if (!errors.isEmpty()) {
             throw new SQLException("Validation échouée : " + String.join(", ", errors));
+        }
+        if (existsByDecision(plan.getDecision())) {
+            throw new SQLException("Un Plan d'Action avec cette décision existe déjà.");
         }
 
         String sql = "INSERT INTO plan_actions (etudiant_id, decision, description, date, statut, "
@@ -88,16 +95,14 @@ public class PlanActionsService implements IService<PlanActions> {
         pst.setString(6, plan.getCategorie() != null ? plan.getCategorie().name() : null);
         int sortieAiId = plan.getSortieAIId();
         if (sortieAiId <= 0) {
-            // Fallback: Récupérer le premier sortie_ai_id valide pour éviter l'erreur NOT NULL
             try (Statement st = cnx.createStatement(); ResultSet rs = st.executeQuery("SELECT id FROM sortie_ai LIMIT 1")) {
                 if (rs.next()) {
                     sortieAiId = rs.getInt("id");
                 } else {
-                    throw new SQLException("Impossible de créer un Plan d'Actions : aucune IA décisionnelle (sortie_ai) n'existe en base pour être liée.");
+                    throw new SQLException("Impossible de créer un Plan d'Actions : aucune IA décisionnelle n'existe.");
                 }
             }
         }
-
         pst.setObject(7, sortieAiId);
         pst.setObject(8, plan.getAuteurId() > 0 ? plan.getAuteurId() : null);
         pst.executeUpdate();
@@ -107,20 +112,19 @@ public class PlanActionsService implements IService<PlanActions> {
             plan.setId(rs.getInt(1));
         }
 
-        // Si lié à une sortie IA, marquer la sortie comme PLANIFIEE
         if (plan.getSortieAIId() > 0) {
             updateSortieAIStatut(plan.getSortieAIId(), "PLANIFIE");
         }
-
-        System.out.println("✅ Plan d'actions ajouté : " + plan.getDecision());
     }
 
     @Override
     public void updateEntity(int id, PlanActions plan) throws SQLException {
-        // Validation avant modification
         List<String> errors = validate(plan);
         if (!errors.isEmpty()) {
             throw new SQLException("Validation échouée : " + String.join(", ", errors));
+        }
+        if (existsByDecisionExcluding(plan.getDecision(), id)) {
+            throw new SQLException("Un autre Plan d'Action avec cette décision existe déjà.");
         }
 
         String sql = "UPDATE plan_actions SET decision = ?, description = ?, statut = ?, "
@@ -134,12 +138,10 @@ public class PlanActionsService implements IService<PlanActions> {
         pst.setObject(6, plan.getEtudiantId() > 0 ? plan.getEtudiantId() : null);
         pst.setInt(7, id);
         pst.executeUpdate();
-        System.out.println("✅ Plan d'actions modifié : " + plan.getDecision());
     }
 
     @Override
     public void deleteEntity(PlanActions plan) throws SQLException {
-        // Supprimer d'abord les relations ManyToMany
         String sqlJoin = "DELETE FROM plan_actions_articles WHERE plan_actions_id = ?";
         PreparedStatement pstJoin = cnx.prepareStatement(sqlJoin);
         pstJoin.setInt(1, plan.getId());
@@ -149,7 +151,6 @@ public class PlanActionsService implements IService<PlanActions> {
         PreparedStatement pst = cnx.prepareStatement(sql);
         pst.setInt(1, plan.getId());
         pst.executeUpdate();
-        System.out.println("✅ Plan d'actions supprimé : " + plan.getDecision());
     }
 
     @Override
@@ -158,49 +159,34 @@ public class PlanActionsService implements IService<PlanActions> {
         String sql = "SELECT * FROM plan_actions ORDER BY date DESC";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
-        while (rs.next()) {
-            data.add(mapResultSet(rs));
-        }
+        while (rs.next()) data.add(mapResultSet(rs));
         return data;
     }
 
-    // ======================== RECHERCHE, TRI, FILTRAGE ========================
-
-    /**
-     * Recherche avancée avec filtres et tri — migration de PlanActionsController::index()
-     */
-    public List<PlanActions> searchPlans(String search, String statut, String categorie,
-                                         String sortBy, String order) throws SQLException {
+    public List<PlanActions> searchPlans(String search, String statut, String categorie, String sortBy, String order) throws SQLException {
         StringBuilder sql = new StringBuilder("SELECT * FROM plan_actions WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
 
-        // Filtre recherche textuelle
         if (search != null && !search.isEmpty()) {
             sql.append("AND (decision LIKE ? OR description LIKE ?) ");
             params.add("%" + search + "%");
             params.add("%" + search + "%");
         }
 
-        // Filtre par statut
         if (statut != null && !statut.isEmpty()) {
             sql.append("AND statut = ? ");
             params.add(statut);
         }
 
-        // Filtre par catégorie
         if (categorie != null && !categorie.isEmpty()) {
             sql.append("AND categorie = ? ");
             params.add(categorie);
         }
 
-        // Tri
         String[] validSorts = {"id", "decision", "date", "statut"};
         String finalSort = "date";
         for (String s : validSorts) {
-            if (s.equals(sortBy)) {
-                finalSort = sortBy;
-                break;
-            }
+            if (s.equals(sortBy)) { finalSort = sortBy; break; }
         }
         String finalOrder = "ASC".equalsIgnoreCase(order) ? "ASC" : "DESC";
         sql.append("ORDER BY ").append(finalSort).append(" ").append(finalOrder);
@@ -212,31 +198,21 @@ public class PlanActionsService implements IService<PlanActions> {
 
         List<PlanActions> data = new ArrayList<>();
         ResultSet rs = pst.executeQuery();
-        while (rs.next()) {
-            data.add(mapResultSet(rs));
-        }
+        while (rs.next()) data.add(mapResultSet(rs));
         return data;
     }
 
-    /**
-     * Récupérer un plan par ID
-     */
     public PlanActions getById(int id) throws SQLException {
         String sql = "SELECT * FROM plan_actions WHERE id = ?";
         PreparedStatement pst = cnx.prepareStatement(sql);
         pst.setInt(1, id);
         ResultSet rs = pst.executeQuery();
-        if (rs.next()) {
-            return mapResultSet(rs);
-        }
+        if (rs.next()) return mapResultSet(rs);
         return null;
     }
 
-    // ======================== FEEDBACK ENSEIGNANT ========================
+    // ======================== FEEDBACK ========================
 
-    /**
-     * Ajouter un feedback d'enseignant à un plan
-     */
     public void addFeedback(int planId, String feedback, int feedbackAuteurId) throws SQLException {
         String sql = "UPDATE plan_actions SET feedback_enseignant = ?, feedback_date = ?, "
                    + "feedback_auteur_id = ?, updated_at = ? WHERE id = ?";
@@ -247,14 +223,29 @@ public class PlanActionsService implements IService<PlanActions> {
         pst.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
         pst.setInt(5, planId);
         pst.executeUpdate();
-        System.out.println("✅ Feedback ajouté au plan #" + planId);
+    }
+
+    public List<PlanActions> getRecentFeedbacks() throws SQLException {
+        List<PlanActions> data = new ArrayList<>();
+        String sql = "SELECT * FROM plan_actions WHERE feedback_enseignant IS NOT NULL AND feedback_enseignant != '' ORDER BY feedback_date DESC LIMIT 10";
+        Statement st = cnx.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        while (rs.next()) data.add(mapResultSet(rs));
+        return data;
+    }
+
+    public List<PlanActions> getRecentUserFeedbacks(int auteurId) throws SQLException {
+        List<PlanActions> data = new ArrayList<>();
+        String sql = "SELECT * FROM plan_actions WHERE feedback_enseignant IS NOT NULL AND feedback_enseignant != '' AND feedback_auteur_id = ? ORDER BY feedback_date DESC LIMIT 10";
+        PreparedStatement pst = cnx.prepareStatement(sql);
+        pst.setInt(1, auteurId);
+        ResultSet rs = pst.executeQuery();
+        while (rs.next()) data.add(mapResultSet(rs));
+        return data;
     }
 
     // ======================== RELATIONS ARTICLES ========================
 
-    /**
-     * Lier un article à un plan d'actions (table de jointure)
-     */
     public void addArticleToPlan(int planId, int articleId) throws SQLException {
         String sql = "INSERT IGNORE INTO plan_actions_articles (plan_actions_id, reference_article_id) VALUES (?, ?)";
         PreparedStatement pst = cnx.prepareStatement(sql);
@@ -263,9 +254,6 @@ public class PlanActionsService implements IService<PlanActions> {
         pst.executeUpdate();
     }
 
-    /**
-     * Supprimer un article d'un plan
-     */
     public void removeArticleFromPlan(int planId, int articleId) throws SQLException {
         String sql = "DELETE FROM plan_actions_articles WHERE plan_actions_id = ? AND reference_article_id = ?";
         PreparedStatement pst = cnx.prepareStatement(sql);
@@ -274,26 +262,18 @@ public class PlanActionsService implements IService<PlanActions> {
         pst.executeUpdate();
     }
 
-    /**
-     * Récupérer les IDs d'articles liés à un plan
-     */
     public List<Integer> getArticleIds(int planId) throws SQLException {
         List<Integer> ids = new ArrayList<>();
         String sql = "SELECT reference_article_id FROM plan_actions_articles WHERE plan_actions_id = ?";
         PreparedStatement pst = cnx.prepareStatement(sql);
         pst.setInt(1, planId);
         ResultSet rs = pst.executeQuery();
-        while (rs.next()) {
-            ids.add(rs.getInt(1));
-        }
+        while (rs.next()) ids.add(rs.getInt(1));
         return ids;
     }
 
     // ======================== STATISTIQUES ========================
 
-    /**
-     * Nombre total de plans
-     */
     public int countAll() throws SQLException {
         String sql = "SELECT COUNT(*) FROM plan_actions";
         Statement st = cnx.createStatement();
@@ -301,39 +281,28 @@ public class PlanActionsService implements IService<PlanActions> {
         return rs.next() ? rs.getInt(1) : 0;
     }
 
-    /**
-     * Répartition des plans par statut (pour PieChart / BarChart)
-     */
     public Map<String, Integer> countByStatut() throws SQLException {
         Map<String, Integer> stats = new HashMap<>();
         String sql = "SELECT statut, COUNT(*) as cnt FROM plan_actions GROUP BY statut";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
-        while (rs.next()) {
-            stats.put(rs.getString("statut"), rs.getInt("cnt"));
-        }
+        while (rs.next()) stats.put(rs.getString("statut"), rs.getInt("cnt"));
         return stats;
     }
 
-    /**
-     * Répartition des plans par catégorie
-     */
     public Map<String, Integer> countByCategorie() throws SQLException {
         Map<String, Integer> stats = new HashMap<>();
         String sql = "SELECT categorie, COUNT(*) as cnt FROM plan_actions GROUP BY categorie";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
         while (rs.next()) {
-            stats.put(rs.getString("categorie"), rs.getInt("cnt"));
+            if (rs.getString("categorie") != null) {
+                stats.put(rs.getString("categorie"), rs.getInt("cnt"));
+            }
         }
         return stats;
     }
 
-    // ======================== HELPER ========================
-
-    /**
-     * Met à jour le statut d'une SortieAI (appelé lors de la création d'un plan lié)
-     */
     private void updateSortieAIStatut(int sortieId, String statut) throws SQLException {
         String sql = "UPDATE sortie_ai SET statut = ?, updated_at = ? WHERE id = ?";
         PreparedStatement pst = cnx.prepareStatement(sql);
@@ -375,6 +344,7 @@ public class PlanActionsService implements IService<PlanActions> {
         if (fbTs != null) plan.setFeedbackDate(fbTs.toLocalDateTime());
 
         plan.setFeedbackAuteurId(rs.getInt("feedback_auteur_id"));
+        
         plan.setAuteurId(rs.getInt("auteur_id"));
 
         return plan;

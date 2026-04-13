@@ -6,43 +6,54 @@
 
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="edu.connection3a36.controllers.PlanActionsFormController"
-      spacing="15">
-    <padding><Insets top="20" right="25" bottom="20" left="25"/></padding>
+      spacing="18" styleClass="form-card">
+    <padding><Insets top="25" right="30" bottom="25" left="30"/></padding>
 
-    <Label fx:id="formTitle" text="Nouveau Plan d'Action" styleClass="section-title"/>
+    <!-- Titre -->
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label text="📋" style="-fx-font-size: 24px;"/>
+        <Label fx:id="formTitle" text="Nouveau Plan d'Action" styleClass="section-title"/>
+    </HBox>
+    <Separator/>
 
     <!-- Décision -->
-    <VBox spacing="3">
-        <Label text="Décision *" style="-fx-font-weight: bold;"/>
-        <TextField fx:id="tfDecision" promptText="Ex: Réunion de suivi pédagogique (min 5 car.)" maxWidth="Infinity"/>
-        <Label fx:id="errDecision" styleClass="error-label" text="" managed="false" visible="false"/>
+    <VBox spacing="5">
+        <Label text="Décision *" styleClass="form-label"/>
+        <TextField fx:id="tfDecision"
+                   promptText="Ex: Réunion de suivi pédagogique (min 5 car.)"
+                   maxWidth="Infinity"/>
+        <Label fx:id="errDecision" styleClass="error-label" text=""
+               managed="false" visible="false"/>
     </VBox>
 
     <!-- Description -->
-    <VBox spacing="3">
-        <Label text="Description *" style="-fx-font-weight: bold;"/>
-        <TextArea fx:id="taDescription" promptText="Description détaillée du plan d'action (min 10 car.)"
-                  prefRowCount="4" maxWidth="Infinity" wrapText="true"/>
-        <Label fx:id="errDescription" styleClass="error-label" text="" managed="false" visible="false"/>
+    <VBox spacing="5" VBox.vgrow="ALWAYS">
+        <Label text="Description *" styleClass="form-label"/>
+        <TextArea fx:id="taDescription"
+                  promptText="Description détaillée du plan d'action (min 10 car.)"
+                  prefRowCount="5" maxWidth="Infinity" wrapText="true" VBox.vgrow="ALWAYS"/>
+        <Label fx:id="errDescription" styleClass="error-label" text=""
+               managed="false" visible="false"/>
     </VBox>
 
-    <!-- Statut & Catégorie -->
-    <HBox spacing="15">
-        <VBox spacing="3" HBox.hgrow="ALWAYS">
-            <Label text="Statut *" style="-fx-font-weight: bold;"/>
+    <!-- Statut &amp; Catégorie -->
+    <HBox spacing="20">
+        <VBox spacing="5" HBox.hgrow="ALWAYS">
+            <Label text="Statut *" styleClass="form-label"/>
             <ComboBox fx:id="cbStatut" maxWidth="Infinity" promptText="Choisir un statut"/>
-            <Label fx:id="errStatut" styleClass="error-label" text="" managed="false" visible="false"/>
+            <Label fx:id="errStatut" styleClass="error-label" text=""
+                   managed="false" visible="false"/>
         </VBox>
-        <VBox spacing="3" HBox.hgrow="ALWAYS">
-            <Label text="Catégorie *" style="-fx-font-weight: bold;"/>
+        <VBox spacing="5" HBox.hgrow="ALWAYS">
+            <Label text="Catégorie *" styleClass="form-label"/>
             <ComboBox fx:id="cbCategorie" maxWidth="Infinity" promptText="Choisir une catégorie"/>
-            <Label fx:id="errCategorie" styleClass="error-label" text="" managed="false" visible="false"/>
+            <Label fx:id="errCategorie" styleClass="error-label" text=""
+                   managed="false" visible="false"/>
         </VBox>
     </HBox>
 
     <!-- Boutons -->
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Region HBox.hgrow="ALWAYS"/>
+    <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 5 0 0 0;">
         <Button text="Annuler" onAction="#handleCancel" styleClass="btn-secondary"/>
         <Button text="💾 Sauvegarder" onAction="#handleSave" styleClass="btn-success"/>
     </HBox>

@@ -21,10 +21,53 @@ public class ReferenceArticleService implements IService<ReferenceArticle> {
         cnx = MyConnection.getInstance().getCnx();
     }
 
+    // ======================== VALIDATION ========================
+    
+    public List<String> validate(ReferenceArticle article) throws SQLException {
+        List<String> errors = new ArrayList<>();
+        if (article.getTitre() == null || article.getTitre().trim().isEmpty()) {
+            errors.add("Le titre est obligatoire");
+        } else if (article.getTitre().trim().length() < 3) {
+            errors.add("Le titre doit contenir au moins 3 caractères");
+        }
+        
+        if (article.getContenu() == null || article.getContenu().trim().isEmpty()) {
+            errors.add("Le contenu est obligatoire");
+        } else if (article.getContenu().trim().length() < 10) {
+            errors.add("Le contenu est trop court");
+        }
+        
+        if (article.getCategorieId() <= 0) {
+            errors.add("Veuillez sélectionner une catégorie valide");
+        }
+        return errors;
+    }
+
+    public boolean existsByTitre(String titre) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM reference_article WHERE LOWER(titre) = LOWER(?)";
+        PreparedStatement pst = cnx.prepareStatement(sql);
+        pst.setString(1, titre.trim());
+        ResultSet rs = pst.executeQuery();
+        return rs.next() && rs.getInt(1) > 0;
+    }
+
+    public boolean existsByTitreExcluding(String titre, int id) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM reference_article WHERE LOWER(titre) = LOWER(?) AND id != ?";
+        PreparedStatement pst = cnx.prepareStatement(sql);
+        pst.setString(1, titre.trim());
+        pst.setInt(2, id);
+        ResultSet rs = pst.executeQuery();
+        return rs.next() && rs.getInt(1) > 0;
+    }
+
     // ======================== CRUD ========================
 
     @Override
     public void addEntity(ReferenceArticle article) throws SQLException {
+        List<String> errors = validate(article);
+        if (!errors.isEmpty()) throw new SQLException(String.join("\n", errors));
+        if (existsByTitre(article.getTitre())) throw new SQLException("Erreur: Un article avec ce titre existe déjà (unicité).");
+        
         String sql = "INSERT INTO reference_article (titre, contenu, categorie_id, auteur_id, created_at, published) "
                    + "VALUES (?, ?, ?, ?, ?, ?)";
         PreparedStatement pst = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -45,6 +88,10 @@ public class ReferenceArticleService implements IService<ReferenceArticle> {
 
     @Override
     public void updateEntity(int id, ReferenceArticle article) throws SQLException {
+        List<String> errors = validate(article);
+        if (!errors.isEmpty()) throw new SQLException(String.join("\n", errors));
+        if (existsByTitreExcluding(article.getTitre(), id)) throw new SQLException("Erreur: Un autre article avec ce titre existe déjà.");
+        
         String sql = "UPDATE reference_article SET titre = ?, contenu = ?, categorie_id = ?, "
                    + "published = ?, updated_at = ? WHERE id = ?";
         PreparedStatement pst = cnx.prepareStatement(sql);

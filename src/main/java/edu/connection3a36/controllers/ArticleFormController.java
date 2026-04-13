@@ -80,6 +80,20 @@ public class ArticleFormController {
 
         if (hasError) return;
 
+        // Check Uniqueness
+        try {
+            boolean exists = (articleToEdit != null)
+                ? articleService.existsByTitreExcluding(tfTitre.getText().trim(), articleToEdit.getId())
+                : articleService.existsByTitre(tfTitre.getText().trim());
+            if (exists) {
+                showError(errTitre, "Un article avec ce titre existe déjà.");
+                return;
+            }
+        } catch(SQLException ex) {
+            showError(errTitre, "Erreur BdD lors de la vérification de l'unicité.");
+            return;
+        }
+
         try {
             ReferenceArticle article = articleToEdit != null ? articleToEdit : new ReferenceArticle();
             article.setTitre(tfTitre.getText().trim());

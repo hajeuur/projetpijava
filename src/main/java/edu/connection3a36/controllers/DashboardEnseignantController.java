@@ -23,10 +23,9 @@ public class DashboardEnseignantController {
     @FXML private TableColumn<Map<String, String>, String> colScoreRisk;
     @FXML private TableColumn<Map<String, String>, String> colMatiereRisk;
 
-    @FXML private TableView<Map<String, String>> tableReclamations;
-    @FXML private TableColumn<Map<String, String>, String> colSujetRec;
-    @FXML private TableColumn<Map<String, String>, String> colEtudiantRec;
-    @FXML private TableColumn<Map<String, String>, String> colStatutRec;
+    @FXML private TableView<edu.connection3a36.entities.PlanActions> tableFeedbacks;
+    @FXML private TableColumn<edu.connection3a36.entities.PlanActions, String> colFeedbackPlan;
+    @FXML private TableColumn<edu.connection3a36.entities.PlanActions, String> colFeedbackTexte;
 
     private final PlanActionsService planService = new PlanActionsService();
     private final ReferenceArticleService articleService = new ReferenceArticleService();
@@ -52,15 +51,13 @@ public class DashboardEnseignantController {
                 Map.of("nom", "Eya Tlili", "score", "51%", "matiere", "Réseaux") // Pour l'anecdote
             );
 
-            // ==== Mock data: Réclamations ====
-            colSujetRec.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get("sujet")));
-            colEtudiantRec.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get("etudiant")));
-            colStatutRec.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get("statut")));
-            tableReclamations.getItems().addAll(
-                Map.of("sujet", "Note absente TP3", "etudiant", "Youssef Ben Ali", "statut", "En attente"),
-                Map.of("sujet", "Justification absence", "etudiant", "Syrine Trabelsi", "statut", "Traitée"),
-                Map.of("sujet", "Accès plateforme", "etudiant", "Nader M.", "statut", "En cours")
-            );
+            // ==== Vrais Feedbacks Enseignants ====
+            colFeedbackPlan.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getDecision()));
+            colFeedbackTexte.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFeedbackEnseignant()));
+
+            java.util.List<edu.connection3a36.entities.PlanActions> feedbacks = planService.getRecentUserFeedbacks(userId);
+            tableFeedbacks.getItems().clear();
+            tableFeedbacks.getItems().addAll(feedbacks);
 
         } catch (Exception e) {
             System.err.println("Erreur chargement dashboard enseignant: " + e.getMessage());

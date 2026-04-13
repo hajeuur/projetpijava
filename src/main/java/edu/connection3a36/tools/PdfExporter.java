@@ -36,7 +36,7 @@ public class PdfExporter {
                 Paragraph title = new Paragraph("Liste des Plans d'Actions")
                         .setTextAlignment(TextAlignment.CENTER)
                         .setBold()
-                        .setFontColor(new com.itextpdf.kernel.colors.DeviceRgb(44, 62, 80))
+                        .setFontColor(new com.itextpdf.kernel.colors.DeviceRgb(16, 44, 89)) // #102c59
                         .setFontSize(22);
                 document.add(title);
 
@@ -45,7 +45,7 @@ public class PdfExporter {
                 Table table = new Table(new float[]{1, 3, 2, 2, 2});
                 table.useAllAvailableWidth();
 
-                com.itextpdf.kernel.colors.Color primaryColor = new com.itextpdf.kernel.colors.DeviceRgb(52, 152, 219);
+                com.itextpdf.kernel.colors.Color primaryColor = new com.itextpdf.kernel.colors.DeviceRgb(16, 44, 89); // #102c59
                 com.itextpdf.kernel.colors.Color whiteColor = com.itextpdf.kernel.colors.ColorConstants.WHITE;
 
                 // Headers
@@ -90,6 +90,7 @@ public class PdfExporter {
                 Paragraph title = new Paragraph("Article : " + article.getTitre())
                         .setTextAlignment(TextAlignment.CENTER)
                         .setBold()
+                        .setFontColor(new com.itextpdf.kernel.colors.DeviceRgb(16, 44, 89)) // #102c59
                         .setFontSize(20);
                 document.add(title);
 
@@ -98,8 +99,10 @@ public class PdfExporter {
                 document.add(new Paragraph("Catégorie : " + (article.getCategorieNom() != null ? article.getCategorieNom() : "")).setItalic());
                 document.add(new Paragraph("Créé le : " + (article.getCreatedAt() != null ? article.getCreatedAt().format(DATE_FMT) : "")).setItalic());
                 
-                document.add(new Paragraph("\nContenu de l'article :\n").setBold().setFontSize(14));
+                document.add(new Paragraph("\nContenu de l'article :\n").setBold().setFontSize(14).setFontColor(new com.itextpdf.kernel.colors.DeviceRgb(157, 187, 206))); // #9dbbce
                 document.add(new Paragraph(article.getContenu() != null ? article.getContenu() : "Aucun contenu."));
+                
+                document.add(new Paragraph("\nDocument généré par MentorAI").setItalic().setFontSize(10).setTextAlignment(TextAlignment.RIGHT).setFontColor(com.itextpdf.kernel.colors.ColorConstants.GRAY));
 
                 document.close();
                 AlertUtil.showSuccess("Article exporté en PDF avec succès !Fichier :\n" + file.getAbsolutePath());
