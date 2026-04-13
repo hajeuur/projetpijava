@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.Controller.StatistiquesController"
+      spacing="15" style="-fx-background-color: #f0f4f8;" prefWidth="1100" prefHeight="750">
+    <padding><Insets top="15" right="20" bottom="20" left="20"/></padding>
+
+    <!-- Top Row -->
+    <HBox spacing="15" VBox.vgrow="ALWAYS">
+        <!-- Top Left: BarChart Projets par Parcours -->
+        <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);"
+              HBox.hgrow="ALWAYS" prefWidth="500">
+            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+            <BarChart fx:id="barChartProjets" title="Nombre de Projets par Parcours" legendVisible="false" VBox.vgrow="ALWAYS" animated="false">
+                <xAxis><CategoryAxis label="" tickLabelRotation="0"/></xAxis>
+                <yAxis><NumberAxis label="" tickUnit="1"/></yAxis>
+            </BarChart>
+        </VBox>
+
+        <!-- Top Right: Horizontal BarChart Ressources par Projet -->
+        <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);"
+              HBox.hgrow="ALWAYS" prefWidth="500">
+            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+            <BarChart fx:id="barChartRessources" title="Nombre de Ressources par Projet" legendVisible="false" VBox.vgrow="ALWAYS" animated="false">
+                <xAxis><NumberAxis label="" tickUnit="1"/></xAxis>
+                <yAxis><CategoryAxis label="Projets"/></yAxis>
+            </BarChart>
+        </VBox>
+    </HBox>
+
+    <!-- Bottom Row -->
+    <HBox spacing="15" VBox.vgrow="ALWAYS">
+        <!-- Bottom Left: PieChart Répartition par Type -->
+        <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);"
+              HBox.hgrow="ALWAYS" prefWidth="500">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+            <Label text="Répartition par Type (Projets)" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+            <PieChart fx:id="pieChartTypeProjet" legendSide="BOTTOM" VBox.vgrow="ALWAYS" animated="false"/>
+        </VBox>
+
+        <!-- Bottom Right: Table Résumé des Tops -->
+        <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);"
+              HBox.hgrow="ALWAYS" prefWidth="500">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+            <Label text="Résumé des Tops" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #102c59; -fx-padding: 0 0 10 0;"/>
+            
+            <TableView fx:id="tableTops" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: #ededed;">
+                <columns>
+                    <TableColumn fx:id="colTopParcours" text="Top Parcours" prefWidth="180"/>
+                    <TableColumn fx:id="colParcoursProjets" text="Projets" prefWidth="60"/>
+                    <TableColumn fx:id="colTopProjet" text="Top Projet" prefWidth="180"/>
+                    <TableColumn fx:id="colProjetRessources" text="Ressources" prefWidth="80"/>
+                </columns>
+                <placeholder><Label text=""/></placeholder>
+            </TableView>
+        </VBox>
+    </HBox>
+
+</VBox>

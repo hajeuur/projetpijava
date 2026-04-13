@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.Controller.AfficherRessourcesController"
+      spacing="10" style="-fx-background-color: transparent;" prefWidth="850" prefHeight="550">
+
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label text="📎" style="-fx-font-size: 22px;"/>
+        <Label fx:id="lblProjetNom" text="Ressources du projet"
+               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Filtrer par type :" style="-fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+        <ComboBox fx:id="cbFiltreType" onAction="#filtrerParType" prefWidth="160"
+                  style="-fx-background-radius: 8; -fx-border-color: #9dbbce; -fx-border-radius: 8;"/>
+    </HBox>
+
+    <TableView fx:id="tableRessources" VBox.vgrow="ALWAYS"
+               style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.08),8,0,0,2); -fx-border-color: #9dbbce; -fx-border-radius: 10; -fx-border-width: 1;">
+        <columns>
+            <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
+            <TableColumn fx:id="colNom" text="Nom" prefWidth="200"/>
+            <TableColumn fx:id="colType" text="Type" prefWidth="100"/>
+            <TableColumn fx:id="colUrl" text="URL" prefWidth="280"/>
+            <TableColumn fx:id="colDateCreation" text="Date Création" prefWidth="120"/>
+        </columns>
+        <placeholder><Label text="Aucune ressource pour ce projet"/></placeholder>
+    </TableView>
+
+    <HBox spacing="15" alignment="CENTER">
+        <Button fx:id="btnAjouter" text="➕ Ajouter" onAction="#ajouterRessource"
+                style="-fx-background-color: linear-gradient(to right, #9dbbce, #7ca0b8); -fx-text-fill: #102c59; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 20; -fx-cursor: hand;"/>
+        <Button fx:id="btnModifier" text="✏️ Modifier" onAction="#modifierRessource"
+                style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 20; -fx-cursor: hand;"/>
+        <Button fx:id="btnSupprimer" text="🗑️ Supprimer" onAction="#supprimerRessource"
+                style="-fx-background-color: transparent; -fx-border-color: #d52e28; -fx-border-radius: 50; -fx-border-width: 2; -fx-text-fill: #d52e28; -fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8 20; -fx-cursor: hand;"/>
+    </HBox>
+</VBox>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.Controller.AfficherProjetsController"
+      spacing="10" style="-fx-background-color: transparent;" prefWidth="900" prefHeight="600">
+
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label text="🗂️" style="-fx-font-size: 22px;"/>
+        <Label fx:id="lblParcoursNom" text="Projets du parcours"
+               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <TextField fx:id="txtRecherche" promptText="🔍 Rechercher par titre ou technologies..." prefWidth="320"
+                   style="-fx-background-radius: 8; -fx-border-color: #9dbbce; -fx-border-radius: 8; -fx-padding: 8;"/>
+        <Button text="Rechercher" onAction="#rechercherProjet"
+                style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;"/>
+    </HBox>
+
+    <TableView fx:id="tableProjets" VBox.vgrow="ALWAYS"
+               style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.08),8,0,0,2); -fx-border-color: #9dbbce; -fx-border-radius: 10; -fx-border-width: 1;">
+        <columns>
+            <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
+            <TableColumn fx:id="colTitre" text="Titre" prefWidth="220"/>
+            <TableColumn fx:id="colType" text="Type" prefWidth="120"/>
+            <TableColumn fx:id="colTechnologies" text="Technologies" prefWidth="200"/>
+            <TableColumn fx:id="colDateDebut" text="Date Début" prefWidth="110"/>
+            <TableColumn fx:id="colDateFin" text="Date Fin" prefWidth="110"/>
+        </columns>
+        <placeholder><Label text="Aucun projet pour ce parcours"/></placeholder>
+    </TableView>
+
+    <HBox spacing="15" alignment="CENTER">
+        <Button fx:id="btnAjouter" text="➕ Ajouter" onAction="#ajouterProjet"
+                style="-fx-background-color: linear-gradient(to right, #9dbbce, #7ca0b8); -fx-text-fill: #102c59; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 20; -fx-cursor: hand;"/>
+        <Button fx:id="btnModifier" text="✏️ Modifier" onAction="#modifierProjet"
+                style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 20; -fx-cursor: hand;"/>
+        <Button fx:id="btnSupprimer" text="🗑️ Supprimer" onAction="#supprimerProjet"
+                style="-fx-background-color: transparent; -fx-border-color: #d52e28; -fx-border-radius: 50; -fx-border-width: 2; -fx-text-fill: #d52e28; -fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8 20; -fx-cursor: hand;"/>
+        <Button text="📎 Voir Ressources" onAction="#voirRessources"
+                style="-fx-background-color: #0a1a36; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 20; -fx-cursor: hand;"/>
+    </HBox>
+</VBox>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.Controller.AjouterRessourceController"
+      spacing="12" style="-fx-background-color: #f4f6f9;" prefWidth="480" prefHeight="420">
+
+    <padding><Insets top="25" right="30" bottom="25" left="30"/></padding>
+
+    <Label text="➕ Nouvelle Ressource" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+    <Label fx:id="lblProjetNom" text="Projet : ..."
+           style="-fx-font-size: 13px; -fx-text-fill: #16a085; -fx-font-style: italic;"/>
+
+    <Label fx:id="lblErreur" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 13px; -fx-wrap-text: true;"/>
+
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints prefWidth="130"/>
+            <ColumnConstraints prefWidth="290" hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label text="Nom *" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <TextField fx:id="txtNom" promptText="Nom de la ressource"
+                   GridPane.rowIndex="0" GridPane.columnIndex="1"
+                   style="-fx-background-radius: 6; -fx-padding: 7;"/>
+
+        <Label text="Type *" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <ComboBox fx:id="cbTypeRessource" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="290"/>
+
+        <Label text="URL" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtUrl" promptText="https://... (optionnel)"
+                   GridPane.rowIndex="2" GridPane.columnIndex="1"
+                   style="-fx-background-radius: 6; -fx-padding: 7;"/>
+
+        <Label text="Description" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextArea fx:id="taDescription" promptText="Description (optionnel)"
+                  GridPane.rowIndex="3" GridPane.columnIndex="1"
+                  prefRowCount="3" style="-fx-background-radius: 6;"/>
+    </GridPane>
+
+    <HBox spacing="15" alignment="CENTER">
+        <Button text="💾 Enregistrer" onAction="#enregistrer"
+                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 8; -fx-padding: 10 25;"/>
+        <Button text="❌ Annuler" onAction="#annuler"
+                style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 8; -fx-padding: 10 25;"/>
+    </HBox>
+</VBox>
