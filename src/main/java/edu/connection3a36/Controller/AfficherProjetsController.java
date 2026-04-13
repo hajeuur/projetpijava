@@ -128,7 +128,7 @@ public class AfficherProjetsController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Ajouter un Projet");
             stage.setScene(new Scene(root));
-            stage.setResizable(false);
+            stage.setMaximized(true);
             stage.centerOnScreen();
             stage.setOnHidden(e -> chargerDonnees());
             stage.show();
@@ -152,7 +152,7 @@ public class AfficherProjetsController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Modifier le Projet");
             stage.setScene(new Scene(root));
-            stage.setResizable(false);
+            stage.setMaximized(true);
             stage.centerOnScreen();
             stage.setOnHidden(e -> chargerDonnees());
             stage.show();
@@ -197,7 +197,7 @@ public class AfficherProjetsController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Ressources du projet : " + selected.getTitre());
             stage.setScene(new Scene(root, 850, 550));
-            stage.setResizable(false);
+            stage.setMaximized(true);
             stage.centerOnScreen();
             stage.show();
         } catch (IOException e) {

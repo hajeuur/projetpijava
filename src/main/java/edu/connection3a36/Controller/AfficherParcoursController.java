@@ -163,7 +163,7 @@ public class AfficherParcoursController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Ajouter un Parcours");
             stage.setScene(new Scene(root));
-            stage.setResizable(false);
+            stage.setMaximized(true);
             stage.centerOnScreen();
             stage.setOnHidden(e -> chargerDonnees());
             stage.show();
@@ -187,7 +187,7 @@ public class AfficherParcoursController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Modifier le Parcours");
             stage.setScene(new Scene(root));
-            stage.setResizable(false);
+            stage.setMaximized(true);
             stage.centerOnScreen();
             stage.setOnHidden(e -> chargerDonnees());
             stage.show();
@@ -232,7 +232,7 @@ public class AfficherParcoursController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Projets du parcours : " + selected.getTitre());
             stage.setScene(new Scene(root, 950, 650));
-            stage.setResizable(false);
+            stage.setMaximized(true);
             stage.centerOnScreen();
             stage.show();
         } catch (IOException e) {

@@ -59,6 +59,7 @@ public class ConnexionController {
                 // Correction erreur disposition de fenetres (toujours extensible, bien centrée)
                 Scene scene = new Scene(root, 1200, 800);
                 stage.setScene(scene);
+                stage.setMaximized(true);
                 stage.setResizable(true);
                 stage.setMinWidth(1000);
                 stage.setMinHeight(700);

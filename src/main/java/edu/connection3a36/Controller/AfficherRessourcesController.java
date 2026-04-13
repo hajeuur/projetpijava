@@ -129,7 +129,7 @@ public class AfficherRessourcesController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Ajouter une Ressource");
             stage.setScene(new Scene(root));
-            stage.setResizable(false);
+            stage.setMaximized(true);
             stage.centerOnScreen();
             stage.setOnHidden(e -> chargerDonnees());
             stage.show();
@@ -153,7 +153,7 @@ public class AfficherRessourcesController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Modifier la Ressource");
             stage.setScene(new Scene(root));
-            stage.setResizable(false);
+            stage.setMaximized(true);
             stage.centerOnScreen();
             stage.setOnHidden(e -> chargerDonnees());
             stage.show();

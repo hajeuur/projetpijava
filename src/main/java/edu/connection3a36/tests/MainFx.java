@@ -21,7 +21,7 @@ public class MainFx extends Application {
         Scene sc = new Scene(root);
         primaryStage.setTitle("MentorAI - Connexion");
         primaryStage.setScene(sc);
-        primaryStage.setResizable(false);
+        primaryStage.setMaximized(true);
         primaryStage.show();
     }
 }
