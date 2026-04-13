@@ -30,7 +30,11 @@ public class ProjetService implements IService<Projet> {
         pst.setDate(5, projet.getDateDebut() != null ? Date.valueOf(projet.getDateDebut()) : null);
         pst.setDate(6, projet.getDateFin() != null ? Date.valueOf(projet.getDateFin()) : null);
         pst.setDate(7, Date.valueOf(LocalDate.now()));
-        pst.setInt(8, projet.getParcoursId());
+        if (projet.getParcoursId() > 0) {
+            pst.setInt(8, projet.getParcoursId());
+        } else {
+            pst.setNull(8, Types.INTEGER);
+        }
         pst.executeUpdate();
         System.out.println("Projet ajouté avec succès.");
     }
@@ -65,7 +69,11 @@ public class ProjetService implements IService<Projet> {
         pst.setDate(5, projet.getDateDebut() != null ? Date.valueOf(projet.getDateDebut()) : null);
         pst.setDate(6, projet.getDateFin() != null ? Date.valueOf(projet.getDateFin()) : null);
         pst.setDate(7, Date.valueOf(LocalDate.now()));
-        pst.setInt(8, projet.getParcoursId());
+        if (projet.getParcoursId() > 0) {
+            pst.setInt(8, projet.getParcoursId());
+        } else {
+            pst.setNull(8, Types.INTEGER);
+        }
         pst.setInt(9, id);
         pst.executeUpdate();
         System.out.println("Projet modifié.");
@@ -109,10 +117,18 @@ public class ProjetService implements IService<Projet> {
     }
 
     public boolean existsByTitreAndParcours(String titre, int parcoursId) throws SQLException {
-        String req = "SELECT COUNT(*) FROM projet WHERE titre = ? AND parcours_id = ?";
-        PreparedStatement pst = cnx.prepareStatement(req);
-        pst.setString(1, titre);
-        pst.setInt(2, parcoursId);
+        String req;
+        PreparedStatement pst;
+        if (parcoursId > 0) {
+            req = "SELECT COUNT(*) FROM projet WHERE titre = ? AND parcours_id = ?";
+            pst = cnx.prepareStatement(req);
+            pst.setString(1, titre);
+            pst.setInt(2, parcoursId);
+        } else {
+            req = "SELECT COUNT(*) FROM projet WHERE titre = ? AND parcours_id IS NULL";
+            pst = cnx.prepareStatement(req);
+            pst.setString(1, titre);
+        }
         ResultSet rs = pst.executeQuery();
         if (rs.next())
             return rs.getInt(1) > 0;

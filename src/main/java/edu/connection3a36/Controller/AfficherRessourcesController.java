@@ -65,25 +65,29 @@ public class AfficherRessourcesController implements Initializable {
                 "Tous", "PDF", "VIDEO", "LIEN", "ARTICLE", "AUTRE"));
         cbFiltreType.setValue("Tous");
 
-        // Gestion affichage/masquage CRUD selon si Front (User/Etudiant) ou Back
-        // (Admin)
-        if (edu.connection3a36.tools.SessionManager.getInstance().getCurrentUser() != null) {
-            String role = edu.connection3a36.tools.SessionManager.getInstance().getCurrentUser().getRole();
-            if ("ROLE_ADMIN".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role)) {
-                if (btnAjouter != null) {
-                    btnAjouter.setVisible(false);
-                    btnAjouter.setManaged(false);
-                }
-                if (btnModifier != null) {
-                    btnModifier.setVisible(false);
-                    btnModifier.setManaged(false);
-                }
-                if (btnSupprimer != null) {
-                    btnSupprimer.setVisible(false);
-                    btnSupprimer.setManaged(false);
-                }
-            }
-        }
+        /* Enabling CRUD in Front as requested */
+        /*
+         * if (edu.connection3a36.tools.SessionManager.getInstance().getCurrentUser() !=
+         * null) {
+         * String role =
+         * edu.connection3a36.tools.SessionManager.getInstance().getCurrentUser().
+         * getRole();
+         * if ("ROLE_ADMIN".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role)) {
+         * if (btnAjouter != null) {
+         * btnAjouter.setVisible(false);
+         * btnAjouter.setManaged(false);
+         * }
+         * if (btnModifier != null) {
+         * btnModifier.setVisible(false);
+         * btnModifier.setManaged(false);
+         * }
+         * if (btnSupprimer != null) {
+         * btnSupprimer.setVisible(false);
+         * btnSupprimer.setManaged(false);
+         * }
+         * }
+         * }
+         */
     }
 
     public void initData(Projet projet) {

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="cardRoot" spacing="12" 
+      style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5); -fx-border-color: #f1f2f6; -fx-border-radius: 12; -fx-border-width: 1;" 
+      prefWidth="400" maxWidth="400" minHeight="500">
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <!-- Top Info Row -->
+    <HBox alignment="CENTER_LEFT">
+        <Label fx:id="lblTypeTag" text="APPLICATION WEB" 
+               style="-fx-background-color: #f0f4f8; -fx-text-fill: #102c59; -fx-font-weight: bold; -fx-font-size: 10px; -fx-padding: 4 10; -fx-background-radius: 4;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <HBox spacing="5" alignment="CENTER_LEFT">
+             <Label text="📅" style="-fx-font-size: 12px;"/>
+             <Label fx:id="lblDate" text="10/01/2023" style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"/>
+        </HBox>
+    </HBox>
+
+    <!-- Title -->
+    <Label fx:id="lblTitre" text="Plateforme de E-learning" wrapText="true"
+           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+
+    <!-- Tech Tags -->
+    <FlowPane fx:id="flowPaneTech" hgap="8" vgap="5">
+        <!-- Tags added dynamically: React, Node.js... -->
+    </FlowPane>
+
+    <Separator style="-fx-opacity: 0.5;"/>
+
+    <!-- Description -->
+    <Label fx:id="lblDescription" text="Description du projet..." wrapText="true" VBox.vgrow="ALWAYS"
+           style="-fx-text-fill: #34495e; -fx-font-size: 13px; -fx-line-spacing: 1.2;" prefHeight="100" alignment="TOP_LEFT"/>
+
+    <!-- Resources Section -->
+    <VBox spacing="10" style="-fx-background-color: #f8f9fa; -fx-background-radius: 8; -fx-padding: 15;">
+        <HBox spacing="8" alignment="CENTER_LEFT">
+            <Label text="⣿" style="-fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+            <Label text="RESSOURCES &amp; APERÇUS" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+        </HBox>
+        <VBox fx:id="vboxRessources" spacing="8">
+            <!-- Dynamic rows for resources -->
+        </VBox>
+    </VBox>
+
+    <Region VBox.vgrow="ALWAYS"/>
+
+    <!-- Action Buttons -->
+    <HBox spacing="10" alignment="CENTER">
+        <Button fx:id="btnModifier" text="✎ Modifier" onAction="#modifierProjet" 
+                style="-fx-background-color: #9dbbce; -fx-text-fill: #102c59; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 20; -fx-cursor: hand;" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+        <Button fx:id="btnSupprimer" text="🗑 Supprimer" onAction="#supprimerProjet" 
+                style="-fx-background-color: transparent; -fx-border-color: #e74c3c; -fx-border-radius: 8; -fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-padding: 8 20; -fx-cursor: hand;" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+    </HBox>
+</VBox>

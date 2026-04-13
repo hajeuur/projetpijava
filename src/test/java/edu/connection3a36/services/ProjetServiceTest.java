@@ -28,6 +28,9 @@ public class ProjetServiceTest {
         Parcours parcours = new Parcours();
         parcours.setTitre(P_TITRE);
         parcours.setTypeParcours("Test");
+        parcours.setDescription("Dummy description for testing");
+        parcours.setEtablissement("Test Etab");
+        parcours.setDiplome("Test Diplome");
         if (!parcoursService.existsByTitreAndType(P_TITRE, "Test")) {
             parcoursService.addEntity(parcours);
         }
@@ -42,26 +45,43 @@ public class ProjetServiceTest {
 
     @Test
     @Order(1)
-    @DisplayName("Tester l'ajout d'un projet")
-    void testAddEntity() {
+    @DisplayName("Tester l'ajout d'un projet lié à un parcours")
+    void testAddEntityWithParcours() {
         Projet projet = new Projet();
         projet.setTitre(PR_TITRE);
         projet.setType("application web");
-        projet.setDescription("Projet généré par JUnit");
-        projet.setTechnologies("Java, JavaFX, MySQL");
+        projet.setDescription("Projet avec parcours");
+        projet.setTechnologies("Java, FX");
         projet.setDateDebut(LocalDate.now());
         projet.setParcoursId(generatedParcoursId);
 
-        assertDoesNotThrow(() -> projetService.addEntity(projet), "L'ajout ne devrait pas lancer d'exception.");
+        assertDoesNotThrow(() -> projetService.addEntity(projet), "L'ajout avec parcours devrait fonctionner.");
     }
 
     @Test
     @Order(2)
+    @DisplayName("Tester l'ajout d'un projet global (sans parcours)")
+    void testAddGlobalEntity() {
+        Projet projet = new Projet();
+        projet.setTitre("Global Project Test");
+        projet.setType("outil");
+        projet.setDescription("Sans parcours");
+        projet.setTechnologies("JUnit");
+        projet.setDateDebut(LocalDate.now());
+        projet.setParcoursId(0); // Global
+
+        assertDoesNotThrow(() -> projetService.addEntity(projet),
+                "L'ajout global (parcours_id=0) devrait fonctionner.");
+    }
+
+    @Test
+    @Order(3)
     @DisplayName("Tester l'ajout d'un projet en doublon (doit échouer)")
     void testAddDuplicateEntity() {
         Projet projet = new Projet();
         projet.setTitre(PR_TITRE);
         projet.setType("application mobile");
+        projet.setDescription("Doublon");
         projet.setParcoursId(generatedParcoursId);
 
         SQLException exception = assertThrows(SQLException.class, () -> {
@@ -95,6 +115,7 @@ public class ProjetServiceTest {
         Projet updated = new Projet();
         updated.setTitre(PR_TITRE + " Modifié");
         updated.setType("application web");
+        updated.setDescription("Description mise à jour");
         updated.setTechnologies("Java, SQL");
         updated.setParcoursId(generatedParcoursId);
 
@@ -102,19 +123,27 @@ public class ProjetServiceTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     @DisplayName("Tester la suppression des données")
     void testDeleteAndCleanup() {
         assertTrue(generatedProjetId > 0);
-        Projet toDelete = new Projet();
-        toDelete.setId(generatedProjetId);
 
-        // Supprimer le projet
-        assertDoesNotThrow(() -> projetService.deleteEntity(toDelete));
+        try {
+            // Nettoyage global
+            List<Projet> globals = projetService.getData();
+            for (Projet p : globals) {
+                if (p.getTitre().equals("Global Project Test") || p.getTitre().equals(PR_TITRE)
+                        || p.getTitre().contains("Modifié")) {
+                    projetService.deleteEntity(p);
+                }
+            }
 
-        // Supprimer le parcours parent de test
-        Parcours toDeleteP = new Parcours();
-        toDeleteP.setId(generatedParcoursId);
-        assertDoesNotThrow(() -> parcoursService.deleteEntity(toDeleteP));
+            // Supprimer le parcours parent de test
+            Parcours toDeleteP = new Parcours();
+            toDeleteP.setId(generatedParcoursId);
+            parcoursService.deleteEntity(toDeleteP);
+        } catch (SQLException e) {
+            fail("Cleanup failed: " + e.getMessage());
+        }
     }
 }

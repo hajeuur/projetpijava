@@ -6,51 +6,41 @@
 
 <VBox xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="edu.connection3a36.Controller.AfficherParcoursController"
-      spacing="10" style="-fx-background-color: transparent;" prefWidth="950" prefHeight="650">
+      spacing="0" style="-fx-background-color: #f0f4f8;" prefWidth="1200" prefHeight="800">
 
-    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+    <!-- Banner Header -->
+    <VBox alignment="CENTER_LEFT" style="-fx-background-color: #102c59; -fx-padding: 30 50;">
+        <HBox alignment="CENTER_LEFT" spacing="20">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Gestion des Parcours" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                <Label text="Visualisez, modifiez et organisez vos expériences vécues et vos formations." style="-fx-font-size: 15px; -fx-text-fill: #9dbbce;"/>
+            </VBox>
+            <Button fx:id="btnAjouter" text="+ Nouveau Parcours" onAction="#ajouterParcours"
+                    style="-fx-background-color: #0d1e3c; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 12 25; -fx-cursor: hand; -fx-border-color: #9dbbce; -fx-border-radius: 50;"/>
+        </HBox>
+    </VBox>
 
-    <!-- Header -->
-    <HBox alignment="CENTER_LEFT" spacing="10">
-        <Label text="📚 Gestion des Parcours" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+    <!-- Search and Filter Bar -->
+    <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-padding: 20 50; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);">
+        <TextField fx:id="txtRecherche" promptText="🔍 Rechercher un titre, école, diplôme..." prefWidth="400"
+                   style="-fx-background-radius: 8; -fx-border-color: #dcdde1; -fx-border-radius: 8; -fx-padding: 10;"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="📁 Voir Projets du Parcours Sélectionné" onAction="#voirProjets"
-                style="-fx-background-color: #0a1a36; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 20; -fx-cursor: hand;"/>
+        <Label text="Filtrer par type :" style="-fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+        <ComboBox fx:id="cbFiltreType" onAction="#filtrerParType" prefWidth="180"
+                  style="-fx-background-radius: 8; -fx-border-color: #dcdde1; -fx-border-radius: 8; -fx-padding: 5;"/>
     </HBox>
 
-    <Label fx:id="lblStats" text="Chargement..." style="-fx-font-size: 13px; -fx-text-fill: #102c59; -fx-background-color: #9dbbce; -fx-padding: 6 12 6 12; -fx-background-radius: 6;"/>
+    <!-- Content Area: Cards -->
+    <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #f0f4f8; -fx-border-color: transparent;">
+        <padding><Insets top="30" right="50" bottom="30" left="50"/></padding>
+        <FlowPane fx:id="flowPaneParcours" hgap="30" vgap="30" alignment="TOP_LEFT">
+            <!-- Cards will be injected here dynamically -->
+        </FlowPane>
+    </ScrollPane>
 
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <TextField fx:id="txtRecherche" promptText="🔍 Rechercher par titre..." prefWidth="300"
-                   style="-fx-background-radius: 8; -fx-border-color: #9dbbce; -fx-border-radius: 8; -fx-padding: 8;"/>
-        <Button text="Rechercher" onAction="#rechercherParcours"
-                style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;"/>
-        <Separator orientation="VERTICAL"/>
-        <Label text="Filtrer :" style="-fx-font-weight: bold; -fx-text-fill: #102c59;"/>
-        <ComboBox fx:id="cbFiltreType" onAction="#filtrerParType" prefWidth="160"
-                  style="-fx-background-radius: 8; -fx-border-color: #9dbbce; -fx-border-radius: 8;"/>
+    <!-- Footer Stats (Optional but kept for functionality) -->
+    <HBox style="-fx-background-color: white; -fx-padding: 10 50;">
+        <Label fx:id="lblStats" text="Chargement des statistiques..." style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
     </HBox>
 
-    <TableView fx:id="tableParcours" VBox.vgrow="ALWAYS"
-               style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.08),8,0,0,2); -fx-border-color: #9dbbce; -fx-border-radius: 10; -fx-border-width: 1;">
-        <columns>
-            <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
-            <TableColumn fx:id="colType" text="Type" prefWidth="120"/>
-            <TableColumn fx:id="colTitre" text="Titre" prefWidth="220"/>
-            <TableColumn fx:id="colEtablissement" text="Établissement" prefWidth="180"/>
-            <TableColumn fx:id="colDiplome" text="Diplôme" prefWidth="150"/>
-            <TableColumn fx:id="colDateDebut" text="Date Début" prefWidth="110"/>
-            <TableColumn fx:id="colDateFin" text="Date Fin" prefWidth="110"/>
-        </columns>
-        <placeholder><Label text="Aucun parcours trouvé"/></placeholder>
-    </TableView>
-
-    <HBox spacing="15" alignment="CENTER">
-        <Button fx:id="btnAjouter" text="➕ Ajouter" onAction="#ajouterParcours"
-                style="-fx-background-color: linear-gradient(to right, #9dbbce, #7ca0b8); -fx-text-fill: #102c59; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 20; -fx-cursor: hand;"/>
-        <Button fx:id="btnModifier" text="✏️ Modifier" onAction="#modifierParcours"
-                style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 20; -fx-cursor: hand;"/>
-        <Button fx:id="btnSupprimer" text="🗑️ Supprimer" onAction="#supprimerParcours"
-                style="-fx-background-color: transparent; -fx-border-color: #d52e28; -fx-border-radius: 50; -fx-border-width: 2; -fx-text-fill: #d52e28; -fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8 20; -fx-cursor: hand;"/>
-    </HBox>
 </VBox>

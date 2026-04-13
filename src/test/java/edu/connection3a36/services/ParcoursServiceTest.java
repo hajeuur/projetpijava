@@ -17,6 +17,17 @@ public class ParcoursServiceTest {
     private static final String TEST_TITRE = "Test JUnit Parcours Unique Title 999";
     private static final String TEST_TYPE = "Formation Test";
 
+    @BeforeAll
+    static void setup() throws SQLException {
+        // Nettoyage préventif au cas où un test précédent a crashé
+        List<Parcours> list = parcoursService.getData();
+        for (Parcours p : list) {
+            if (TEST_TITRE.equals(p.getTitre())) {
+                parcoursService.deleteEntity(p);
+            }
+        }
+    }
+
     @Test
     @Order(1)
     @DisplayName("Tester l'ajout d'un parcours")
@@ -41,6 +52,9 @@ public class ParcoursServiceTest {
         Parcours parcours = new Parcours();
         parcours.setTitre(TEST_TITRE);
         parcours.setTypeParcours(TEST_TYPE);
+        parcours.setDescription("Doublon");
+        parcours.setEtablissement("Test Etab");
+        parcours.setDiplome("Test Diplome");
 
         SQLException exception = assertThrows(SQLException.class, () -> {
             parcoursService.addEntity(parcours);

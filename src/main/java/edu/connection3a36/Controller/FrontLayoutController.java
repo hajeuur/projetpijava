@@ -38,6 +38,11 @@ public class FrontLayoutController implements Initializable {
     }
 
     @FXML
+    private void loadProjets() {
+        loadView("/AfficherProjetsGlobal.fxml");
+    }
+
+    @FXML
     private void logout() {
         SessionManager.getInstance().logout();
         try {

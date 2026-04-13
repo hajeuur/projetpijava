@@ -2,6 +2,7 @@ package edu.connection3a36.Controller;
 
 import edu.connection3a36.entities.Parcours;
 import edu.connection3a36.services.ParcoursService;
+import edu.connection3a36.tools.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -10,7 +11,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -19,140 +20,95 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class AfficherParcoursController implements Initializable {
 
     @FXML
-    private TableView<Parcours> tableParcours;
-    @FXML
-    private TableColumn<Parcours, Integer> colId;
-    @FXML
-    private TableColumn<Parcours, String> colType;
-    @FXML
-    private TableColumn<Parcours, String> colTitre;
-    @FXML
-    private TableColumn<Parcours, String> colEtablissement;
-    @FXML
-    private TableColumn<Parcours, String> colDiplome;
-    @FXML
-    private TableColumn<Parcours, String> colDateDebut;
-    @FXML
-    private TableColumn<Parcours, String> colDateFin;
+    private FlowPane flowPaneParcours;
     @FXML
     private TextField txtRecherche;
     @FXML
     private ComboBox<String> cbFiltreType;
     @FXML
     private Label lblStats;
-
     @FXML
     private Button btnAjouter;
-    @FXML
-    private Button btnModifier;
-    @FXML
-    private Button btnSupprimer;
 
     private final ParcoursService parcoursService = new ParcoursService();
-    private ObservableList<Parcours> parcoursData = FXCollections.observableArrayList();
+    private ObservableList<Parcours> allParcours = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        if (colId != null)
-            colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        if (colType != null)
-            colType.setCellValueFactory(new PropertyValueFactory<>("typeParcours"));
-        if (colTitre != null)
-            colTitre.setCellValueFactory(new PropertyValueFactory<>("titre"));
-        if (colEtablissement != null)
-            colEtablissement.setCellValueFactory(new PropertyValueFactory<>("etablissement"));
-        if (colDiplome != null)
-            colDiplome.setCellValueFactory(new PropertyValueFactory<>("diplome"));
-
-        // Affichage des dates sous forme de String
-        if (colDateDebut != null)
-            colDateDebut.setCellValueFactory(cellData -> {
-                Parcours p = cellData.getValue();
-                return new javafx.beans.property.SimpleStringProperty(
-                        p.getDateDebut() != null ? p.getDateDebut().toString() : "");
-            });
-        if (colDateFin != null)
-            colDateFin.setCellValueFactory(cellData -> {
-                Parcours p = cellData.getValue();
-                return new javafx.beans.property.SimpleStringProperty(
-                        p.getDateFin() != null ? p.getDateFin().toString() : "");
-            });
-
-        cbFiltreType.setItems(FXCollections.observableArrayList(
-                "Tous", "Formation", "Stage", "Alternance", "Emploi", "Personnel"));
+        cbFiltreType.setItems(
+                FXCollections.observableArrayList("Tous", "Formation", "Expérience", "Certification", "Autre"));
         cbFiltreType.setValue("Tous");
 
-        // Gestion affichage/masquage CRUD selon si Front (User/Etudiant) ou Back
-        // (Admin)
-        if (edu.connection3a36.tools.SessionManager.getInstance().getCurrentUser() != null) {
-            String role = edu.connection3a36.tools.SessionManager.getInstance().getCurrentUser().getRole();
-            if ("ROLE_ADMIN".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role)) {
-                // "juste laffichage dans le back" -> Admin ne voit pas les boutons CRUD
-                if (btnAjouter != null) {
-                    btnAjouter.setVisible(false);
-                    btnAjouter.setManaged(false);
-                }
-                if (btnModifier != null) {
-                    btnModifier.setVisible(false);
-                    btnModifier.setManaged(false);
-                }
-                if (btnSupprimer != null) {
-                    btnSupprimer.setVisible(false);
-                    btnSupprimer.setManaged(false);
-                }
-            }
-        }
+        txtRecherche.textProperty().addListener((observable, oldValue, newValue) -> filterData());
+
+        /* Enabling CRUD in Front Office as requested */
+        /*
+         * if (SessionManager.getInstance().getCurrentUser() != null) {
+         * String role = SessionManager.getInstance().getCurrentUser().getRole();
+         * if (!("ROLE_ADMIN".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role)))
+         * {
+         * btnAjouter.setVisible(false);
+         * btnAjouter.setManaged(false);
+         * }
+         * }
+         */
 
         chargerDonnees();
     }
 
-    private void chargerDonnees() {
+    public void chargerDonnees() {
         try {
-            List<Parcours> liste = parcoursService.getData();
-            parcoursData = FXCollections.observableArrayList(liste);
-            tableParcours.setItems(parcoursData);
-            mettreAJourStats();
+            List<Parcours> list = parcoursService.getData();
+            allParcours = FXCollections.observableArrayList(list);
+            filterData();
+            updateStats();
         } catch (SQLException e) {
             afficherErreur("Erreur de chargement", e.getMessage());
         }
     }
 
-    @FXML
-    private void rechercherParcours() {
-        String keyword = txtRecherche.getText().trim();
-        try {
-            List<Parcours> liste;
-            if (keyword.isEmpty()) {
-                liste = parcoursService.getData();
-            } else {
-                liste = parcoursService.searchByTitre(keyword);
+    private void filterData() {
+        String searchText = txtRecherche.getText() == null ? "" : txtRecherche.getText().toLowerCase().trim();
+        String selectedType = cbFiltreType.getValue();
+
+        List<Parcours> filtered = allParcours.stream()
+                .filter(p -> {
+                    boolean matchesSearch = p.getTitre().toLowerCase().contains(searchText) ||
+                            p.getEtablissement().toLowerCase().contains(searchText) ||
+                            p.getDiplome().toLowerCase().contains(searchText);
+                    boolean matchesType = selectedType.equals("Tous") ||
+                            (p.getTypeParcours() != null && p.getTypeParcours().equalsIgnoreCase(selectedType));
+                    return matchesSearch && matchesType;
+                })
+                .collect(Collectors.toList());
+
+        displayCards(filtered);
+    }
+
+    private void displayCards(List<Parcours> list) {
+        flowPaneParcours.getChildren().clear();
+        for (Parcours p : list) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/ParcoursCard.fxml"));
+                loader.setController(new ParcoursCardController());
+                Parent card = loader.load();
+                ParcoursCardController controller = loader.getController();
+                controller.setData(p, this);
+                flowPaneParcours.getChildren().add(card);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            parcoursData = FXCollections.observableArrayList(liste);
-            tableParcours.setItems(parcoursData);
-        } catch (SQLException e) {
-            afficherErreur("Erreur de recherche", e.getMessage());
         }
     }
 
-    @FXML
-    private void filtrerParType() {
-        String type = cbFiltreType.getValue();
-        try {
-            List<Parcours> liste;
-            if (type == null || type.equals("Tous")) {
-                liste = parcoursService.getData();
-            } else {
-                liste = parcoursService.filterByType(type);
-            }
-            parcoursData = FXCollections.observableArrayList(liste);
-            tableParcours.setItems(parcoursData);
-        } catch (SQLException e) {
-            afficherErreur("Erreur de filtrage", e.getMessage());
-        }
+    private void updateStats() {
+        int count = allParcours.size();
+        lblStats.setText("Nombre total de parcours : " + count);
     }
 
     @FXML
@@ -161,114 +117,72 @@ public class AfficherParcoursController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterParcours.fxml"));
             Parent root = loader.load();
             Stage stage = new Stage();
-            stage.setTitle("Ajouter un Parcours");
+            stage.setTitle("Nouveau Parcours");
             stage.setScene(new Scene(root));
             stage.setMaximized(true);
-            stage.centerOnScreen();
             stage.setOnHidden(e -> chargerDonnees());
             stage.show();
         } catch (IOException e) {
-            afficherErreur("Erreur d'ouverture", e.getMessage());
+            afficherErreur("Erreur", e.getMessage());
         }
     }
 
-    @FXML
-    private void modifierParcours() {
-        Parcours selected = tableParcours.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            afficherAvertissement("Sélection requise", "Veuillez sélectionner un parcours à modifier.");
-            return;
-        }
+    public void modifierParcoursSpecific(Parcours p) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ModifierParcours.fxml"));
             Parent root = loader.load();
             ModifierParcoursController controller = loader.getController();
-            controller.initData(selected);
+            controller.initData(p);
             Stage stage = new Stage();
             stage.setTitle("Modifier le Parcours");
             stage.setScene(new Scene(root));
             stage.setMaximized(true);
-            stage.centerOnScreen();
             stage.setOnHidden(e -> chargerDonnees());
             stage.show();
         } catch (IOException e) {
-            afficherErreur("Erreur d'ouverture", e.getMessage());
+            afficherErreur("Erreur", e.getMessage());
         }
     }
 
-    @FXML
-    private void supprimerParcours() {
-        Parcours selected = tableParcours.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            afficherAvertissement("Sélection requise", "Veuillez sélectionner un parcours à supprimer.");
-            return;
-        }
+    public void supprimerParcoursSpecific(Parcours p) {
         Optional<ButtonType> result = new Alert(Alert.AlertType.CONFIRMATION,
-                "Supprimer le parcours \"" + selected.getTitre() + "\" et tous ses projets ?",
+                "Supprimer le parcours \"" + p.getTitre() + "\" ?",
                 ButtonType.YES, ButtonType.NO).showAndWait();
         if (result.isPresent() && result.get() == ButtonType.YES) {
             try {
-                parcoursService.deleteEntity(selected);
+                parcoursService.deleteEntity(p);
                 chargerDonnees();
-                afficherInfo("Succès", "Parcours supprimé avec succès.");
             } catch (SQLException e) {
-                afficherErreur("Erreur de suppression", e.getMessage());
+                afficherErreur("Erreur suppression", e.getMessage());
             }
         }
     }
 
-    @FXML
-    private void voirProjets() {
-        Parcours selected = tableParcours.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            afficherAvertissement("Sélection requise", "Veuillez sélectionner un parcours pour voir ses projets.");
-            return;
-        }
+    public void voirProjetsSpecific(Parcours p) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherProjets.fxml"));
             Parent root = loader.load();
             AfficherProjetsController controller = loader.getController();
-            controller.initData(selected);
+            controller.initData(p);
             Stage stage = new Stage();
-            stage.setTitle("Projets du parcours : " + selected.getTitre());
-            stage.setScene(new Scene(root, 950, 650));
+            stage.setTitle("Projets de : " + p.getTitre());
+            stage.setScene(new Scene(root));
             stage.setMaximized(true);
-            stage.centerOnScreen();
             stage.show();
         } catch (IOException e) {
-            afficherErreur("Erreur d'ouverture", e.getMessage());
+            afficherErreur("Erreur", e.getMessage());
         }
     }
 
-    private void mettreAJourStats() {
-        try {
-            int total = parcoursService.getData().size();
-            int formations = parcoursService.countByType("Formation");
-            int stages = parcoursService.countByType("Stage");
-            lblStats.setText(String.format("Total: %d | Formations: %d | Stages: %d", total, formations, stages));
-        } catch (SQLException e) {
-            lblStats.setText("Statistiques non disponibles");
-        }
+    @FXML
+    private void filtrerParType() {
+        filterData();
     }
 
-    private void afficherErreur(String titre, String message) {
+    private void afficherErreur(String titre, String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(titre);
-        alert.setContentText(message);
-        alert.show();
-    }
-
-    private void afficherAvertissement(String titre, String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(titre);
-        alert.setContentText(message);
-        alert.show();
-    }
-
-    private void afficherInfo(String titre, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(titre);
-        alert.setContentText(message);
+        alert.setContentText(msg);
         alert.show();
     }
 }

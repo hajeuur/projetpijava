@@ -31,6 +31,9 @@ public class RessourceServiceTest {
         Parcours parcours = new Parcours();
         parcours.setTitre(P_TITRE);
         parcours.setTypeParcours("Test");
+        parcours.setDescription("Dummy description");
+        parcours.setEtablissement("Test Etab");
+        parcours.setDiplome("Test Diplome");
         if (!parcoursService.existsByTitreAndType(P_TITRE, "Test")) {
             parcoursService.addEntity(parcours);
         }
@@ -40,6 +43,8 @@ public class RessourceServiceTest {
         Projet projet = new Projet();
         projet.setTitre(PR_TITRE);
         projet.setType("Autre");
+        projet.setDescription("Dummy description");
+        projet.setTechnologies("Test");
         projet.setParcoursId(generatedParcoursId);
         if (!projetService.existsByTitreAndParcours(PR_TITRE, generatedParcoursId)) {
             projetService.addEntity(projet);
@@ -68,6 +73,7 @@ public class RessourceServiceTest {
     void testAddDuplicate() {
         Ressource res = new Ressource();
         res.setNom(R_NOM);
+        res.setDescription("Doublon");
         res.setProjetId(generatedProjetId);
 
         SQLException exception = assertThrows(SQLException.class, () -> ressourceService.addEntity(res));
@@ -96,6 +102,7 @@ public class RessourceServiceTest {
         updated.setNom(R_NOM + " Modifiée");
         updated.setTypeRessource("VIDEO");
         updated.setUrlRessource("http://test.com/vid.mp4");
+        updated.setDescription("Desc modifiée");
         updated.setProjetId(generatedProjetId);
 
         assertDoesNotThrow(() -> ressourceService.updateEntity(generatedRessourceId, updated));
