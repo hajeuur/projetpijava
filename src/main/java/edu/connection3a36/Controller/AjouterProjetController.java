@@ -5,9 +5,14 @@ import edu.connection3a36.entities.Projet;
 import edu.connection3a36.services.ProjetService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+
+import java.io.IOException;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -32,6 +37,8 @@ public class AjouterProjetController implements Initializable {
     private DatePicker dpDateFin;
     @FXML
     private Label lblErreur;
+    @FXML
+    private Label errTitre, errType, errTechnologies, errDateDebut, errDateFin;
 
     private final ProjetService projetService = new ProjetService();
     private Parcours parcoursActuel;
@@ -50,53 +57,79 @@ public class AjouterProjetController implements Initializable {
 
     @FXML
     private void enregistrer() {
-        lblErreur.setText("");
+        boolean isValid = true;
+        hideAllErrors();
 
         if (txtTitre.getText().trim().isEmpty()) {
-            lblErreur.setText("❌ Le titre du projet est obligatoire.");
-            return;
+            showErr(errTitre, "• Le titre est obligatoire.");
+            isValid = false;
+        } else if (txtTitre.getText().trim().length() < 3) {
+            showErr(errTitre, "• Minimum 3 caractères.");
+            isValid = false;
         }
-        if (txtTitre.getText().trim().length() < 3) {
-            lblErreur.setText("❌ Le titre doit contenir au moins 3 caractères.");
-            return;
-        }
-        if (cbType.getValue() == null || cbType.getValue().isEmpty()) {
-            lblErreur.setText("❌ Le type de projet est requis.");
-            return;
+
+        if (cbType.getValue() == null) {
+            showErr(errType, "• Le type est obligatoire.");
+            isValid = false;
         }
         if (txtTechnologies.getText().trim().isEmpty()) {
-            lblErreur.setText("❌ Veuillez indiquer les technologies utilisées.");
-            return;
+            showErr(errTechnologies, "• Techs obligatoires.");
+            isValid = false;
         }
         if (dpDateDebut.getValue() == null) {
-            lblErreur.setText("❌ Veuillez indiquer une date de début.");
-            return;
+            showErr(errDateDebut, "• Date début obligatoire.");
+            isValid = false;
         }
-        if (dpDateFin.getValue() != null && dpDateFin.getValue().isBefore(dpDateDebut.getValue())) {
-            lblErreur.setText("❌ La date de fin ne peut pas être antérieure à la date de début.");
-            return;
+
+        if (dpDateDebut.getValue() != null && dpDateFin.getValue() != null
+                && dpDateFin.getValue().isBefore(dpDateDebut.getValue())) {
+            showErr(errDateFin, "• La date de fin doit être après le début.");
+            isValid = false;
         }
+
+        if (!isValid)
+            return;
 
         Projet projet = new Projet();
         projet.setTitre(txtTitre.getText().trim());
         projet.setType(cbType.getValue());
-        projet.setDescription(taDescription.getText().trim().isEmpty() ? null : taDescription.getText().trim());
+        projet.setDescription(taDescription.getText());
         projet.setTechnologies(txtTechnologies.getText().trim());
         projet.setDateDebut(dpDateDebut.getValue());
         projet.setDateFin(dpDateFin.getValue());
-        projet.setDateCreation(LocalDate.now());
         projet.setParcoursId(parcoursActuel.getId());
 
         try {
+            if (projetService.existsByTitreAndParcours(projet.getTitre(), projet.getParcoursId())) {
+                showErr(errTitre, "• Ce titre existe déjà dans ce parcours.");
+                return;
+            }
             projetService.addEntity(projet);
             fermer();
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Succès");
-            alert.setContentText("Projet ajouté avec succès !");
-            alert.show();
+            new Alert(Alert.AlertType.INFORMATION, "Projet ajouté !").show();
         } catch (SQLException e) {
             lblErreur.setText("❌ " + e.getMessage());
         }
+    }
+
+    private void hideAllErrors() {
+        errTitre.setVisible(false);
+        errTitre.setManaged(false);
+        errType.setVisible(false);
+        errType.setManaged(false);
+        errTechnologies.setVisible(false);
+        errTechnologies.setManaged(false);
+        errDateDebut.setVisible(false);
+        errDateDebut.setManaged(false);
+        errDateFin.setVisible(false);
+        errDateFin.setManaged(false);
+        lblErreur.setText("");
+    }
+
+    private void showErr(Label lbl, String msg) {
+        lbl.setText(msg);
+        lbl.setVisible(true);
+        lbl.setManaged(true);
     }
 
     @FXML
@@ -105,7 +138,14 @@ public class AjouterProjetController implements Initializable {
     }
 
     private void fermer() {
-        Stage stage = (Stage) txtTitre.getScene().getWindow();
-        stage.close();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherProjets.fxml"));
+            Parent view = loader.load();
+            AfficherProjetsController controller = loader.getController();
+            controller.initData(parcoursActuel);
+            ((BorderPane) txtTitre.getScene().getRoot()).setCenter(view);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

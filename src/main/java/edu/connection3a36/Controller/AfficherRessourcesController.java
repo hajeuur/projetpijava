@@ -13,6 +13,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -127,16 +128,10 @@ public class AfficherRessourcesController implements Initializable {
     private void ajouterRessource() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterRessource.fxml"));
-            Parent root = loader.load();
+            Parent view = loader.load();
             AjouterRessourceController controller = loader.getController();
             controller.initData(projetActuel);
-            Stage stage = new Stage();
-            stage.setTitle("Ajouter une Ressource");
-            stage.setScene(new Scene(root));
-            stage.setMaximized(true);
-            stage.centerOnScreen();
-            stage.setOnHidden(e -> chargerDonnees());
-            stage.show();
+            ((BorderPane) tableRessources.getScene().getRoot()).setCenter(view);
         } catch (IOException e) {
             afficherErreur("Erreur d'ouverture", e.getMessage());
         }
@@ -151,18 +146,58 @@ public class AfficherRessourcesController implements Initializable {
         }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ModifierRessource.fxml"));
-            Parent root = loader.load();
+            Parent view = loader.load();
             ModifierRessourceController controller = loader.getController();
             controller.initData(selected, projetActuel);
-            Stage stage = new Stage();
-            stage.setTitle("Modifier la Ressource");
-            stage.setScene(new Scene(root));
-            stage.setMaximized(true);
-            stage.centerOnScreen();
-            stage.setOnHidden(e -> chargerDonnees());
-            stage.show();
+            ((BorderPane) tableRessources.getScene().getRoot()).setCenter(view);
         } catch (IOException e) {
             afficherErreur("Erreur d'ouverture", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void ouvrirLien() {
+        Ressource selected = tableRessources.getSelectionModel().getSelectedItem();
+        if (selected != null && selected.getUrlRessource() != null && !selected.getUrlRessource().isEmpty()) {
+            try {
+                // Utilisation de HostServices (via MainFx ou singleton si possible) ou
+                // java.awt.Desktop
+                String url = selected.getUrlRessource().trim();
+                if (!url.startsWith("http"))
+                    url = "http://" + url;
+
+                java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
+            } catch (Exception e) {
+                afficherErreur("Erreur", "Impossible d'ouvrir le lien : " + e.getMessage());
+            }
+        } else {
+            afficherErreur("Attention", "Aucun lien URL disponible pour cette ressource.");
+        }
+    }
+
+    @FXML
+    private void handleTableClick(javafx.scene.input.MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            ouvrirLien();
+        }
+    }
+
+    @FXML
+    private void retour() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherProjets.fxml"));
+            Parent view = loader.load();
+            AfficherProjetsController controller = loader.getController();
+
+            // Recharger les projets du même parcours
+            edu.connection3a36.services.ParcoursService ps = new edu.connection3a36.services.ParcoursService();
+            edu.connection3a36.entities.Parcours parc = ps.getById(projetActuel.getParcoursId());
+            controller.initData(parc);
+
+            ((BorderPane) tableRessources.getScene().getRoot()).setCenter(view);
+        } catch (Exception e) {
+            e.printStackTrace();
+            afficherErreur("Erreur", "Impossible de retourner aux projets : " + e.getMessage());
         }
     }
 

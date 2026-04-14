@@ -6,6 +6,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.net.URL;
@@ -136,7 +137,13 @@ public class ModifierParcoursController implements Initializable {
     }
 
     private void fermer() {
-        Stage stage = (Stage) txtTitre.getScene().getWindow();
-        stage.close();
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/AfficherParcours.fxml"));
+            javafx.scene.Parent view = loader.load();
+            ((BorderPane) txtTitre.getScene().getRoot()).setCenter(view);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 }

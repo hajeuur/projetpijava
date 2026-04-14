@@ -11,6 +11,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 
@@ -115,13 +116,8 @@ public class AfficherParcoursController implements Initializable {
     private void ajouterParcours() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterParcours.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("Nouveau Parcours");
-            stage.setScene(new Scene(root));
-            stage.setMaximized(true);
-            stage.setOnHidden(e -> chargerDonnees());
-            stage.show();
+            Parent view = loader.load();
+            ((BorderPane) flowPaneParcours.getScene().getRoot()).setCenter(view);
         } catch (IOException e) {
             afficherErreur("Erreur", e.getMessage());
         }
@@ -130,15 +126,10 @@ public class AfficherParcoursController implements Initializable {
     public void modifierParcoursSpecific(Parcours p) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ModifierParcours.fxml"));
-            Parent root = loader.load();
+            Parent view = loader.load();
             ModifierParcoursController controller = loader.getController();
             controller.initData(p);
-            Stage stage = new Stage();
-            stage.setTitle("Modifier le Parcours");
-            stage.setScene(new Scene(root));
-            stage.setMaximized(true);
-            stage.setOnHidden(e -> chargerDonnees());
-            stage.show();
+            ((BorderPane) flowPaneParcours.getScene().getRoot()).setCenter(view);
         } catch (IOException e) {
             afficherErreur("Erreur", e.getMessage());
         }
@@ -161,14 +152,10 @@ public class AfficherParcoursController implements Initializable {
     public void voirProjetsSpecific(Parcours p) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherProjets.fxml"));
-            Parent root = loader.load();
+            Parent view = loader.load();
             AfficherProjetsController controller = loader.getController();
             controller.initData(p);
-            Stage stage = new Stage();
-            stage.setTitle("Projets de : " + p.getTitre());
-            stage.setScene(new Scene(root));
-            stage.setMaximized(true);
-            stage.show();
+            ((BorderPane) flowPaneParcours.getScene().getRoot()).setCenter(view);
         } catch (IOException e) {
             afficherErreur("Erreur", e.getMessage());
         }

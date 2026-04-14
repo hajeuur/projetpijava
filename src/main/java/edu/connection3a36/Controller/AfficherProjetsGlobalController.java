@@ -10,6 +10,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 
@@ -78,39 +79,29 @@ public class AfficherProjetsGlobalController implements Initializable {
     private void ajouterProjet() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherProjets.fxml"));
-            Parent root = loader.load();
+            Parent view = loader.load();
             AfficherProjetsController controller = loader.getController();
-            controller.initData(null); // Global mode (null = no pre-selected parcours)
+            controller.initData(null); // Mode global (aucun parcours pré-sélectionné)
 
-            Stage stage = new Stage();
-            stage.setTitle("Gestion Manuelle des Projets");
-            stage.setScene(new Scene(root));
-            stage.setMaximized(true);
-            stage.setOnHidden(e -> chargerDonnees());
-            stage.show();
+            ((BorderPane) flowPaneProjets.getScene().getRoot()).setCenter(view);
         } catch (IOException e) {
             e.printStackTrace();
+            afficherInfo("Erreur", "Impossible de charger la vue projet : " + e.getMessage());
         }
     }
 
     public void modifierProjetSpecific(Projet p) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherProjets.fxml"));
-            Parent root = loader.load();
+            Parent view = loader.load();
             AfficherProjetsController controller = loader.getController();
-            controller.initData(null); // Load all to allow switching
-            // We'll need a way to select the project in the list
-            // For now, it will load everything and user can pick it, or we add a select
-            // method
+            controller.initData(null); // On charge tout pour permettre de switcher si besoin
+            controller.selectProject(p); // On sélectionne le projet pour l'édition
 
-            Stage stage = new Stage();
-            stage.setTitle("Modifier : " + p.getTitre());
-            stage.setScene(new Scene(root));
-            stage.setMaximized(true);
-            stage.setOnHidden(e -> chargerDonnees());
-            stage.show();
+            ((BorderPane) flowPaneProjets.getScene().getRoot()).setCenter(view);
         } catch (IOException e) {
             e.printStackTrace();
+            afficherInfo("Erreur", "Impossible de charger la vue projet : " + e.getMessage());
         }
     }
 

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="25" style="-fx-background-color: #f8fafc; -fx-padding: 30;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.connection3a36.Controller.DetailsProjetController">
+    <!-- Header with Back Button -->
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <Button text="← Retour" onAction="#retour" 
+                style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-padding: 10 20; -fx-cursor: hand; -fx-text-fill: #0f172a; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.02), 10, 0, 0, 2);"/>
+        <VBox spacing="5" HBox.hgrow="ALWAYS">
+            <Label fx:id="lblTitre" text="Détails du Projet" style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="Espace Projet" style="-fx-text-fill: #94a3b8; -fx-font-size: 13;"/>
+                <Label text="/" style="-fx-text-fill: #cbd5e1;"/>
+                <Label fx:id="lblTypeBadge" text="Académique" style="-fx-text-fill: #2563eb; -fx-font-weight: bold; -fx-font-size: 13;"/>
+            </HBox>
+        </VBox>
+    </HBox>
+
+    <HBox spacing="30" VBox.vgrow="ALWAYS">
+        <!-- Main Details Card (60% width) -->
+        <VBox spacing="25" HBox.hgrow="ALWAYS" minWidth="600" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 35; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 25, 0, 0, 12);">
+            <VBox spacing="10">
+                <Label text="COMPÉTENCES &amp; TECHNOLOGIES" style="-fx-text-fill: #94a3b8; -fx-font-size: 11; -fx-font-weight: bold; -fx-letter-spacing: 1px;"/>
+                <Label fx:id="lblTechnologies" text="---" wrapText="true" style="-fx-font-size: 17; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+            </VBox>
+
+            <VBox spacing="10">
+                <Label text="CALENDRIER DU PROJET" style="-fx-text-fill: #94a3b8; -fx-font-size: 11; -fx-font-weight: bold; -fx-letter-spacing: 1px;"/>
+                <Label fx:id="lblPeriode" text="---" style="-fx-font-size: 15; -fx-text-fill: #475569;"/>
+            </VBox>
+            
+            <Separator style="-fx-opacity: 0.5;"/>
+            
+            <VBox spacing="15" VBox.vgrow="ALWAYS">
+                <Label text="EXPLICATION DÉTAILLÉE" style="-fx-text-fill: #94a3b8; -fx-font-size: 11; -fx-font-weight: bold; -fx-letter-spacing: 1px;"/>
+                <Label fx:id="lblDescription" text="..." wrapText="true" style="-fx-text-fill: #64748b; -fx-line-spacing: 1.8; -fx-font-size: 15;"/>
+            </VBox>
+        </VBox>
+
+        <!-- Right Side: Resources List Card (40% width) -->
+        <VBox spacing="20" minWidth="400" prefWidth="500" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 25, 0, 0, 12);">
+            <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-padding: 0 0 15 0; -fx-border-color: #f1f5f9; -fx-border-width: 0 0 1 0;">
+                <StackPane style="-fx-background-color: #eff6ff; -fx-padding: 12; -fx-background-radius: 12;">
+                    <Label text="🔗" style="-fx-font-size: 20;"/>
+                </StackPane>
+                <VBox>
+                    <Label text="Ressources" style="-fx-font-weight: bold; -fx-font-size: 18; -fx-text-fill: #1e293b;"/>
+                    <Label fx:id="lblRessourcesCount" text="0 élément(s)" style="-fx-text-fill: #94a3b8; -fx-font-size: 13;"/>
+                </VBox>
+            </HBox>
+            
+            <TableView fx:id="tableRessources" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                <columns>
+                    <TableColumn fx:id="colNom" text="DOCUMENT" />
+                    <TableColumn fx:id="colType" text="TYPE" minWidth="100" maxWidth="100" style="-fx-alignment: CENTER;" />
+                </columns>
+                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+            </TableView>
+        </VBox>
+    </HBox>
+</VBox>

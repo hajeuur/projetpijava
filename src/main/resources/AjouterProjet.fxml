@@ -26,25 +26,30 @@
         <TextField fx:id="txtTitre" promptText="Titre du projet (min 3 caractères)"
                    GridPane.rowIndex="0" GridPane.columnIndex="1"
                    style="-fx-background-radius: 6; -fx-padding: 7;"/>
+        <Label fx:id="errTitre" text="• Le titre est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
         <Label text="Type *" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-        <ComboBox fx:id="cbType" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="300"/>
+        <ComboBox fx:id="cbType" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="300"/>
+        <Label fx:id="errType" text="• Le type est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
         <Label text="Technologies *" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
         <TextField fx:id="txtTechnologies" promptText="Ex: Java, JavaFX, MySQL..."
-                   GridPane.rowIndex="2" GridPane.columnIndex="1"
+                   GridPane.rowIndex="4" GridPane.columnIndex="1"
                    style="-fx-background-radius: 6; -fx-padding: 7;"/>
+        <Label fx:id="errTechnologies" text="• Les technologies sont obligatoires." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
         <Label text="Description" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
         <TextArea fx:id="taDescription" promptText="Description du projet (optionnel)"
                   GridPane.rowIndex="3" GridPane.columnIndex="1"
-                  prefRowCount="3" style="-fx-background-radius: 6;"/>
+                  prefRowCount="3" style="-fx-background-radius: 6;" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
 
         <Label text="Date de Début *" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-        <DatePicker fx:id="dpDateDebut" GridPane.rowIndex="4" GridPane.columnIndex="1" prefWidth="300"/>
+        <DatePicker fx:id="dpDateDebut" GridPane.rowIndex="7" GridPane.columnIndex="1" prefWidth="300"/>
+        <Label fx:id="errDateDebut" text="• La date de début est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
 
         <Label text="Date de Fin" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-        <DatePicker fx:id="dpDateFin" GridPane.rowIndex="5" GridPane.columnIndex="1" prefWidth="300"/>
+        <DatePicker fx:id="dpDateFin" GridPane.rowIndex="9" GridPane.columnIndex="1" prefWidth="300"/>
+        <Label fx:id="errDateFin" text="• La date de fin doit être après le début." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
     </GridPane>
 
     <HBox spacing="15" alignment="CENTER">

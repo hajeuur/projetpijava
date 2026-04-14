@@ -25,16 +25,19 @@
         <Label text="Nom *" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
         <TextField fx:id="txtNom" GridPane.rowIndex="0" GridPane.columnIndex="1"
                    style="-fx-background-radius: 6; -fx-padding: 7;"/>
+        <Label fx:id="errNom" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-        <Label text="Type *" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-        <ComboBox fx:id="cbTypeRessource" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="290"/>
+        <Label text="Type *" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <ComboBox fx:id="cbTypeRessource" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="290"/>
+        <Label fx:id="errType" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-        <Label text="URL" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-        <TextField fx:id="txtUrl" GridPane.rowIndex="2" GridPane.columnIndex="1"
+        <Label text="URL" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtUrl" GridPane.rowIndex="4" GridPane.columnIndex="1"
                    style="-fx-background-radius: 6; -fx-padding: 7;"/>
+        <Label fx:id="errUrl" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
-        <Label text="Description" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-        <TextArea fx:id="taDescription" GridPane.rowIndex="3" GridPane.columnIndex="1"
+        <Label text="Description" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+        <TextArea fx:id="taDescription" GridPane.rowIndex="6" GridPane.columnIndex="1"
                   prefRowCount="3" style="-fx-background-radius: 6;"/>
     </GridPane>
 

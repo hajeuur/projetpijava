@@ -6,8 +6,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -18,25 +19,52 @@ public class DashboardController implements Initializable {
     @FXML
     private BorderPane mainContainer;
     @FXML
-    private Label lblUserName, lblUserRole;
+    private StackPane centerContent;
+    @FXML
+    private Label lblSidebarName, lblSidebarRole;
+    @FXML
+    private Button btnHome, btnProjets, btnParcours;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        if (SessionManager.getInstance().getCurrentUser() != null) {
-            lblUserName.setText(SessionManager.getInstance().getCurrentUser().getEmail());
-            lblUserRole.setText(SessionManager.getInstance().getCurrentUser().getRole());
-        }
-        loadBackOffice();
+        lblSidebarName.setText("admin");
+        lblSidebarRole.setText("Administrateur");
+        loadHome();
     }
 
     @FXML
-    public void loadBackOffice() {
-        loadView("/BackOfficeParcours.fxml");
+    private void loadHome() {
+        setActive(btnHome);
+        loadView("/HomeBack.fxml");
     }
 
     @FXML
     public void loadProjets() {
+        setActive(btnProjets);
         loadView("/BackOfficeProjets.fxml");
+    }
+
+    @FXML
+    private void loadParcours() {
+        setActive(btnParcours);
+        loadView("/BackOfficeParcours.fxml");
+    }
+
+    private void setActive(Button activeBtn) {
+        btnHome.setStyle(
+                "-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;");
+        btnProjets.setStyle(
+                "-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;");
+        btnParcours.setStyle(
+                "-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;");
+
+        activeBtn.setStyle(
+                "-fx-background-color: #1a3a6d; -fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand; -fx-background-radius: 0;");
+    }
+
+    @FXML
+    public void loadBackOffice() {
+        loadParcours();
     }
 
     @FXML
@@ -62,11 +90,11 @@ public class DashboardController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
             Parent view = loader.load();
-            mainContainer.setCenter(view);
+            centerContent.getChildren().setAll(view);
         } catch (IOException e) {
             System.err.println("Erreur : " + fxml);
             e.printStackTrace();
-            mainContainer.setCenter(new Label("Erreur : " + fxml));
+            centerContent.getChildren().setAll(new Label("Erreur : " + fxml));
         }
     }
 }

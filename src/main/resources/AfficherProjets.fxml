@@ -11,9 +11,16 @@
     <VBox spacing="0" style="-fx-background-color: #f0f4f8;">
         
         <!-- Top Blue Banner -->
-        <VBox alignment="CENTER" style="-fx-background-color: #102c59; -fx-padding: 40 0;">
-            <Label text="Gestion des Projets" style="-fx-font-size: 32px; -fx-text-fill: white; -fx-font-weight: bold;"/>
-            <Label text="Gérez vos réalisations académiques et professionnelles ainsi que leurs ressources." style="-fx-font-size: 15px; -fx-text-fill: #9dbbce; -fx-padding: 10 0 0 0;"/>
+        <VBox alignment="CENTER" style="-fx-background-color: #102c59; -fx-padding: 30 0;">
+            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 0 50;">
+                <Button text="← Retour" onAction="#retour" 
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-border-color: rgba(255,255,255,0.3); -fx-border-radius: 5; -fx-cursor: hand;"/>
+                <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <Label text="Gestion des Projets" style="-fx-font-size: 32px; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                    <Label text="Gérez vos réalisations académiques et professionnelles ainsi que leurs ressources." style="-fx-font-size: 15px; -fx-text-fill: #9dbbce; -fx-padding: 5 0 0 0;"/>
+                </VBox>
+                <Region prefWidth="100"/> <!-- Balance -->
+            </HBox>
         </VBox>
         
         <!-- Main Content -->
@@ -61,31 +68,37 @@
                     <VBox GridPane.rowIndex="0" GridPane.columnIndex="0" spacing="8">
                         <Label text="Titre du projet *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
                         <TextField fx:id="txtTitre" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 10; -fx-font-size: 14px;"/>
+                        <Label fx:id="errTitre" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
                     </VBox>
                     
                     <VBox GridPane.rowIndex="0" GridPane.columnIndex="1" spacing="8">
                         <Label text="Type de projet *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
                         <TextField fx:id="txtType" promptText="Web, Mobile..." style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 10; -fx-font-size: 14px;"/>
+                        <Label fx:id="errType" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
                     </VBox>
                     
                     <VBox GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="8">
                         <Label text="Description *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
                         <TextArea fx:id="taDescription" prefRowCount="4" wrapText="true" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 4; -fx-font-size: 14px;"/>
+                        <Label fx:id="errDescription" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
                     </VBox>
                     
                     <VBox GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="8">
                         <Label text="Technologies utilisées" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
                         <TextField fx:id="txtTechnologies" promptText="PHP, Symfony, Bootstrap..." style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 10; -fx-font-size: 14px;"/>
+                        <Label fx:id="errTechnologies" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
                     </VBox>
                     
                     <VBox GridPane.rowIndex="3" GridPane.columnIndex="0" spacing="8">
                         <Label text="Date de début *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
                         <DatePicker fx:id="dpDateDebut" promptText="jj/mm/aaaa" maxWidth="Infinity" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 5; -fx-font-size: 14px;"/>
+                        <Label fx:id="errDateDebut" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
                     </VBox>
                     
                     <VBox GridPane.rowIndex="3" GridPane.columnIndex="1" spacing="8">
                         <Label text="Date de fin" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
                         <DatePicker fx:id="dpDateFin" promptText="jj/mm/aaaa" maxWidth="Infinity" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 5; -fx-font-size: 14px;"/>
+                        <Label fx:id="errDateFin" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
                     </VBox>
 
                     <VBox GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="8">

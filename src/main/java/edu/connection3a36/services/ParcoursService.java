@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class  ParcoursService implements IService<Parcours> {
+public class ParcoursService implements IService<Parcours> {
 
     private final Connection cnx = MyConnection.getInstance().getCnx();
 
@@ -89,6 +89,17 @@ public class  ParcoursService implements IService<Parcours> {
             list.add(mapResultSet(rs));
         }
         return list;
+    }
+
+    public Parcours getById(int id) throws SQLException {
+        String req = "SELECT * FROM parcours WHERE id = ?";
+        PreparedStatement pst = cnx.prepareStatement(req);
+        pst.setInt(1, id);
+        ResultSet rs = pst.executeQuery();
+        if (rs.next()) {
+            return mapResultSet(rs);
+        }
+        return null;
     }
 
     public List<Parcours> searchByTitre(String keyword) throws SQLException {

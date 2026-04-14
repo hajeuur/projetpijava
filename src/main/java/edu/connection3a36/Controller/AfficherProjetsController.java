@@ -11,6 +11,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -39,6 +40,8 @@ public class AfficherProjetsController implements Initializable {
     private Label lblTabRessources;
     @FXML
     private Label lblErreur;
+    @FXML
+    private Label errTitre, errType, errDescription, errTechnologies, errDateDebut, errDateFin;
 
     @FXML
     private TextField txtTitre;
@@ -132,6 +135,19 @@ public class AfficherProjetsController implements Initializable {
         preparerAjout(); // Par défaut on affiche un formulaire vide
     }
 
+    public void selectProject(Projet p) {
+        if (p == null)
+            return;
+        // Search in data to ensure we have the exact object reference
+        for (Projet item : listProjets.getItems()) {
+            if (item.getId() == p.getId()) {
+                listProjets.getSelectionModel().select(item);
+                remplirFormulaire(item);
+                break;
+            }
+        }
+    }
+
     private void chargerDonnees() {
         try {
             List<Projet> liste;
@@ -219,14 +235,36 @@ public class AfficherProjetsController implements Initializable {
         LocalDate dd = dpDateDebut.getValue();
         LocalDate df = dpDateFin.getValue();
 
-        if (titre.isEmpty() || type.isEmpty() || desc.isEmpty() || dd == null) {
-            lblErreur.setText("Veuillez remplir tous les champs obligatoires (*).");
-            return;
+        hideAllErrors();
+        boolean isValid = true;
+
+        if (titre.isEmpty()) {
+            showErr(errTitre, "• Le titre est obligatoire.");
+            isValid = false;
+        } else if (titre.length() < 3) {
+            showErr(errTitre, "• Minimum 3 caractères.");
+            isValid = false;
         }
-        if (titre.length() < 3) {
-            lblErreur.setText("Le titre doit contenir au moins 3 caractères.");
-            return;
+
+        if (type.isEmpty()) {
+            showErr(errType, "• Le type est obligatoire.");
+            isValid = false;
         }
+        if (desc.isEmpty()) {
+            showErr(errDescription, "• La description est obligatoire.");
+            isValid = false;
+        }
+        if (dd == null) {
+            showErr(errDateDebut, "• Date début obligatoire.");
+            isValid = false;
+        }
+        if (dd != null && df != null && df.isBefore(dd)) {
+            showErr(errDateFin, "• La date de fin doit être après le début.");
+            isValid = false;
+        }
+
+        if (!isValid)
+            return;
 
         try {
             Parcours linkedP = cbParcours.getValue();
@@ -241,6 +279,12 @@ public class AfficherProjetsController implements Initializable {
                 p.setDateDebut(dd);
                 p.setDateFin(df);
                 p.setParcoursId(linkedP != null ? linkedP.getId() : 0);
+
+                if (projetService.existsByTitreAndParcours(p.getTitre(), p.getParcoursId())) {
+                    showErr(errTitre, "• Ce projet existe déjà dans ce parcours.");
+                    return;
+                }
+
                 projetService.addEntity(p);
                 afficherInfo("Succès", "Le projet a été créé.");
             } else {
@@ -291,17 +335,23 @@ public class AfficherProjetsController implements Initializable {
         }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherRessources.fxml"));
-            Parent root = loader.load();
+            Parent view = loader.load();
             AfficherRessourcesController controller = loader.getController();
             controller.initData(selectedProjet);
-            Stage stage = new Stage();
-            stage.setTitle("Ressources du projet : " + selectedProjet.getTitre());
-            stage.setScene(new Scene(root, 950, 650));
-            stage.setMaximized(true);
-            stage.centerOnScreen();
-            stage.show();
+            ((BorderPane) listProjets.getScene().getRoot()).setCenter(view);
         } catch (IOException e) {
             lblErreur.setText("Erreur ouverture Ressources: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void retour() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherProjetsGlobal.fxml"));
+            Parent view = loader.load();
+            ((BorderPane) listProjets.getScene().getRoot()).setCenter(view);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -319,5 +369,27 @@ public class AfficherProjetsController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.show();
+    }
+
+    private void hideAllErrors() {
+        errTitre.setVisible(false);
+        errTitre.setManaged(false);
+        errType.setVisible(false);
+        errType.setManaged(false);
+        errDescription.setVisible(false);
+        errDescription.setManaged(false);
+        errTechnologies.setVisible(false);
+        errTechnologies.setManaged(false);
+        errDateDebut.setVisible(false);
+        errDateDebut.setManaged(false);
+        errDateFin.setVisible(false);
+        errDateFin.setManaged(false);
+        lblErreur.setText("");
+    }
+
+    private void showErr(Label lbl, String msg) {
+        lbl.setText(msg);
+        lbl.setVisible(true);
+        lbl.setManaged(true);
     }
 }

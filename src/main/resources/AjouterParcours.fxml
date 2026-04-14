@@ -45,40 +45,47 @@
                     <VBox GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="8">
                         <Label text="Titre du parcours *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
                         <TextField fx:id="txtTitre" promptText="Ex: Licence en Informatique, Développeur Web PHP..." style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 10; -fx-font-size: 14px;"/>
+                        <Label fx:id="errTitre" text="• Le titre est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
                     </VBox>
                     
                     <!-- Type / Diplome -->
                     <VBox GridPane.rowIndex="1" GridPane.columnIndex="0" spacing="8">
                         <Label text="Type de parcours *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
                         <ComboBox fx:id="cbTypeParcours" promptText="Ex: Formation, Expérience..." maxWidth="Infinity" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 5; -fx-font-size: 14px; -fx-background-color: #f8f9fa;"/>
+                        <Label fx:id="errType" text="• Le type est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
                     </VBox>
                     
                     <VBox GridPane.rowIndex="1" GridPane.columnIndex="1" spacing="8">
                         <Label text="Diplôme / Certification *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
                         <TextField fx:id="txtDiplome" promptText="Ex: Bac+3, Certificat d'aptitude..." style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 10; -fx-font-size: 14px;"/>
+                        <Label fx:id="errDiplome" text="• Le diplôme est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
                     </VBox>
                     
                     <!-- Etablissement -->
                     <VBox GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="8">
                         <Label text="Établissement ou Organisme *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
                         <TextField fx:id="txtEtablissement" promptText="Le nom de votre école ou de l'entreprise" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 10; -fx-font-size: 14px;"/>
+                        <Label fx:id="errEtablissement" text="• L'établissement est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
                     </VBox>
                     
                     <!-- Dates -->
                     <VBox GridPane.rowIndex="3" GridPane.columnIndex="0" spacing="8">
                         <Label text="Date de début *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
                         <DatePicker fx:id="dpDateDebut" promptText="jj/mm/aaaa" maxWidth="Infinity" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 5; -fx-font-size: 14px;"/>
+                        <Label fx:id="errDateDebut" text="• La date de début est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
                     </VBox>
                     
                     <VBox GridPane.rowIndex="3" GridPane.columnIndex="1" spacing="8">
                         <Label text="Date de fin" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
                         <DatePicker fx:id="dpDateFin" promptText="jj/mm/aaaa" maxWidth="Infinity" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 5; -fx-font-size: 14px;"/>
+                        <Label fx:id="errDateFin" text="• La date de fin doit être après le début." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
                     </VBox>
                     
                     <!-- Description -->
                     <VBox GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="8">
                         <Label text="Description de vos missions et acquis *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
                         <TextArea fx:id="taDescription" promptText="Détaillez vos responsabilités, technologies utilisées..." prefRowCount="4" wrapText="true" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 4; -fx-font-size: 14px;"/>
+                        <Label fx:id="errDescription" text="• La description est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
                     </VBox>
                     
                     <!-- Optionnels : Spécialité & Entreprise -->
