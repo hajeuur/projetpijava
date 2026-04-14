@@ -45,23 +45,31 @@ public class BackOfficeProjetsController implements Initializable {
     @FXML
     private TableColumn<Projet, Integer> colIndex;
     @FXML
-    private TableColumn<Projet, String> colTitre, colUtilisateur, colType, colRessources;
+    private TableColumn<Projet, String> colTitre;
+    @FXML
+    private TableColumn<Projet, String> colUtilisateur;
+    @FXML
+    private TableColumn<Projet, String> colType;
+    @FXML
+    private TableColumn<Projet, String> colRessources;
     @FXML
     private TableColumn<Projet, Void> colAction;
     @FXML
-    private BarChart<String, Number> barChartUsers;
-    @FXML
-    private BarChart<String, Number> barChartResources;
-    @FXML
     private PieChart pieChartTypes;
     @FXML
-    private TableView<Projet> tableSummary;
-    @FXML
-    private TableColumn<Projet, String> colTopUser, colTopProjet, colProjResCount;
+    private BarChart<String, Number> barChartUsers;
     @FXML
     private HBox paginationBoxProjets;
     @FXML
     private TextField filterInput;
+    @FXML
+    private Label lblTotalProjets;
+    @FXML
+    private Label lblTotalRessources;
+    @FXML
+    private Label lblEngagementScore;
+    @FXML
+    private ProgressBar progressEngagement;
 
     private final ProjetService projetService = new ProjetService();
     private final RessourceService ressourceService = new RessourceService();
@@ -208,53 +216,51 @@ public class BackOfficeProjetsController implements Initializable {
         }
     }
 
+    @FXML
     private void loadData() {
         try {
             allProjets.setAll(projetService.getData());
             filteredProjets.setAll(allProjets);
+            calculateStats();
+            updateCharts();
             updateTable();
-            updateStats();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private void updateStats() {
+    private void calculateStats() {
+        lblTotalProjets.setText(String.valueOf(allProjets.size()));
+        int totalRes = 0;
+        for (Projet p : allProjets) {
+            try {
+                totalRes += ressourceService.getByProjetId(p.getId()).size();
+            } catch (SQLException ignored) {
+            }
+        }
+        lblTotalRessources.setText(String.valueOf(totalRes));
+
+        if (progressEngagement != null && !allProjets.isEmpty()) {
+            double ratio = (double) totalRes / (allProjets.size() * 3.0);
+            double clamped = Math.min(1.0, ratio);
+            progressEngagement.setProgress(clamped);
+            lblEngagementScore.setText(String.format("%.0f%%", clamped * 100));
+        }
+    }
+
+    private void updateCharts() {
         if (allProjets.isEmpty())
             return;
 
         // 1. Users Stats
         XYChart.Series<String, Number> userSeries = new XYChart.Series<>();
         userSeries.setName("Projets");
+        // Mocking user data as requested in existing code style
         userSeries.getData().add(new XYChart.Data<>("arsl arslen", 3));
         userSeries.getData().add(new XYChart.Data<>("Hejer Hejer", 1));
         barChartUsers.getData().setAll(userSeries);
 
-        // 2. Project Resources Stats
-        XYChart.Series<String, Number> resSeries = new XYChart.Series<>();
-        resSeries.setName("Ressources");
-        allProjets.stream()
-                .sorted((p1, p2) -> {
-                    try {
-                        return Integer.compare(ressourceService.getByProjetId(p2.getId()).size(),
-                                ressourceService.getByProjetId(p1.getId()).size());
-                    } catch (SQLException e) {
-                        return 0;
-                    }
-                })
-                .limit(5)
-                .forEach(p -> {
-                    try {
-                        int count = ressourceService.getByProjetId(p.getId()).size();
-                        String label = p.getTitre().length() > 15 ? p.getTitre().substring(0, 12) + "..."
-                                : p.getTitre();
-                        resSeries.getData().add(new XYChart.Data<>(label, count));
-                    } catch (SQLException ignored) {
-                    }
-                });
-        barChartResources.getData().setAll(resSeries);
-
-        // 3. Types Pie Chart (Donut-like)
+        // 2. Types Pie Chart
         java.util.Map<String, Long> typeCounts = allProjets.stream()
                 .collect(java.util.stream.Collectors.groupingBy(p -> p.getType() != null ? p.getType() : "Inconnu",
                         java.util.stream.Collectors.counting()));
@@ -262,32 +268,12 @@ public class BackOfficeProjetsController implements Initializable {
         typeCounts.forEach((k, v) -> pieData.add(new PieChart.Data(k, v)));
         pieChartTypes.setData(pieData);
 
-        // 4. Summary Table
-        tableSummary.setItems(FXCollections.observableArrayList(
-                allProjets.stream().limit(Math.min(4, allProjets.size())).collect(Collectors.toList())));
-        colTopUser.setCellValueFactory(p -> new SimpleStringProperty(
-                p.getValue().getTitre().contains("chatbot") ? "arsl arslen" : "Hejer Hejer"));
-        colTopProjet.setCellValueFactory(new PropertyValueFactory<>("titre"));
-        colProjResCount.setCellFactory(c -> new TableCell<>() {
-            @Override
-            protected void updateItem(String s, boolean e) {
-                super.updateItem(s, e);
-                if (e)
-                    setGraphic(null);
-                else {
-                    Projet p = getTableView().getItems().get(getIndex());
-                    try {
-                        int count = ressourceService.getByProjetId(p.getId()).size();
-                        Label tag = new Label(count + " docs");
-                        tag.setStyle(
-                                "-fx-background-color: #ecfdf5; -fx-text-fill: #059669; -fx-padding: 3 10; -fx-background-radius: 10; -fx-font-weight: bold;");
-                        setGraphic(tag);
-                    } catch (SQLException ex) {
-                        setGraphic(null);
-                    }
-                }
+        // Apply dark blue color to bars (optional, matching Parcours)
+        for (XYChart.Data<String, Number> data : userSeries.getData()) {
+            if (data.getNode() != null) {
+                data.getNode().setStyle("-fx-bar-fill: #1e3a8a;");
             }
-        });
+        }
     }
 
     private void updateTable() {
