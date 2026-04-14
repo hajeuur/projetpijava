@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="edu.mentorai.Controller.ProgrammeShowController"
+            prefWidth="1100" prefHeight="700"
+            style="-fx-background-color: #f4f7fb;">
+    <top>
+        <VBox style="-fx-background-color: #102c59;">
+            <padding><Insets top="25" left="40" right="40" bottom="25"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button text="Retour aux objectifs" onAction="#handleRetour"
+                        style="-fx-background-color: rgba(255,255,255,0.15); -fx-text-fill: white; -fx-background-radius: 50; -fx-padding: 8 18 8 18; -fx-cursor: hand;"/>
+                <VBox HBox.hgrow="ALWAYS" spacing="3">
+                    <Label fx:id="objectifTitreLabel" text=""
+                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label fx:id="dateGenerationLabel" text=""
+                           style="-fx-font-size: 12px; -fx-text-fill: #9dbbce;"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true"
+                    style="-fx-background: #f4f7fb; -fx-background-color: #f4f7fb;">
+            <VBox spacing="20">
+                <padding><Insets top="25" left="30" right="30" bottom="25"/></padding>
+
+                <!-- MESSAGE MOTIVANT -->
+                <VBox style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20 25 20 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.06), 10, 0, 0, 3);">
+                    <Label fx:id="motivationLabel" text="Aucun message motivant pour le moment"
+                           style="-fx-text-fill: #666; -fx-font-size: 13px;" wrapText="true"/>
+                </VBox>
+
+                <!-- STATS ROW -->
+                <HBox spacing="20">
+
+                    <!-- PROGRESSION -->
+                    <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.06), 10, 0, 0, 3);">
+                        <Label text="PROGRESSION"
+                               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #888;"/>
+                        <Label fx:id="scoreLabel" text="0%"
+                               style="-fx-font-size: 38px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                        <ProgressBar fx:id="progressBar" progress="0" prefWidth="160"
+                                     style="-fx-accent: #102c59;"/>
+                        <Label fx:id="tachesCountLabel" text="0 taches sur 0 validees"
+                               style="-fx-text-fill: #888; -fx-font-size: 12px;"/>
+                    </VBox>
+
+                    <!-- REPARTITION -->
+                    <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.06), 10, 0, 0, 3);">
+                        <Label text="REPARTITION"
+                               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #888;"/>
+
+                        <!-- CERCLE TACHES -->
+                        <StackPane fx:id="tacheChartPane" prefHeight="150" alignment="CENTER"/>
+
+                        <!-- Cache mais necessaire pour controller -->
+                        <Label fx:id="totalTachesLabel" text="0" visible="false" managed="false"/>
+
+                        <VBox spacing="4" alignment="CENTER_LEFT">
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="●" style="-fx-text-fill: #198754;"/>
+                                <Label fx:id="realiséesLabel" text="0 Realisees"
+                                       style="-fx-text-fill: #555; -fx-font-size: 12px;"/>
+                            </HBox>
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="●" style="-fx-text-fill: #ffc107;"/>
+                                <Label fx:id="enCoursLabel" text="0 En cours"
+                                       style="-fx-text-fill: #555; -fx-font-size: 12px;"/>
+                            </HBox>
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Label text="●" style="-fx-text-fill: #d52e28;"/>
+                                <Label fx:id="abandonnesLabel" text="0 Abandonnees"
+                                       style="-fx-text-fill: #555; -fx-font-size: 12px;"/>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+
+                    <!-- RECOMPENSE -->
+                    <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.06), 10, 0, 0, 3);">
+                        <Label text="RECOMPENSE"
+                               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #888;"/>
+                        <Label fx:id="medailleLabel" text="?"
+                               style="-fx-font-size: 40px;"/>
+                        <Label fx:id="medailleTextLabel" text="Validez vos taches pour gagner une medaille"
+                               style="-fx-text-fill: #888; -fx-font-size: 12px;" wrapText="true"/>
+                    </VBox>
+
+                </HBox>
+
+                <!-- TACHES HEADER -->
+                <HBox alignment="CENTER_LEFT" spacing="15">
+                    <Label text="Vos Etapes de Reussite"
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #102c59;"
+                           HBox.hgrow="ALWAYS"/>
+                    <Button text="+ Ajouter une tache" onAction="#handleAddTache"
+                            style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 20 10 20; -fx-cursor: hand;"/>
+                </HBox>
+
+                <!-- TACHES LIST -->
+                <VBox fx:id="tachesContainer" spacing="10"/>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

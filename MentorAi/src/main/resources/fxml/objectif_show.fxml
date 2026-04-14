@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="edu.mentorai.Controller.ObjectifShowController"
+            prefWidth="900" prefHeight="600"
+            style="-fx-background-color: #f4f7fb;">
+    <top>
+        <VBox style="-fx-background-color: #102c59;">
+            <padding><Insets top="20" left="30" right="30" bottom="20"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button text="← Retour" onAction="#handleRetour"
+                        style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-cursor: hand; -fx-font-size: 13px;"/>
+                <Label text="Détail de l'objectif"
+                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: #f4f7fb; -fx-background-color: #f4f7fb;">
+            <VBox spacing="20">
+                <padding><Insets top="30" left="40" right="40" bottom="30"/></padding>
+
+                <!-- OBJECTIF CARD -->
+                <VBox spacing="15"
+                      style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 35; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 15, 0, 0, 5);">
+
+                    <Label fx:id="titreLabel" text=""
+                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+
+                    <VBox spacing="4">
+                        <Label text="Description :"
+                               style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <Label fx:id="descriptionLabel" text=""
+                               style="-fx-text-fill: #666; -fx-font-size: 13px;"/>
+                    </VBox>
+
+                    <HBox spacing="40">
+                        <VBox spacing="4">
+                            <Label text="Date de début :"
+                                   style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                            <Label fx:id="datedebutLabel" text=""
+                                   style="-fx-text-fill: #666;"/>
+                        </VBox>
+                        <VBox spacing="4">
+                            <Label text="Date cible :"
+                                   style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                            <Label fx:id="datefinLabel" text=""
+                                   style="-fx-text-fill: #666;"/>
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Statut :"
+                               style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <Label fx:id="statutLabel" text=""
+                               style="-fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 5 15 5 15;"/>
+                    </HBox>
+
+                    <Separator/>
+
+                    <!-- PROGRAMME ASSOCIE -->
+                    <Label text="Programme associé"
+                           style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                    <HBox spacing="10">
+                        <Label text="Titre du programme :"
+                               style="-fx-font-weight: bold; -fx-text-fill: #555; -fx-font-size: 13px;"/>
+                        <Label fx:id="programmeTitreLabel" text=""
+                               style="-fx-text-fill: #666;"/>
+                    </HBox>
+                    <HBox spacing="10">
+                        <Label text="Date de génération :"
+                               style="-fx-font-weight: bold; -fx-text-fill: #555; -fx-font-size: 13px;"/>
+                        <Label fx:id="programmeDateLabel" text=""
+                               style="-fx-text-fill: #666;"/>
+                    </HBox>
+
+                    <Separator/>
+
+                    <!-- ACTIONS -->
+                    <HBox spacing="15" alignment="CENTER">
+                        <Button text="✏ Modifier" onAction="#handleEdit" prefWidth="160" prefHeight="42"
+                                style="-fx-background-color: #fffbeb; -fx-text-fill: #d97706; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand;"/>
+                        <Button text="🗑 Supprimer" onAction="#handleDelete" prefWidth="160" prefHeight="42"
+                                style="-fx-background-color: #fef2f2; -fx-text-fill: #dc2626; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand;"/>
+                        <Button text="← Retour à la liste" onAction="#handleRetour" prefWidth="180" prefHeight="42"
+                                style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-cursor: hand;"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

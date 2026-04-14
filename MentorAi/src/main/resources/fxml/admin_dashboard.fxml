@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="edu.mentorai.Controller.AdminDashboardController"
+            prefWidth="1100" prefHeight="700"
+            style="-fx-background-color: #f4f7fb;">
+    <top>
+        <VBox style="-fx-background-color: #102c59;">
+            <padding><Insets top="20" left="40" right="40" bottom="20"/></padding>
+            <HBox alignment="CENTER_LEFT">
+                <VBox HBox.hgrow="ALWAYS" spacing="3">
+                    <Label text="Back-Office Admin - MentorAI"
+                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Tableau de bord administrateur - Consultation uniquement"
+                           style="-fx-font-size: 12px; -fx-text-fill: #9dbbce;"/>
+                </VBox>
+                <Button text="Vue Utilisateur" onAction="#handleVueUtilisateur"
+                        style="-fx-background-color: white; -fx-text-fill: #102c59; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 8 20 8 20; -fx-cursor: hand;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true"
+                    style="-fx-background: #f4f7fb; -fx-background-color: #f4f7fb;">
+            <VBox spacing="25">
+                <padding><Insets top="30" left="30" right="30" bottom="30"/></padding>
+
+                <!-- STATS CARDS -->
+                <HBox spacing="20">
+                    <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 3);">
+                        <Label text="TOTAL OBJECTIFS"
+                               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #888;"/>
+                        <Label fx:id="totalObjectifsLabel" text="0"
+                               style="-fx-font-size: 38px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                    </VBox>
+                    <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 3);">
+                        <Label text="OBJECTIFS ATTEINTS"
+                               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #888;"/>
+                        <Label fx:id="atteintsLabel" text="0"
+                               style="-fx-font-size: 38px; -fx-font-weight: bold; -fx-text-fill: #198754;"/>
+                    </VBox>
+                    <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 3);">
+                        <Label text="EN COURS"
+                               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #888;"/>
+                        <Label fx:id="enCoursLabel" text="0"
+                               style="-fx-font-size: 38px; -fx-font-weight: bold; -fx-text-fill: #ffc107;"/>
+                    </VBox>
+                    <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 3);">
+                        <Label text="TAUX DE REUSSITE"
+                               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #888;"/>
+                        <Label fx:id="tauxLabel" text="0%"
+                               style="-fx-font-size: 38px; -fx-font-weight: bold; -fx-text-fill: #d52e28;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- INFO READONLY -->
+                <HBox style="-fx-background-color: #fff3cd; -fx-background-radius: 10; -fx-padding: 15 20 15 20;">
+                    <Label text="Mode consultation uniquement - Aucune modification possible"
+                           style="-fx-text-fill: #856404; -fx-font-weight: bold; -fx-font-size: 13px;"/>
+                </HBox>
+
+                <!-- NAVIGATION -->
+                <HBox spacing="20">
+                    <Button text="Voir tous les Objectifs" onAction="#handleObjectifs"
+                            maxWidth="Infinity" prefHeight="55" HBox.hgrow="ALWAYS"
+                            style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 15; -fx-cursor: hand;"/>
+                    <Button text="Voir toutes les Taches" onAction="#handleTaches"
+                            maxWidth="Infinity" prefHeight="55" HBox.hgrow="ALWAYS"
+                            style="-fx-background-color: #198754; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 15; -fx-cursor: hand;"/>
+                </HBox>
+
+                <!-- TABLE RECENTS -->
+                <VBox spacing="10"
+                      style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.06), 10, 0, 0, 3);">
+                    <Label text="Derniers objectifs ajoutes"
+                           style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                    <TableView fx:id="recentTable" prefHeight="280" editable="false">
+                        <columns>
+                            <TableColumn fx:id="colId" text="ID" prefWidth="90"/>
+                            <TableColumn fx:id="colTitre" text="Titre" prefWidth="320"/>
+                            <TableColumn fx:id="colStatut" text="Statut" prefWidth="130"/>
+                            <TableColumn fx:id="colDebut" text="Date debut" prefWidth="130"/>
+                            <TableColumn fx:id="colFin" text="Date fin" prefWidth="130"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

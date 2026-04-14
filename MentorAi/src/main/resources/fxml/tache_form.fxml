@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="edu.mentorai.Controller.TacheFormController"
+            prefWidth="700" prefHeight="500"
+            style="-fx-background-color: #f4f7fb;">
+    <top>
+        <VBox style="-fx-background-color: #102c59;">
+            <padding><Insets top="20" left="30" right="30" bottom="20"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button text="← Retour" onAction="#handleRetour"
+                        style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-cursor: hand;"/>
+                <Label fx:id="headerLabel" text="Ajouter une tâche"
+                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: #f4f7fb; -fx-background-color: #f4f7fb;">
+            <VBox spacing="20">
+                <padding><Insets top="30" left="40" right="40" bottom="30"/></padding>
+                <VBox spacing="18"
+                      style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 35; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 15, 0, 0, 5);">
+
+                    <!-- ORDRE -->
+                    <VBox spacing="5">
+                        <Label text="ORDRE" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                        <TextField fx:id="ordreField" promptText="Ex: 1"
+                                   style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #eee; -fx-padding: 12 15 12 15;"/>
+                        <Label fx:id="ordreError" text="" style="-fx-text-fill: #d52e28; -fx-font-size: 11px;"/>
+                    </VBox>
+
+                    <!-- TITRE -->
+                    <VBox spacing="5">
+                        <Label text="TITRE" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                        <TextField fx:id="titreField" promptText="Titre de la tâche"
+                                   style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #eee; -fx-padding: 12 15 12 15;"/>
+                        <Label fx:id="titreError" text="" style="-fx-text-fill: #d52e28; -fx-font-size: 11px;"/>
+                    </VBox>
+
+                    <!-- DESCRIPTION -->
+                    <VBox spacing="5">
+                        <Label text="DESCRIPTION" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                        <TextArea fx:id="descriptionField" promptText="Description de la tâche..." prefRowCount="3"
+                                  style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #eee; -fx-padding: 12 15 12 15;"/>
+                    </VBox>
+
+                    <!-- ETAT -->
+                    <VBox spacing="5">
+                        <Label text="ÉTAT" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                        <ComboBox fx:id="etatCombo" maxWidth="Infinity"
+                                  style="-fx-background-radius: 10;"/>
+                        <Label fx:id="etatError" text="" style="-fx-text-fill: #d52e28; -fx-font-size: 11px;"/>
+                    </VBox>
+
+                    <!-- BUTTONS -->
+                    <HBox spacing="15" alignment="CENTER">
+                        <Button text="Annuler" onAction="#handleRetour" prefWidth="150" prefHeight="42"
+                                style="-fx-background-color: transparent; -fx-border-color: #ccc; -fx-border-radius: 50; -fx-background-radius: 50; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="submitBtn" text="Ajouter la tâche" onAction="#handleSubmit"
+                                prefWidth="200" prefHeight="42"
+                                style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-cursor: hand;"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

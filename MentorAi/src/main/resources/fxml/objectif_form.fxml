@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="edu.mentorai.Controller.ObjectifFormController"
+            prefWidth="700" prefHeight="580"
+            style="-fx-background-color: #f4f7fb;">
+    <!-- HEADER -->
+    <top>
+        <VBox style="-fx-background-color: #102c59;">
+            <padding><Insets top="20" left="30" right="30" bottom="20"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button text="← Retour" onAction="#handleRetour"
+                        style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-cursor: hand; -fx-font-size: 13px;"/>
+                <Label fx:id="headerLabel" text="Nouvel Objectif"
+                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: #f4f7fb; -fx-background-color: #f4f7fb;">
+            <VBox spacing="20">
+                <padding><Insets top="30" left="40" right="40" bottom="30"/></padding>
+
+                <VBox style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 35; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 15, 0, 0, 5);"
+                      spacing="18">
+
+                    <!-- TITRE -->
+                    <VBox spacing="5">
+                        <Label text="TITRE DE L'OBJECTIF"
+                               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                        <TextField fx:id="titreField" promptText="Ex: Apprendre JavaFX en 30 jours"
+                                   style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #eee; -fx-padding: 12 15 12 15; -fx-font-size: 14px;"/>
+                        <Label fx:id="titreError" text=""
+                               style="-fx-text-fill: #d52e28; -fx-font-size: 11px;"/>
+                    </VBox>
+
+                    <!-- DESCRIPTION -->
+                    <VBox spacing="5">
+                        <Label text="DESCRIPTION &amp; ÉTAPES"
+                               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                        <TextArea fx:id="descriptionField" promptText="Détaillez vos intentions..."
+                                  prefRowCount="4"
+                                  style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #eee; -fx-padding: 12 15 12 15; -fx-font-size: 14px;"/>
+                        <Label fx:id="descriptionError" text=""
+                               style="-fx-text-fill: #d52e28; -fx-font-size: 11px;"/>
+                    </VBox>
+
+                    <!-- DATES -->
+                    <HBox spacing="20">
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="DATE DE DÉBUT"
+                                   style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                            <DatePicker fx:id="datedebutField" maxWidth="Infinity"
+                                        style="-fx-background-radius: 10;"/>
+                            <Label fx:id="datedebutError" text=""
+                                   style="-fx-text-fill: #d52e28; -fx-font-size: 11px;"/>
+                        </VBox>
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="DATE DE FIN ESTIMÉE"
+                                   style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                            <DatePicker fx:id="datefinField" maxWidth="Infinity"
+                                        style="-fx-background-radius: 10;"/>
+                            <Label fx:id="datefinError" text=""
+                                   style="-fx-text-fill: #d52e28; -fx-font-size: 11px;"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- BUTTONS -->
+                    <HBox spacing="15" alignment="CENTER">
+                        <Button text="Annuler" onAction="#handleRetour" prefWidth="160" prefHeight="44"
+                                style="-fx-background-color: transparent; -fx-border-color: #ccc; -fx-border-radius: 50; -fx-background-radius: 50; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="submitBtn" text="Créer l'Objectif" onAction="#handleSubmit"
+                                prefWidth="200" prefHeight="44"
+                                style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-cursor: hand; -fx-font-size: 14px;"/>
+                    </HBox>
+
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

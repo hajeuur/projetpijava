@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="edu.mentorai.Controller.AdminObjectifsController"
+            prefWidth="1100" prefHeight="700"
+            style="-fx-background-color: #f4f7fb;">
+    <top>
+        <VBox style="-fx-background-color: #102c59;">
+            <padding><Insets top="20" left="40" right="40" bottom="20"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button text="Retour" onAction="#handleRetour"
+                        style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-cursor: hand; -fx-font-size: 13px;"/>
+                <VBox spacing="2">
+                    <Label text="Admin - Liste des Objectifs"
+                           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Consultation uniquement - Aucune modification possible"
+                           style="-fx-font-size: 11px; -fx-text-fill: #9dbbce;"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="15">
+            <padding><Insets top="20" left="25" right="25" bottom="20"/></padding>
+
+            <!-- INFO READONLY -->
+            <HBox style="-fx-background-color: #fff3cd; -fx-background-radius: 10; -fx-padding: 12 20 12 20;">
+                <Label text="Mode lecture seule - Visualisation des objectifs uniquement"
+                       style="-fx-text-fill: #856404; -fx-font-weight: bold;"/>
+            </HBox>
+
+            <!-- SEARCH -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="searchField" promptText="Rechercher par titre..."
+                           prefWidth="320"
+                           style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #eee; -fx-padding: 10 15 10 15;"/>
+                <Button text="Rechercher" onAction="#handleSearch"
+                        style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand; -fx-padding: 10 20 10 20;"/>
+                <Button text="Tout afficher" onAction="#handleShowAll"
+                        style="-fx-background-color: #f0f4f8; -fx-text-fill: #102c59; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand; -fx-padding: 10 20 10 20;"/>
+            </HBox>
+
+            <!-- STATS BAR -->
+            <HBox spacing="15"
+                  style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15 20 15 20; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.06), 8, 0, 0, 2);">
+                <Label text="Total :" style="-fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                <Label fx:id="countLabel" text="0"
+                       style="-fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                <Label text="|" style="-fx-text-fill: #ccc;"/>
+                <Label text="Atteints :" style="-fx-font-weight: bold; -fx-text-fill: #198754;"/>
+                <Label fx:id="atteintsLabel" text="0" style="-fx-text-fill: #198754;"/>
+                <Label text="|" style="-fx-text-fill: #ccc;"/>
+                <Label text="En cours :" style="-fx-font-weight: bold; -fx-text-fill: #ffc107;"/>
+                <Label fx:id="enCoursLabel" text="0" style="-fx-text-fill: #ffc107;"/>
+                <Label text="|" style="-fx-text-fill: #ccc;"/>
+                <Label text="Abandonnes :" style="-fx-font-weight: bold; -fx-text-fill: #d52e28;"/>
+                <Label fx:id="abandonnesLabel" text="0" style="-fx-text-fill: #d52e28;"/>
+            </HBox>
+
+            <!-- TABLE -->
+            <TableView fx:id="objectifsTable" VBox.vgrow="ALWAYS" editable="false">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="90"/>
+                    <TableColumn fx:id="colTitre" text="Titre" prefWidth="300"/>
+                    <TableColumn fx:id="colDescription" text="Description" prefWidth="250"/>
+                    <TableColumn fx:id="colStatut" text="Statut" prefWidth="120"/>
+                    <TableColumn fx:id="colDebut" text="Date debut" prefWidth="120"/>
+                    <TableColumn fx:id="colFin" text="Date fin" prefWidth="120"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+</BorderPane>
