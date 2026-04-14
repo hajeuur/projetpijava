@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    private static final String MODE = "USER";
+    private static final String MODE = "ADMIN";
 
     @Override
     public void start(Stage stage) throws Exception {
