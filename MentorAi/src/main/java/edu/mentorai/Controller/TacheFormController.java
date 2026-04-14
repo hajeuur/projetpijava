@@ -147,7 +147,7 @@ public class TacheFormController {
     private void goBackToProgramme() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/programme_show.fxml"));
-            Scene scene = new Scene(loader.load(), 1100, 700);
+            Scene scene = new Scene(loader.load(), 1200, 750);
             ProgrammeShowController ctrl = loader.getController();
             ctrl.setObjectif(objectif);
             ctrl.setUtilisateurId(utilisateurId);

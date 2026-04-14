@@ -5,18 +5,13 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="edu.mentorai.Controller.AdminDashboardController"
-            prefWidth="1100" prefHeight="700"
+            prefWidth="1200" prefHeight="750"
             style="-fx-background-color: #f4f7fb;">
     <top>
         <VBox style="-fx-background-color: #102c59;">
             <padding><Insets top="20" left="40" right="40" bottom="20"/></padding>
             <HBox alignment="CENTER_LEFT">
-                <VBox HBox.hgrow="ALWAYS" spacing="3">
-                    <Label text="Back-Office Admin - MentorAI"
-                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                    <Label text="Tableau de bord administrateur - Consultation uniquement"
-                           style="-fx-font-size: 12px; -fx-text-fill: #9dbbce;"/>
-                </VBox>
+
                 <Button text="Vue Utilisateur" onAction="#handleVueUtilisateur"
                         style="-fx-background-color: white; -fx-text-fill: #102c59; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 8 20 8 20; -fx-cursor: hand;"/>
             </HBox>

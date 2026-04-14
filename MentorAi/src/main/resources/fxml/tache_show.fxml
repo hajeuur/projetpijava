@@ -5,7 +5,7 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="edu.mentorai.Controller.TacheShowController"
-            prefWidth="700" prefHeight="450"
+            prefWidth="1200" prefHeight="750"
             style="-fx-background-color: #f4f7fb;">
     <top>
         <VBox style="-fx-background-color: #102c59;">

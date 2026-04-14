@@ -53,7 +53,7 @@ public class TacheShowController {
     private void handleEdit() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/tache_form.fxml"));
-            Scene scene = new Scene(loader.load(), 700, 500);
+            Scene scene = new Scene(loader.load(), 1200, 750);
             TacheFormController ctrl = loader.getController();
             ctrl.setProgramme(programme);
             ctrl.setObjectif(objectif);
@@ -84,7 +84,7 @@ public class TacheShowController {
     private void goBackToProgramme() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/programme_show.fxml"));
-            Scene scene = new Scene(loader.load(), 1100, 700);
+            Scene scene = new Scene(loader.load(), 1200, 750);
             ProgrammeShowController ctrl = loader.getController();
             ctrl.setObjectif(objectif);
             ctrl.setUtilisateurId(utilisateurId);

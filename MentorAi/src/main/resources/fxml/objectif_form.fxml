@@ -5,7 +5,7 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="edu.mentorai.Controller.ObjectifFormController"
-            prefWidth="700" prefHeight="580"
+            prefWidth="1200" prefHeight="750"
             style="-fx-background-color: #f4f7fb;">
     <!-- HEADER -->
     <top>

@@ -334,7 +334,7 @@ public class ObjectifListController {
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/fxml/admin_dashboard.fxml"));
-            Main.primaryStage.setScene(new Scene(loader.load(), 1100, 700));
+            Main.primaryStage.setScene(new Scene(loader.load(), 1200, 750));
         } catch (Exception e) { showAlert("Erreur", e.getMessage()); }
     }
 

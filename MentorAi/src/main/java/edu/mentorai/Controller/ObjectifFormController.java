@@ -151,7 +151,7 @@ public class ObjectifFormController {
     private void goBackToList() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/objectif_list.fxml"));
-            Scene scene = new Scene(loader.load(), 1100, 700);
+            Scene scene = new Scene(loader.load(), 1200, 750);
             ObjectifListController ctrl = loader.getController();
             ctrl.setUtilisateurId(utilisateurId);
             ctrl.loadData();

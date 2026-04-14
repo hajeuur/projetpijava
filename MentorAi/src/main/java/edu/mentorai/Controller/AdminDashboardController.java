@@ -82,7 +82,7 @@ public class AdminDashboardController {
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/fxml/admin_objectifs.fxml"));
-            Main.primaryStage.setScene(new Scene(loader.load(), 1100, 700));
+            Main.primaryStage.setScene(new Scene(loader.load(), 1200, 750));
         } catch (Exception e) { showAlert("Erreur", e.getMessage()); }
     }
 
@@ -91,7 +91,7 @@ public class AdminDashboardController {
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/fxml/admin_taches.fxml"));
-            Main.primaryStage.setScene(new Scene(loader.load(), 1100, 700));
+            Main.primaryStage.setScene(new Scene(loader.load(), 1200, 750));
         } catch (Exception e) { showAlert("Erreur", e.getMessage()); }
     }
 
@@ -100,7 +100,7 @@ public class AdminDashboardController {
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/fxml/objectif_list.fxml"));
-            Scene scene = new Scene(loader.load(), 1100, 700);
+            Scene scene = new Scene(loader.load(), 1200, 750);
             ObjectifListController ctrl = loader.getController();
             ctrl.setUtilisateurId(1);
             ctrl.loadData();

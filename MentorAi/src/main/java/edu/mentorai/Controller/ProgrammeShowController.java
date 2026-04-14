@@ -191,7 +191,7 @@ public class ProgrammeShowController {
     private void handleAddTache() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/tache_form.fxml"));
-            Scene scene = new Scene(loader.load(), 700, 500);
+            Scene scene = new Scene(loader.load(), 1200, 750);
             TacheFormController ctrl = loader.getController();
             ctrl.setProgramme(programme);
             ctrl.setUtilisateurId(utilisateurId);
@@ -203,7 +203,7 @@ public class ProgrammeShowController {
     private void handleVoirTache(Tache tache) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/tache_show.fxml"));
-            Scene scene = new Scene(loader.load(), 700, 450);
+            Scene scene = new Scene(loader.load(), 1200, 750);
             TacheShowController ctrl = loader.getController();
             ctrl.setTache(tache);
             ctrl.setProgramme(programme);
@@ -216,7 +216,7 @@ public class ProgrammeShowController {
     private void handleEditTache(Tache tache) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/tache_form.fxml"));
-            Scene scene = new Scene(loader.load(), 700, 500);
+            Scene scene = new Scene(loader.load(), 1200, 750);
             TacheFormController ctrl = loader.getController();
             ctrl.setProgramme(programme);
             ctrl.setUtilisateurId(utilisateurId);
@@ -265,7 +265,7 @@ public class ProgrammeShowController {
     private void handleRetour() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/objectif_list.fxml"));
-            Scene scene = new Scene(loader.load(), 1100, 700);
+            Scene scene = new Scene(loader.load(), 1200, 750);
             ObjectifListController ctrl = loader.getController();
             ctrl.setUtilisateurId(utilisateurId);
             ctrl.loadData();
