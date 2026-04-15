@@ -128,7 +128,7 @@ public class BackOfficeParcoursController implements Initializable {
                     Parcours p = getTableView().getItems().get(getIndex());
                     String start = p.getDateDebut() != null ? p.getDateDebut().toString() : "...";
                     String end = p.getDateFin() != null ? p.getDateFin().toString() : "Présent";
-                    Label l = new Label("\uD83D\uDCC5 " + start + " - " + end);
+                    Label l = new Label("📅 " + start + " - " + end);
                     l.setStyle("-fx-font-size: 11;");
                     setGraphic(l);
                 }
@@ -157,7 +157,7 @@ public class BackOfficeParcoursController implements Initializable {
         });
 
         colAction.setCellFactory(c -> new TableCell<>() {
-            private final Button btn = new Button("\u221E Voir");
+            private final Button btn = new Button("Voir");
             {
                 btn.setStyle(
                         "-fx-background-color: #ffffff; -fx-border-color: #3b82f6; -fx-text-fill: #3b82f6; -fx-border-radius: 5; -fx-cursor: hand;");
@@ -176,7 +176,8 @@ public class BackOfficeParcoursController implements Initializable {
     }
 
     private void setupFilters() {
-        comboType.setItems(FXCollections.observableArrayList("Tous", "Formation", "Expérience", "Emploi"));
+        comboType.setItems(FXCollections.observableArrayList(
+                "Tous", "Formation", "Stage", "Alternance", "Emploi", "Personnel"));
         comboType.setOnAction(e -> filtrerParcours());
     }
 

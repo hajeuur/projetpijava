@@ -41,8 +41,8 @@ public class AfficherParcoursController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        cbFiltreType.setItems(
-                FXCollections.observableArrayList("Tous", "Formation", "Expérience", "Certification", "Autre"));
+        cbFiltreType.setItems(FXCollections.observableArrayList(
+                "Tous", "Formation", "Stage", "Alternance", "Emploi", "Personnel"));
         cbFiltreType.setValue("Tous");
 
         txtRecherche.textProperty().addListener((observable, oldValue, newValue) -> filterData());

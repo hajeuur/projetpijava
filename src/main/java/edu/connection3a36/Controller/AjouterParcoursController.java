@@ -114,8 +114,8 @@ public class AjouterParcoursController implements Initializable {
         p.setTypeContrat(txtTypeContrat.getText().trim());
 
         try {
-            if (parcoursService.existsByTitreAndType(p.getTitre(), p.getTypeParcours())) {
-                showErr(errTitre, "• Ce parcours existe déjà.");
+            if (parcoursService.existsByTitre(p.getTitre())) {
+                showErr(errTitre, "• Ce titre de parcours existe déjà.");
                 return;
             }
             parcoursService.addEntity(p);

@@ -15,9 +15,9 @@ public class ParcoursService implements IService<Parcours> {
 
     @Override
     public void addEntity(Parcours parcours) throws SQLException {
-        // Unicité : même titre + type_parcours
-        if (existsByTitreAndType(parcours.getTitre(), parcours.getTypeParcours())) {
-            throw new SQLException("Un parcours avec ce titre et ce type existe déjà.");
+        // Unicité : même titre (insensible à la casse)
+        if (existsByTitre(parcours.getTitre())) {
+            throw new SQLException("Un parcours avec ce titre existe déjà.");
         }
         String req = "INSERT INTO parcours (type_parcours, titre, date_debut, date_fin, description, " +
                 "etablissement, diplome, specialite, entreprise, poste, type_contrat, date_creation) " +
@@ -58,6 +58,10 @@ public class ParcoursService implements IService<Parcours> {
 
     @Override
     public void updateEntity(int id, Parcours parcours) throws SQLException {
+        // Unicité : même titre (exclure l'ID actuel)
+        if (existsByTitreExcludingId(parcours.getTitre(), id)) {
+            throw new SQLException("Un parcours avec ce titre existe déjà.");
+        }
         String req = "UPDATE parcours SET type_parcours=?, titre=?, date_debut=?, date_fin=?, " +
                 "description=?, etablissement=?, diplome=?, specialite=?, entreprise=?, " +
                 "poste=?, type_contrat=?, date_modification=? WHERE id=?";
@@ -127,11 +131,25 @@ public class ParcoursService implements IService<Parcours> {
         return list;
     }
 
-    public boolean existsByTitreAndType(String titre, String typeParcours) throws SQLException {
-        String req = "SELECT COUNT(*) FROM parcours WHERE titre = ? AND type_parcours = ?";
+    public boolean existsByTitre(String titre) throws SQLException {
+        String req = "SELECT COUNT(*) FROM parcours WHERE LOWER(titre) = LOWER(?)";
         PreparedStatement pst = cnx.prepareStatement(req);
         pst.setString(1, titre);
-        pst.setString(2, typeParcours);
+        ResultSet rs = pst.executeQuery();
+        if (rs.next())
+            return rs.getInt(1) > 0;
+        return false;
+    }
+
+    /**
+     * Vérifie si un parcours avec le même titre existe déjà, 
+     * en excluant l'ID actuel (pour la modification).
+     */
+    public boolean existsByTitreExcludingId(String titre, int id) throws SQLException {
+        String req = "SELECT COUNT(*) FROM parcours WHERE LOWER(titre) = LOWER(?) AND id != ?";
+        PreparedStatement pst = cnx.prepareStatement(req);
+        pst.setString(1, titre);
+        pst.setInt(2, id);
         ResultSet rs = pst.executeQuery();
         if (rs.next())
             return rs.getInt(1) > 0;

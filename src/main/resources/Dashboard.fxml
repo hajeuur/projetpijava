@@ -22,23 +22,23 @@
 
             <!-- Navigation Items -->
             <VBox spacing="2">
-                <Button text="🏠  Home" fx:id="btnHome" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#loadHome"
+                <Button text="⌂  Home" fx:id="btnHome" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#loadHome"
                         style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
-                <Button text="📖  Etude" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                <Button text="▦  Etude" maxWidth="Infinity" alignment="BASELINE_LEFT"
                         style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
-                <Button text="📝  Note" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                <Button text="✎  Note" maxWidth="Infinity" alignment="BASELINE_LEFT"
                         style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
-                <Button text="💼  Projets" fx:id="btnProjets" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#loadProjets"
+                <Button text="📁  Projets" fx:id="btnProjets" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#loadProjets"
                         style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
-                <Button text="🛤️  Parcours" fx:id="btnParcours" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#loadParcours"
+                <Button text="⚙  Parcours" fx:id="btnParcours" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#loadParcours"
                         style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
-                <Button text="⏲️  Productivity" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                <Button text="⌚  Productivity" maxWidth="Infinity" alignment="BASELINE_LEFT"
                         style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
-                <Button text="📧  Contact" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                <Button text="✉  Contact" maxWidth="Infinity" alignment="BASELINE_LEFT"
                         style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
-                <Button text="💲  Pricing" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                <Button text="＄  Pricing" maxWidth="Infinity" alignment="BASELINE_LEFT"
                         style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
-                <Button text="ℹ️  About" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                <Button text="ⓘ  About" maxWidth="Infinity" alignment="BASELINE_LEFT"
                         style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
             </VBox>
 

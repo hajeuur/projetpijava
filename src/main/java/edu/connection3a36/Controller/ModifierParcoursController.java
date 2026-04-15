@@ -120,6 +120,13 @@ public class ModifierParcoursController implements Initializable {
         parcoursAModifier.setDateModification(LocalDate.now());
 
         try {
+            // Test d'unicité : titre uniquement (exclure l'ID actuel)
+            if (parcoursService.existsByTitreExcludingId(parcoursAModifier.getTitre(),
+                    parcoursAModifier.getId())) {
+                lblErreur.setText("❌ Un parcours avec ce titre existe déjà.");
+                return;
+            }
+
             parcoursService.updateEntity(parcoursAModifier.getId(), parcoursAModifier);
             fermer();
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
