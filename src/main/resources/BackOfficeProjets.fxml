@@ -57,8 +57,33 @@
 
     <!-- Stats Section -->
     <VBox spacing="25">
+        <!-- 1. Quick Stats Cards row -->
+        <HBox alignment="CENTER" spacing="25">
+            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #1e3a8a; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);" HBox.hgrow="ALWAYS">
+                <Label style="-fx-font-size: 30; -fx-text-fill: white;" text="📂" />
+                <VBox spacing="2">
+                    <Label fx:id="labelTotalProjects" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: white;" text="0" />
+                    <Label style="-fx-font-size: 13; -fx-text-fill: rgba(255,255,255,0.8);" text="Total Projets" />
+                </VBox>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #166534; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);" HBox.hgrow="ALWAYS">
+                <Label style="-fx-font-size: 30; -fx-text-fill: white;" text="📄" />
+                <VBox spacing="2">
+                    <Label fx:id="labelTotalResources" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: white;" text="0" />
+                    <Label style="-fx-font-size: 13; -fx-text-fill: rgba(255,255,255,0.8);" text="Total Ressources" />
+                </VBox>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #0369a1; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);" HBox.hgrow="ALWAYS">
+                <Label style="-fx-font-size: 30; -fx-text-fill: white;" text="👥" />
+                <VBox spacing="2">
+                    <Label fx:id="labelActiveUsers" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: white;" text="0" />
+                    <Label style="-fx-font-size: 13; -fx-text-fill: rgba(255,255,255,0.8);" text="Utilisateurs Actifs" />
+                </VBox>
+            </HBox>
+        </HBox>
+
         <HBox spacing="25" VBox.vgrow="ALWAYS">
-            <!-- 1. Utilisateurs avec le plus de projets -->
+            <!-- 2. Utilisateurs avec le plus de projets -->
             <VBox style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.03), 15, 0, 0, 8);" HBox.hgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-letter-spacing: 1;" text="UTILISATEURS (TOP)" />
@@ -68,9 +93,9 @@
                         <Label style="-fx-font-size: 11; -fx-text-fill: #64748b;" text="Projets" />
                     </HBox>
                 </HBox>
-                <BarChart fx:id="barChartUsers" animated="false" legendVisible="false" prefHeight="300" style="-fx-padding: 10 0 0 0;">
-                    <xAxis><CategoryAxis side="BOTTOM" tickLabelFill="#64748b" tickLabelsVisible="true" /></xAxis>
-                    <yAxis><NumberAxis side="LEFT" tickLabelFill="#64748b" tickLabelsVisible="true" tickUnit="1" /></yAxis>
+                <BarChart fx:id="barChartUsers" animated="false" horizontalGridLinesVisible="true" legendVisible="false" prefHeight="320" style="-fx-padding: 15; -fx-horizontal-grid-lines-visible: true;" verticalGridLinesVisible="false">
+                    <xAxis><CategoryAxis gapStartAndEnd="true" side="BOTTOM" tickLabelFill="#475569" tickLabelsVisible="true" /></xAxis>
+                    <yAxis><NumberAxis minorTickVisible="false" side="LEFT" tickLabelFill="#475569" tickLabelsVisible="true" tickUnit="1" /></yAxis>
                 </BarChart>
             </VBox>
 
@@ -84,9 +109,9 @@
                         <Label style="-fx-font-size: 11; -fx-text-fill: #64748b;" text="Ressources" />
                     </HBox>
                 </HBox>
-                <BarChart fx:id="barChartRessources" animated="false" legendVisible="false" prefHeight="300" style="-fx-padding: 10 0 0 0;">
-                    <xAxis><NumberAxis side="BOTTOM" tickLabelFill="#64748b" tickLabelsVisible="true" tickUnit="1" /></xAxis>
-                    <yAxis><CategoryAxis side="LEFT" tickLabelFill="#64748b" tickLabelsVisible="true" /></yAxis>
+                <BarChart fx:id="barChartRessources" animated="false" horizontalGridLinesVisible="false" legendVisible="false" prefHeight="320" style="-fx-padding: 15; -fx-vertical-grid-lines-visible: true;" verticalGridLinesVisible="true">
+                    <xAxis><NumberAxis minorTickVisible="false" side="BOTTOM" tickLabelFill="#475569" tickLabelsVisible="true" tickUnit="1" /></xAxis>
+                    <yAxis><CategoryAxis side="LEFT" tickLabelFill="#475569" tickLabelsVisible="true" /></yAxis>
                 </BarChart>
             </VBox>
         </HBox>
@@ -95,7 +120,7 @@
             <!-- 3. Répartition par Type -->
             <VBox maxWidth="450" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.03), 15, 0, 0, 8);" HBox.hgrow="ALWAYS">
                 <Label style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-letter-spacing: 1;" text="RÉPARTITION PAR TYPE" />
-                <StackPane style="-fx-padding: 10 0 0 0;" VBox.vgrow="ALWAYS">
+                <StackPane style="-fx-padding: 15;" VBox.vgrow="ALWAYS">
                     <PieChart fx:id="pieChartTypes" labelsVisible="true" legendSide="BOTTOM" />
                 </StackPane>
             </VBox>
