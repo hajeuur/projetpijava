@@ -3,6 +3,10 @@ package edu.mentorai.Controller;
 import edu.mentorai.Main;
 import edu.mentorai.entities.*;
 import edu.mentorai.interfaces.*;
+import edu.mentorai.services.MotivationService;
+import edu.mentorai.services.ObjectifService;
+import edu.mentorai.services.ProgrammeService;
+import edu.mentorai.services.TacheService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -27,10 +31,10 @@ public class TacheFormController {
     private Tache tacheToEdit;
     private int utilisateurId = 1;
 
-    private final TacheDAO tacheDAO = new TacheDAO();
-    private final ProgrammeDAO programmeDAO = new ProgrammeDAO();
-    private final ObjectifDAO objectifDAO = new ObjectifDAO();
-    private final MotivationDAO motivationDAO = new MotivationDAO();
+    private final TacheService tacheService = new TacheService();
+    private final ProgrammeService programmeService = new ProgrammeService();
+    private final ObjectifService objectifService = new ObjectifService();
+    private final MotivationService motivationService = new MotivationService();
 
     @FXML
     public void initialize() {
@@ -92,13 +96,13 @@ public class TacheFormController {
                 tache.setDescription(description.isEmpty() ? null : description);
                 tache.setEtat(etat);
                 tache.setProgrammeId(programme.getId());
-                tacheDAO.save(tache);
+                tacheService.save(tache);
             } else {
                 tacheToEdit.setOrdre(ordre);
                 tacheToEdit.setTitre(titre);
                 tacheToEdit.setDescription(description.isEmpty() ? null : description);
                 tacheToEdit.setEtat(etat);
-                tacheDAO.update(tacheToEdit);
+                tacheService.update(tacheToEdit);
             }
 
             updateStats();
@@ -108,7 +112,7 @@ public class TacheFormController {
     }
 
     private void updateStats() throws Exception {
-        List<Tache> taches = tacheDAO.findByProgramme(programme.getId());
+        List<Tache> taches = tacheService.findByProgramme(programme.getId());
         int total = taches.size();
         long realisees = taches.stream().filter(t -> t.getEtat() == Etat.realisee).count();
         int score = total > 0 ? (int) Math.round((realisees * 100.0) / total) : 0;
@@ -118,7 +122,7 @@ public class TacheFormController {
         else if (score >= 60) medaille = Medaille.Argent;
         else if (score >= 30) medaille = Medaille.Bronze;
 
-        programmeDAO.updateScore(programme.getId(), score, medaille);
+        programmeService.updateScore(programme.getId(), score, medaille);
 
         Statutobj newStatut;
         if (score == 0) newStatut = Statutobj.Abandonner;
@@ -126,7 +130,7 @@ public class TacheFormController {
         else newStatut = Statutobj.EnCours;
 
         objectif.setStatut(newStatut);
-        objectifDAO.update(objectif);
+        objectifService.update(objectif);
 
         String msg;
         if (score < 30) msg = "Continue, tu es sur la bonne voie !";
@@ -138,7 +142,7 @@ public class TacheFormController {
         motivation.setMessagemotivant(msg);
         motivation.setDategeneration(java.time.LocalDate.now());
         motivation.setProgrammeId(programme.getId());
-        motivationDAO.save(motivation);
+        motivationService.save(motivation);
     }
 
     @FXML

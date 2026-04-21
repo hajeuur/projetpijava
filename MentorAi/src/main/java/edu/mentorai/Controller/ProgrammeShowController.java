@@ -3,6 +3,10 @@ package edu.mentorai.Controller;
 import edu.mentorai.Main;
 import edu.mentorai.entities.*;
 import edu.mentorai.interfaces.*;
+import edu.mentorai.services.MotivationService;
+import edu.mentorai.services.ObjectifService;
+import edu.mentorai.services.ProgrammeService;
+import edu.mentorai.services.TacheService;
 import edu.mentorai.tools.CircleChart;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -35,10 +39,10 @@ public class ProgrammeShowController {
     private Programme programme;
     private int utilisateurId = 1;
 
-    private final ProgrammeDAO programmeDAO = new ProgrammeDAO();
-    private final TacheDAO tacheDAO = new TacheDAO();
-    private final MotivationDAO motivationDAO = new MotivationDAO();
-    private final ObjectifDAO objectifDAO = new ObjectifDAO();
+    private final ProgrammeService programmeService = new ProgrammeService();
+    private final TacheService tacheService = new TacheService();
+    private final MotivationService motivationService = new MotivationService();
+    private final ObjectifService objectifService = new ObjectifService();
 
     public void setObjectif(Objectif obj) { this.objectif = obj; }
     public void setUtilisateurId(int id) { this.utilisateurId = id; }
@@ -46,7 +50,7 @@ public class ProgrammeShowController {
     public void loadData() {
         try {
             // Load programme
-            programme = programmeDAO.findByObjectifId(objectif.getId());
+            programme = programmeService.findByObjectifId(objectif.getId());
             if (programme == null) return;
 
             // Header
@@ -56,13 +60,13 @@ public class ProgrammeShowController {
                     " pour votre réussite.");
 
             // Motivation
-            Motivation motivation = motivationDAO.findLatestByProgramme(programme.getId());
+            Motivation motivation = motivationService.findLatestByProgramme(programme.getId());
             if (motivation != null && motivation.getMessagemotivant() != null) {
                 motivationLabel.setText(motivation.getMessagemotivant());
             }
 
             // Taches stats
-            List<Tache> taches = tacheDAO.findByProgramme(programme.getId());
+            List<Tache> taches = tacheService.findByProgramme(programme.getId());
             programme.setTaches(taches);
 
             int total = taches.size();
@@ -233,7 +237,7 @@ public class ProgrammeShowController {
         alert.showAndWait().ifPresent(r -> {
             if (r == ButtonType.OK) {
                 try {
-                    tacheDAO.delete(tache.getId());
+                    tacheService.delete(tache.getId());
                     updateStats();
                     loadData();
                 } catch (Exception e) { showAlert("Erreur", e.getMessage()); }
@@ -242,7 +246,7 @@ public class ProgrammeShowController {
     }
 
     private void updateStats() throws Exception {
-        List<Tache> taches = tacheDAO.findByProgramme(programme.getId());
+        List<Tache> taches = tacheService.findByProgramme(programme.getId());
         int total = taches.size();
         long realisees = taches.stream().filter(t -> t.getEtat() == Etat.realisee).count();
         int score = total > 0 ? (int) Math.round((realisees * 100.0) / total) : 0;
@@ -252,13 +256,13 @@ public class ProgrammeShowController {
         else if (score >= 60) medaille = Medaille.Argent;
         else if (score >= 30) medaille = Medaille.Bronze;
 
-        programmeDAO.updateScore(programme.getId(), score, medaille);
+        programmeService.updateScore(programme.getId(), score, medaille);
 
         // Update objectif statut
         Statutobj newStatut = score == 0 ? Statutobj.Abandonner
                 : score == 100 ? Statutobj.Atteint : Statutobj.EnCours;
         objectif.setStatut(newStatut);
-        objectifDAO.update(objectif);
+        objectifService.update(objectif);
     }
 
     @FXML

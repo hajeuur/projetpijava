@@ -3,7 +3,7 @@ package edu.mentorai.Controller;
 import edu.mentorai.Main;
 import edu.mentorai.entities.Objectif;
 import edu.mentorai.entities.Statutobj;
-import edu.mentorai.interfaces.ObjectifDAO;
+import edu.mentorai.services.ObjectifService;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -28,7 +28,7 @@ public class AdminObjectifsController {
     @FXML private Label enCoursLabel;
     @FXML private Label abandonnesLabel;
 
-    private final ObjectifDAO objectifDAO = new ObjectifDAO();
+    private final ObjectifService objectifService = new ObjectifService();
     private List<Objectif> allObjectifs;
 
     @FXML
@@ -84,7 +84,7 @@ public class AdminObjectifsController {
 
     private void loadData() {
         try {
-            allObjectifs = objectifDAO.findAll();
+            allObjectifs = objectifService.findAll();
             updateTable(allObjectifs);
         } catch (Exception e) {
             showAlert("Erreur", e.getMessage());

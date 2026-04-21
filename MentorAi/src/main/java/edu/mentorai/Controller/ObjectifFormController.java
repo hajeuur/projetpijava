@@ -4,8 +4,8 @@ import edu.mentorai.Main;
 import edu.mentorai.entities.Objectif;
 import edu.mentorai.entities.Programme;
 import edu.mentorai.entities.Statutobj;
-import edu.mentorai.interfaces.ObjectifDAO;
-import edu.mentorai.interfaces.ProgrammeDAO;
+import edu.mentorai.services.ObjectifService;
+import edu.mentorai.services.ProgrammeService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -30,8 +30,8 @@ public class ObjectifFormController {
     private Objectif objectifToEdit = null;
     private Runnable onSaved;
 
-    private final ObjectifDAO objectifDAO = new ObjectifDAO();
-    private final ProgrammeDAO programmeDAO = new ProgrammeDAO();
+    private final ObjectifService objectifService = new ObjectifService();
+    private final ProgrammeService programmeService = new ProgrammeService();
 
     public void setUtilisateurId(int id) { this.utilisateurId = id; }
     public void setOnSaved(Runnable r) { this.onSaved = r; }
@@ -106,7 +106,7 @@ public class ObjectifFormController {
                 programme.setTitre(titre);
                 programme.setDategeneration(LocalDate.now());
                 programme.setScorePourcentage(0);
-                programmeDAO.save(programme);
+                programmeService.save(programme);
 
                 Objectif objectif = new Objectif();
                 objectif.setTitre(titre);
@@ -116,7 +116,7 @@ public class ObjectifFormController {
                 objectif.setStatut(Statutobj.EnCours);
                 objectif.setProgramme(programme);
                 objectif.setUtilisateurId(utilisateurId);
-                objectifDAO.save(objectif);
+                objectifService.save(objectif);
 
                 showInfo("Succès", "Objectif créé avec succès !");
             } else {
@@ -125,7 +125,7 @@ public class ObjectifFormController {
                 objectifToEdit.setDescription(description);
                 objectifToEdit.setDatedebut(datedebut);
                 objectifToEdit.setDatefin(datefin);
-                objectifDAO.update(objectifToEdit);
+                objectifService.update(objectifToEdit);
 
                 // Update programme titre aussi
                 if (objectifToEdit.getProgramme() != null) {

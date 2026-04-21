@@ -3,7 +3,7 @@ package edu.mentorai.Controller;
 import edu.mentorai.Main;
 import edu.mentorai.entities.Objectif;
 import edu.mentorai.entities.Statutobj;
-import edu.mentorai.interfaces.ObjectifDAO;
+import edu.mentorai.services.ObjectifService;
 import edu.mentorai.tools.CircleChart;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -34,7 +34,7 @@ public class ObjectifListController {
     @FXML private StackPane objectifChartPane;
 
     private int utilisateurId = 1;
-    private final ObjectifDAO objectifDAO = new ObjectifDAO();
+    private final ObjectifService objectifService = new ObjectifService();
     private List<Objectif> currentList;
 
     @FXML
@@ -48,7 +48,7 @@ public class ObjectifListController {
 
     public void loadData() {
         try {
-            currentList = objectifDAO.findByUtilisateur(utilisateurId);
+            currentList = objectifService.findByUtilisateur(utilisateurId);
             applySortAndDisplay();
         } catch (Exception e) {
             showAlert("Erreur", e.getMessage());
@@ -246,7 +246,7 @@ public class ObjectifListController {
         alert.showAndWait().ifPresent(r -> {
             if (r == ButtonType.OK) {
                 try {
-                    objectifDAO.delete(obj.getId());
+                    objectifService.delete(obj.getId());
                     loadData();
                 } catch (Exception e) { showAlert("Erreur", e.getMessage()); }
             }
@@ -258,8 +258,8 @@ public class ObjectifListController {
         try {
             String query = searchField.getText().trim();
             currentList = query.isEmpty()
-                    ? objectifDAO.findByUtilisateur(utilisateurId)
-                    : objectifDAO.searchByTitre(query);
+                    ? objectifService.findByUtilisateur(utilisateurId)
+                    : objectifService.searchByTitre(query);
             applySortAndDisplay();
         } catch (Exception e) { showAlert("Erreur", e.getMessage()); }
     }
@@ -272,8 +272,8 @@ public class ObjectifListController {
         alert.showAndWait().ifPresent(r -> {
             if (r == ButtonType.OK) {
                 try {
-                    List<Objectif> all = objectifDAO.findByUtilisateur(utilisateurId);
-                    for (Objectif o : all) objectifDAO.delete(o.getId());
+                    List<Objectif> all = objectifService.findByUtilisateur(utilisateurId);
+                    for (Objectif o : all) objectifService.delete(o.getId());
                     loadData();
                 } catch (Exception e) { showAlert("Erreur", e.getMessage()); }
             }
@@ -289,7 +289,7 @@ public class ObjectifListController {
                     new FileChooser.ExtensionFilter("CSV", "*.csv"));
             File file = fc.showSaveDialog(Main.primaryStage);
             if (file == null) return;
-            List<Objectif> all = objectifDAO.findByUtilisateur(utilisateurId);
+            List<Objectif> all = objectifService.findByUtilisateur(utilisateurId);
             try (PrintWriter pw = new PrintWriter(new FileOutputStream(file))) {
                 pw.println("N,ID,Titre,Date debut,Date fin,Statut");
                 int i = 1;
@@ -312,7 +312,7 @@ public class ObjectifListController {
                     new FileChooser.ExtensionFilter("Text", "*.txt"));
             File file = fc.showSaveDialog(Main.primaryStage);
             if (file == null) return;
-            List<Objectif> all = objectifDAO.findByUtilisateur(utilisateurId);
+            List<Objectif> all = objectifService.findByUtilisateur(utilisateurId);
             try (PrintWriter pw = new PrintWriter(new FileOutputStream(file))) {
                 pw.println("LISTE DES OBJECTIFS - MentorAI");
                 pw.println("================================");

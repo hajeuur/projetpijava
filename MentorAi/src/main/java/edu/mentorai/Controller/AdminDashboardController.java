@@ -3,7 +3,7 @@ package edu.mentorai.Controller;
 import edu.mentorai.Main;
 import edu.mentorai.entities.Objectif;
 import edu.mentorai.entities.Statutobj;
-import edu.mentorai.interfaces.ObjectifDAO;
+import edu.mentorai.services.ObjectifService;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -26,7 +26,7 @@ public class AdminDashboardController {
     @FXML private TableColumn<Objectif, String> colDebut;
     @FXML private TableColumn<Objectif, String> colFin;
 
-    private final ObjectifDAO objectifDAO = new ObjectifDAO();
+    private final ObjectifService objectifService = new ObjectifService();
 
     @FXML
     public void initialize() {
@@ -56,7 +56,7 @@ public class AdminDashboardController {
 
     private void loadStats() {
         try {
-            List<Objectif> all = objectifDAO.findAll();
+            List<Objectif> all = objectifService.findAll();
 
             long atteints = all.stream()
                     .filter(o -> o.getStatut() == Statutobj.Atteint).count();

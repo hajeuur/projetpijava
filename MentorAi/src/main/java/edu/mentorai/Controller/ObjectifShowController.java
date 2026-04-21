@@ -3,9 +3,8 @@ package edu.mentorai.Controller;
 import edu.mentorai.Main;
 import edu.mentorai.entities.Objectif;
 import edu.mentorai.entities.Programme;
-import edu.mentorai.entities.Statutobj;
-import edu.mentorai.interfaces.ObjectifDAO;
-import edu.mentorai.interfaces.ProgrammeDAO;
+import edu.mentorai.services.ObjectifService;
+import edu.mentorai.services.ProgrammeService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -23,8 +22,8 @@ public class ObjectifShowController {
 
     private Objectif objectif;
     private int utilisateurId = 1;
-    private final ObjectifDAO objectifDAO = new ObjectifDAO();
-    private final ProgrammeDAO programmeDAO = new ProgrammeDAO();
+    private final ObjectifService objectifService = new ObjectifService();
+    private final ProgrammeService programmeService = new ProgrammeService();
 
     public void setUtilisateurId(int id) { this.utilisateurId = id; }
 
@@ -48,7 +47,7 @@ public class ObjectifShowController {
 
         // Programme
         try {
-            Programme programme = programmeDAO.findByObjectifId(obj.getId());
+            Programme programme = programmeService.findByObjectifId(obj.getId());
             if (programme != null) {
                 programmeTitreLabel.setText(programme.getTitre());
                 programmeDateLabel.setText(programme.getDategeneration() != null
@@ -83,7 +82,7 @@ public class ObjectifShowController {
         alert.showAndWait().ifPresent(r -> {
             if (r == ButtonType.OK) {
                 try {
-                    objectifDAO.delete(objectif.getId());
+                    objectifService.delete(objectif.getId());
                     goBackToList();
                 } catch (Exception e) { showAlert("Erreur", e.getMessage()); }
             }

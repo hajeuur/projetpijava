@@ -3,6 +3,9 @@ package edu.mentorai.Controller;
 import edu.mentorai.Main;
 import edu.mentorai.entities.*;
 import edu.mentorai.interfaces.*;
+import edu.mentorai.services.ObjectifService;
+import edu.mentorai.services.ProgrammeService;
+import edu.mentorai.services.TacheService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -20,9 +23,9 @@ public class TacheShowController {
     private Objectif objectif;
     private int utilisateurId = 1;
 
-    private final TacheDAO tacheDAO = new TacheDAO();
-    private final ProgrammeDAO programmeDAO = new ProgrammeDAO();
-    private final ObjectifDAO objectifDAO = new ObjectifDAO();
+    private final TacheService tacheService = new TacheService();
+    private final ProgrammeService programmeService = new ProgrammeService();
+    private final ObjectifService objectifService = new ObjectifService();
 
     public void setUtilisateurId(int id) { this.utilisateurId = id; }
     public void setProgramme(Programme p) { this.programme = p; }
@@ -71,7 +74,7 @@ public class TacheShowController {
         alert.showAndWait().ifPresent(r -> {
             if (r == ButtonType.OK) {
                 try {
-                    tacheDAO.delete(tache.getId());
+                    tacheService.delete(tache.getId());
                     goBackToProgramme();
                 } catch (Exception e) { showAlert("Erreur", e.getMessage()); }
             }
