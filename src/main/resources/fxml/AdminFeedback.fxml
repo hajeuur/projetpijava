@@ -39,7 +39,7 @@
                          -fx-padding: 0;">
                 <HBox style="-fx-background-color: #102c59; -fx-padding: 10 15 10 15;
                              -fx-background-radius: 8 8 0 0;" alignment="CENTER_LEFT">
-                    <Label text="🔍  Recherche et Filtres"
+                    <Label text="Recherche et Filtres"
                            style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;"/>
                 </HBox>
                 <HBox spacing="12" style="-fx-padding: 12 15 12 15;" alignment="CENTER_LEFT">
@@ -65,16 +65,32 @@
                     </VBox>
                     <VBox spacing="3">
                         <Label text="" style="-fx-font-size: 11px;"/>
-                        <Button text="🔍 Rechercher" onAction="#filtrer"
+                        <Button text="Rechercher" onAction="#filtrer"
                                 style="-fx-background-color: #102c59; -fx-text-fill: white;
                                        -fx-font-weight: bold; -fx-background-radius: 6;
                                        -fx-padding: 7 16 7 16; -fx-cursor: hand;"/>
                     </VBox>
                     <VBox spacing="3">
                         <Label text="" style="-fx-font-size: 11px;"/>
-                        <Button text="↺ Réinitialiser" onAction="#reinitialiser"
+                        <Button text="Reinitialiser" onAction="#reinitialiser"
                                 style="-fx-background-color: #e0e0e0; -fx-text-fill: #333;
                                        -fx-background-radius: 6;
+                                       -fx-padding: 7 16 7 16; -fx-cursor: hand;"/>
+                    </VBox>
+                    <!-- ✅ BOUTON PDF -->
+                    <VBox spacing="3">
+                        <Label text="" style="-fx-font-size: 11px;"/>
+                        <Button text="Export PDF" onAction="#exporterPDF"
+                                style="-fx-background-color: #d52e28; -fx-text-fill: white;
+                                       -fx-font-weight: bold; -fx-background-radius: 6;
+                                       -fx-padding: 7 16 7 16; -fx-cursor: hand;"/>
+                    </VBox>
+                    <!-- ✅ BOUTON EXCEL -->
+                    <VBox spacing="3">
+                        <Label text="" style="-fx-font-size: 11px;"/>
+                        <Button text="Export Excel" onAction="#exporterExcel"
+                                style="-fx-background-color: #28a745; -fx-text-fill: white;
+                                       -fx-font-weight: bold; -fx-background-radius: 6;
                                        -fx-padding: 7 16 7 16; -fx-cursor: hand;"/>
                     </VBox>
                 </HBox>
@@ -85,7 +101,7 @@
                          -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.1),5,0,0,2);">
                 <HBox style="-fx-background-color: #fff3cd; -fx-padding: 12 15 12 15;
                              -fx-background-radius: 8 8 0 0;" alignment="CENTER_LEFT">
-                    <Label text="⏳  Feedbacks en attente de traitement"
+                    <Label text="Feedbacks en attente de traitement"
                            style="-fx-font-size: 15px; -fx-font-weight: bold;
                                   -fx-text-fill: #856404;"/>
                 </HBox>
@@ -108,7 +124,7 @@
                          -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.1),5,0,0,2);">
                 <HBox style="-fx-background-color: #d4edda; -fx-padding: 12 15 12 15;
                              -fx-background-radius: 8 8 0 0;" alignment="CENTER_LEFT">
-                    <Label text="✅  Historique des feedbacks traités"
+                    <Label text="Historique des feedbacks traites"
                            style="-fx-font-size: 15px; -fx-font-weight: bold;
                                   -fx-text-fill: #155724;"/>
                 </HBox>

@@ -26,17 +26,14 @@ public class AjouterFeedbackController implements Initializable {
     @FXML private Label erreurType, erreurNote, erreurMessage;
 
     private int noteSelectionnee = 0;
-    private int utilisateurIdConnecte = 11; // user existant dans ta BDD
+    private int utilisateurIdConnecte = 11;
 
     private FeedbackService feedbackService = new FeedbackService();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // ✅ CORRECTION : items + taille forcée
         comboType.setItems(FXCollections.observableArrayList(
-                "probleme",
-                "satisfaction",
-                "suggestion"
+                "probleme", "satisfaction", "suggestion"
         ));
         comboType.setMaxWidth(Double.MAX_VALUE);
     }
@@ -52,7 +49,6 @@ public class AjouterFeedbackController implements Initializable {
         noteSelectionnee = note;
         labelNote.setText("(" + note + "/5)");
         erreurNote.setText("");
-
         Button[] etoiles = {star1, star2, star3, star4, star5};
         for (int i = 0; i < 5; i++) {
             String couleur = (i < note) ? "#f0a500" : "#ccc";
@@ -97,13 +93,19 @@ public class AjouterFeedbackController implements Initializable {
 
         if (!valide) return;
 
+        // ✅ CONTRÔLE D'UNICITÉ
+        if (feedbackService.existe(utilisateurIdConnecte, message)) {
+            erreurMessage.setText("⚠️ Vous avez déjà envoyé ce feedback !");
+            return;
+        }
+
         Feedback feedback = new Feedback(
                 message,
                 noteSelectionnee,
                 LocalDate.now(),
                 comboType.getValue(),
                 "en_attente",
-                0,   // traitement_id = 0 → sera converti en NULL dans le service
+                0,
                 utilisateurIdConnecte
         );
 
@@ -114,7 +116,6 @@ public class AjouterFeedbackController implements Initializable {
         );
         labelResultat.setText("✅ Votre feedback a été envoyé avec succès !");
 
-        // ✅ CORRECTION reset propre
         comboType.setValue(null);
         textMessage.clear();
         noteSelectionnee = 0;
@@ -136,10 +137,8 @@ public class AjouterFeedbackController implements Initializable {
                     getClass().getResource("/fxml/MesFeedbacks.fxml")
             );
             VBox root = loader.load();
-
             MesFeedbacksController ctrl = loader.getController();
             ctrl.setUtilisateurId(utilisateurIdConnecte);
-
             Stage stage = (Stage) comboType.getScene().getWindow();
             stage.setTitle("MentorAI - Mes Feedbacks");
             stage.setScene(new Scene(root));

@@ -26,7 +26,6 @@ public class FeedbackService {
             ps.setString(4, feedback.getTypefeedback());
             ps.setString(5, feedback.getEtatfeedback());
 
-            // ✅ CORRECTION CLÉ : si pas de traitement → NULL (pas 0)
             if (feedback.getTraitementId() == 0) {
                 ps.setNull(6, Types.INTEGER);
             } else {
@@ -40,6 +39,22 @@ public class FeedbackService {
         } catch (SQLException e) {
             System.out.println("❌ Erreur lors de l'ajout : " + e.getMessage());
         }
+    }
+
+    // ===================== CONTRÔLE D'UNICITÉ =====================
+    // ✅ Vérifie si l'utilisateur a déjà envoyé exactement le même message
+    public boolean existe(int utilisateurId, String contenu) {
+        String query = "SELECT * FROM feedback WHERE utilisateur_id = ? AND contenu = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setInt(1, utilisateurId);
+            ps.setString(2, contenu);
+            ResultSet rs = ps.executeQuery();
+            return rs.next(); // true = existe déjà, false = n'existe pas
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur contrôle unicité : " + e.getMessage());
+        }
+        return false;
     }
 
     // ===================== READ =====================
@@ -57,7 +72,7 @@ public class FeedbackService {
                         rs.getDate("datefeedback").toLocalDate(),
                         rs.getString("typefeedback"),
                         rs.getString("etatfeedback"),
-                        rs.getInt("traitement_id"),   // retourne 0 si NULL, c'est OK
+                        rs.getInt("traitement_id"),
                         rs.getInt("utilisateur_id")
                 );
                 feedbacks.add(f);
@@ -69,7 +84,6 @@ public class FeedbackService {
     }
 
     // ===================== READ par utilisateur =====================
-    // ✅ NOUVEAU : récupérer seulement les feedbacks d'un utilisateur
     public List<Feedback> getByUtilisateur(int utilisateurId) {
         List<Feedback> feedbacks = new ArrayList<>();
         String query = "SELECT * FROM feedback WHERE utilisateur_id = ? ORDER BY datefeedback DESC";
@@ -107,7 +121,6 @@ public class FeedbackService {
             ps.setString(4, feedback.getTypefeedback());
             ps.setString(5, feedback.getEtatfeedback());
 
-            // ✅ Même logique NULL pour update
             if (feedback.getTraitementId() == 0) {
                 ps.setNull(6, Types.INTEGER);
             } else {
