@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.AfficherRessourcesController"
+      spacing="0" style="-fx-background-color: #f0f4f8;" prefWidth="950" prefHeight="650">
+
+    <!-- Top Banner -->
+    <VBox spacing="10" style="-fx-background-color: #102c59; -fx-padding: 20 40;">
+        <HBox alignment="CENTER_LEFT" spacing="15">
+            <Button text="← Retour" onAction="#retour" 
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-border-color: rgba(255,255,255,0.3); -fx-border-radius: 5; -fx-cursor: hand;"/>
+            <Label text="🔗" style="-fx-font-size: 28px;"/>
+            <VBox>
+                <Label fx:id="lblProjetNom" text="Ressources du Projet" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                <Label text="Documents, liens et supports validés pour ce projet." style="-fx-font-size: 13px; -fx-text-fill: #9dbbce;"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnAjouter" text="+ Ajouter une ressource" onAction="#ajouterRessource"
+                    style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 20; -fx-cursor: hand;"/>
+        </HBox>
+    </VBox>
+
+    <!-- Filters -->
+    <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-padding: 15 40; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);">
+        <Label text="Filtrer :" style="-fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+        <ComboBox fx:id="cbFiltreType" onAction="#filtrerParType" prefWidth="180"
+                  style="-fx-background-radius: 8; -fx-border-color: #dcdde1; -fx-border-radius: 8; -fx-padding: 5;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+    </HBox>
+
+    <!-- Main Content -->
+    <FlowPane fx:id="flowPaneRessources" hgap="25" vgap="25" style="-fx-padding: 30 40;">
+        <!-- Card-like elements for resources will be added here -->
+        <VBox spacing="10" alignment="CENTER" prefWidth="870" style="-fx-padding: 50;">
+            <TableView fx:id="tableRessources" VBox.vgrow="ALWAYS" prefHeight="400" onMouseClicked="#handleTableClick"
+                       style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.08),10,0,0,4); -fx-border-color: #dcdde1; -fx-border-radius: 12;">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="50" visible="false"/>
+                    <TableColumn fx:id="colNom" text="Nom du document" prefWidth="250"/>
+                    <TableColumn fx:id="colType" text="Type" prefWidth="120"/>
+                    <TableColumn fx:id="colUrl" text="Lien / URL" prefWidth="350"/>
+                    <TableColumn fx:id="colDateCreation" text="Ajouté le" prefWidth="120"/>
+                </columns>
+                <placeholder><Label text="Aucune ressource disponible."/></placeholder>
+            </TableView>
+        </VBox>
+    </FlowPane>
+
+    <!-- Footer Actions -->
+    <HBox spacing="20" alignment="CENTER" style="-fx-padding: 20 40; -fx-background-color: white;">
+        <Button fx:id="btnOuvrir" text="🌐 Ouvrir le lien" onAction="#ouvrirLien"
+                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 25; -fx-cursor: hand;"/>
+        <Button fx:id="btnModifier" text="✏️ Modifier" onAction="#modifierRessource"
+                style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 25; -fx-cursor: hand;"/>
+        <Button fx:id="btnSupprimer" text="🗑 Supprimer" onAction="#supprimerRessource"
+                style="-fx-background-color: transparent; -fx-border-color: #e74c3c; -fx-border-radius: 8; -fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10 25; -fx-cursor: hand;"/>
+    </HBox>
+
+</VBox>

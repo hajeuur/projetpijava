@@ -42,6 +42,10 @@ public class MainController {
     @FXML private Button btnAIDecisionnel;
     @FXML private Button btnSwitchBack;
     @FXML private Button btnNotifications;
+    @FXML private Button btnParcours;
+    @FXML private Button btnProjets;
+    @FXML private Button btnBackParcours;
+    @FXML private Button btnBackProjets;
 
     // ── Sidebar (BACK) ────────────────────────────────────────────────────────
     @FXML private VBox backSidebar;
@@ -53,9 +57,14 @@ public class MainController {
     @FXML private Label lblUserBack;
 
     // ── État interne ──────────────────────────────────────────────────────────
+    private static MainController instance;
     private Button activeHeaderBtn;
     private Button activeSidebarBtn;
     private String userRole = "";
+
+    public static MainController getInstance() {
+        return instance;
+    }
 
     // ─────────────────────────────────────────────────────────────────────────
     // INITIALISATION
@@ -63,6 +72,7 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        instance = this;
         Utilisateur user = SessionManager.getCurrentUser();
         if (user == null) return;
 
@@ -80,41 +90,38 @@ public class MainController {
      */
     private void configureByRole() {
         if (isSuperAdmin()) {
-            // SUPERADMIN / ADMINM → FRONT en premier (dashboard stratégique)
-            showFrontMode();
-            show(btnSwitchBack);       // peut basculer vers back-office
-            hide(btnDashboardEnseignant);
-            show(btnDashboardAdmin);
-            hide(btnAIPedagogique);
-            show(btnAIDecisionnel);
-            show(btnNotifications);
-            
-            updateNotifications();
-            
-            // Sidebar back : tout activé
+            // SUPERADMIN (admin@esprit.tn) → Back-Office Complet uniquement
+            showBackMode();
             show(boxAdmin);
             show(boxBackAdmin);
-            show(boxSwitcher);
-
-            showDashboardAdmin();
+            hide(boxSwitcher); // Pas de front (réservé aux étudiants)
+            
+            // On montre tout dans boxBackAdmin pour le superadmin
+            for (javafx.scene.Node n : boxBackAdmin.getChildren()) show(n);
+            
+            showCategories();
 
         } else if (isAdmin()) {
-            // Admin classique -> Accès Frontend Stratégique + Backoffice
-            showFrontMode();
-            show(btnSwitchBack);
-            hide(btnDashboardEnseignant);
-            show(btnDashboardAdmin);
-            hide(btnAIPedagogique);
-            show(btnAIDecisionnel);
-            show(btnNotifications);
-            updateNotifications();
-
-            // Partage admin
-            show(boxAdmin);
-            hide(boxBackAdmin);
-            show(boxSwitcher);
-
-            showDashboardAdmin();
+            // ADMIN SIMPLE (admin@gmail.com) → Back-Office Parcours/Projets UNIQUEMENT
+            showBackMode();
+            hide(boxAdmin);
+            show(boxBackAdmin);
+            hide(boxSwitcher);
+            
+            // On cache les autres outils dans la section CRUD pour cet admin
+            for (javafx.scene.Node n : boxBackAdmin.getChildren()) {
+                if (n instanceof Button) {
+                    Button b = (Button) n;
+                    if (b == btnBackParcours || b == btnBackProjets) show(b);
+                    else hide(b);
+                } else if (n instanceof Label) {
+                    show(n); // Garder le titre "BACK CRUD"
+                } else {
+                    hide(n); // Cacher les séparateurs etc
+                }
+            }
+            
+            showBackParcours();
 
         } else if (isEnseignant()) {
             // Enseignant → FRONT uniquement (dashboard pédagogique + IA)
@@ -131,14 +138,29 @@ public class MainController {
 
             showDashboardEnseignant();
 
-        } else {
-            // Visiteur / étudiant → contenu vide
+        } else if (isEtudiant()) {
+            // Étudiant → FRONT uniquement (Parcours + Projets)
             showFrontMode();
             hide(btnSwitchBack);
             hide(btnDashboardEnseignant); hide(btnDashboardAdmin);
             hide(btnPlanActions);
             hide(btnArticles);
             hide(btnAIPedagogique); hide(btnAIDecisionnel);
+            
+            show(btnParcours);
+            show(btnProjets);
+            
+            showParcours();
+
+        } else {
+            // Visiteur → contenu vide
+            showFrontMode();
+            hide(btnSwitchBack);
+            hide(btnDashboardEnseignant); hide(btnDashboardAdmin);
+            hide(btnPlanActions);
+            hide(btnArticles);
+            hide(btnAIPedagogique); hide(btnAIDecisionnel);
+            hide(btnParcours); hide(btnProjets);
             contentArea.getChildren().clear();
         }
     }
@@ -158,11 +180,21 @@ public class MainController {
     void switchToBack() {
         SessionManager.setFrontMode(false);
         showBackMode();
+        
+        // Gestion visibilité sidebar selon le niveau d'admin
         if (isSuperAdmin()) {
             show(boxAdmin);
             show(boxBackAdmin);
+            show(boxSwitcher);
+        } else if (isAdmin()) {
+            hide(boxAdmin);      // Un simple admin ne gère pas les utilisateurs
+            show(boxBackAdmin);  // Mais gère Parcours/Projets/Plans/Articles
+            show(boxSwitcher);
         }
-        showCategories();
+        
+        // Par défaut au switch
+        if (isAdmin()) showBackParcours();
+        else showCategories();
     }
 
     /** Affiche le header TOP, masque la sidebar. */
@@ -212,6 +244,20 @@ public class MainController {
             loadView("/fxml/ArticleList.fxml");
         }
         setActiveBtn(btnArticles);
+    }
+
+    @FXML
+    void showParcours() {
+        System.out.println("🎓 Loading Parcours View...");
+        loadView("/AfficherParcours.fxml");
+        setActiveBtn(btnParcours);
+    }
+
+    @FXML
+    void showProjets() {
+        System.out.println("📂 Loading Projects View...");
+        loadView("/AfficherProjetsGlobal.fxml");
+        setActiveBtn(btnProjets);
     }
 
     @FXML
@@ -273,25 +319,47 @@ public class MainController {
         setActiveBtn(btnAIDecisionnel);
     }
 
+    @FXML
+    void showBackParcours() {
+        loadView("/BackOfficeParcours.fxml");
+        setActiveBtn(btnBackParcours);
+    }
+
+    @FXML
+    void showBackProjets() {
+        loadView("/BackOfficeProjets.fxml");
+        setActiveBtn(btnBackProjets);
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // DÉCONNEXION
     // ─────────────────────────────────────────────────────────────────────────
 
     @FXML
-    void handleLogout() {
-        SessionManager.logout();
+    public void handleLogout() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
-            Parent root = loader.load();
+            SessionManager.logout();
             Stage stage = (Stage) contentArea.getScene().getWindow();
-            Scene sc = new Scene(root, 1200, 750);
-            sc.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
-            stage.setTitle("MentorAI — Connexion");
-            stage.setScene(sc);
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/Login.fxml"));
+            Scene scene = new Scene(root, 1200, 750);
+            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+            stage.setScene(scene);
             stage.centerOnScreen();
+            stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Permet aux sous-contrôleurs de charger une vue sans casser le MainController.
+     */
+    public void loadInContentArea(String fxmlPath) {
+        loadView(fxmlPath);
+    }
+
+    public void loadInContentArea(Parent view) {
+        contentArea.getChildren().setAll(view);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -346,7 +414,9 @@ public class MainController {
         Button[] headerBtns = {
             btnDashboardEnseignant, btnDashboardAdmin,
             btnPlanActions, btnArticles,
-            btnAIPedagogique, btnAIDecisionnel
+            btnAIPedagogique, btnAIDecisionnel,
+            btnParcours, btnProjets,
+            btnBackParcours, btnBackProjets
         };
         for (Button b : headerBtns) {
             if (b != null) {
@@ -375,17 +445,28 @@ public class MainController {
 
     // ── Role checks ───────────────────────────────────────────────────────────
     private boolean isSuperAdmin() {
-        return userRole.equals("ADMINM")
-            || userRole.contains("SUPERADMIN")
-            || userRole.contains("SUPER_ADMIN");
+        Utilisateur user = SessionManager.getCurrentUser();
+        if (user == null) return false;
+        
+        String email = user.getEmail() != null ? user.getEmail().toLowerCase() : "";
+        return email.equals("admin@esprit.tn") || userRole.equals("ADMINM");
     }
 
     private boolean isAdmin() {
-        return userRole.contains("ADMIN") && !isSuperAdmin();
+        Utilisateur user = SessionManager.getCurrentUser();
+        if (user == null) return false;
+        
+        String email = user.getEmail() != null ? user.getEmail().toLowerCase() : "";
+        // admin@gmail.com est un admin mais PAS le superadmin
+        return (email.equals("admin@gmail.com") || userRole.contains("ADMIN")) && !isSuperAdmin();
     }
 
     private boolean isEnseignant() {
         return userRole.contains("ENSEIGNANT");
+    }
+
+    private boolean isEtudiant() {
+        return userRole.contains("ETUDIANT") || userRole.equals("STUDENT");
     }
 
     // ── Visibility helpers ────────────────────────────────────────────────────
