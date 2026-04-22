@@ -2,14 +2,12 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.esprit.controllers.BackOfficeController"
             prefHeight="650.0" prefWidth="1100.0">
 
-    <!-- Sidebar gauche -->
     <left>
         <VBox spacing="0" style="-fx-background-color: #1a2a4a; -fx-min-width: 200;">
             <Label text="MentorAI"
@@ -23,41 +21,59 @@
         </VBox>
     </left>
 
-    <!-- Contenu principal -->
     <center>
-        <VBox spacing="20" style="-fx-padding: 30;">
+        <VBox spacing="15" style="-fx-padding: 30;">
 
             <!-- Header -->
-            <HBox alignment="CENTER_LEFT" spacing="20">
+            <HBox alignment="CENTER_LEFT" spacing="15">
                 <Label text="Gestion des utilisateurs"
                        style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #1a2a4a;"/>
                 <HBox HBox.hgrow="ALWAYS"/>
-                <Button text="+ Ajouter utilisateur"
+                <Button text="Exporter Excel"
+                        onAction="#handleExportExcel"
+                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 14;"/>
+                <Button text="Exporter PDF"
+                        onAction="#handleExportPDF"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 14;"/>
+                <Button text="+ Ajouter"
                         onAction="#handleAjouter"
-                        style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 16;"/>
+                        style="-fx-background-color: #1a2a4a; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 14;"/>
             </HBox>
 
-            <!-- Barre de recherche -->
+            <!-- Barre recherche + tri -->
             <HBox spacing="10" alignment="CENTER_LEFT">
                 <TextField fx:id="searchField"
                            promptText="Rechercher par nom, email ou rôle..."
-                           prefWidth="400"
+                           prefWidth="350"
                            onKeyReleased="#handleSearch"
                            style="-fx-border-color: #cccccc; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8;"/>
+                <Label text="Trier par :"
+                       style="-fx-font-size: 13; -fx-text-fill: #555;"/>
+                <ComboBox fx:id="sortCombo"
+                          onAction="#handleSort"
+                          prefWidth="180"
+                          style="-fx-border-color: #cccccc; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+                <Button text="Réinitialiser"
+                        onAction="#handleReset"
+                        style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 12;"/>
             </HBox>
 
             <!-- TableView -->
             <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
                 <columns>
                     <TableColumn fx:id="colId" text="#" prefWidth="50"/>
-                    <TableColumn fx:id="colNom" text="Nom" prefWidth="120"/>
-                    <TableColumn fx:id="colPrenom" text="Prénom" prefWidth="120"/>
-                    <TableColumn fx:id="colEmail" text="Email" prefWidth="200"/>
+                    <TableColumn fx:id="colNom" text="Nom" prefWidth="110"/>
+                    <TableColumn fx:id="colPrenom" text="Prénom" prefWidth="110"/>
+                    <TableColumn fx:id="colEmail" text="Email" prefWidth="190"/>
                     <TableColumn fx:id="colRole" text="Rôle" prefWidth="100"/>
-                    <TableColumn fx:id="colStatus" text="Status" prefWidth="100"/>
-                    <TableColumn fx:id="colActions" text="Actions" prefWidth="200"/>
+                    <TableColumn fx:id="colStatus" text="Status" prefWidth="90"/>
+                    <TableColumn fx:id="colActions" text="Actions" prefWidth="220"/>
                 </columns>
             </TableView>
+
+            <!-- Compteur -->
+            <Label fx:id="countLabel"
+                   style="-fx-font-size: 12; -fx-text-fill: #888;"/>
 
         </VBox>
     </center>

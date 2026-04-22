@@ -14,4 +14,213 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+
+        <!-- JavaFX (inchangé) -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>21</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/hejer/Downloads/openjfx-21.0.11-ea+4_windows-x64_bin-sdk/javafx-sdk-21.0.11/lib/javafx.base.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>21</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/hejer/Downloads/openjfx-21.0.11-ea+4_windows-x64_bin-sdk/javafx-sdk-21.0.11/lib/javafx.controls.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>21</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/hejer/Downloads/openjfx-21.0.11-ea+4_windows-x64_bin-sdk/javafx-sdk-21.0.11/lib/javafx.fxml.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>21</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/hejer/Downloads/openjfx-21.0.11-ea+4_windows-x64_bin-sdk/javafx-sdk-21.0.11/lib/javafx.graphics.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-media</artifactId>
+            <version>21</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/hejer/Downloads/openjfx-21.0.11-ea+4_windows-x64_bin-sdk/javafx-sdk-21.0.11/lib/javafx.media.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>21</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/hejer/Downloads/openjfx-21.0.11-ea+4_windows-x64_bin-sdk/javafx-sdk-21.0.11/lib/javafx.web.jar</systemPath>
+        </dependency>
+
+        <!-- MySQL (inchangé) -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>9.6.0</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/mysql-connector-j-9.6.0/mysql-connector-j-9.6.0.jar</systemPath>
+        </dependency>
+
+        <!-- JavaMail (inchangé) -->
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.2</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/javax.mail-1.6.2.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/activation-1.1.1.jar</systemPath>
+        </dependency>
+
+        <!-- JUnit 5 (inchangé) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.1</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/junit-jupiter-5.10.1.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.10.1</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/junit-jupiter-api-5.10.1.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-commons</artifactId>
+            <version>1.10.1</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/junit-platform-commons-1.10.1.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.opentest4j</groupId>
+            <artifactId>opentest4j</artifactId>
+            <version>1.3.0</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/opentest4j-1.3.0.jar</systemPath>
+        </dependency>
+
+        <!-- Google OAuth2 (inchangé) -->
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>1.34.1</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/google-api-client-1.34.1.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client</artifactId>
+            <version>1.34.1</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/google-oauth-client-1.34.1.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client</artifactId>
+            <version>1.43.3</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/google-http-client-1.43.3.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-jackson2</artifactId>
+            <version>1.43.3</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/google-http-client-jackson2-1.43.3.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.15.2</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/jackson-core-2.15.2.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/jackson-databind-2.15.2.jar</systemPath>
+        </dependency>
+
+        <!-- Google OAuth2 Jetty (inchangé) -->
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-jetty</artifactId>
+            <version>1.34.1</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/google-oauth-client-jetty-1.34.1.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-java6</artifactId>
+            <version>1.34.1</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/google-oauth-client-java6-1.34.1.jar</systemPath>
+        </dependency>
+
+        <!-- Jetty server (nécessaire pour LocalServerReceiver) -->
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty</artifactId>
+            <version>6.1.26</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/jetty-6.1.26.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>6.1.26</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/jetty-util-6.1.26.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/servlet-api-2.5.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>32.1.3-jre</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/guava-32.1.3-jre.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-gson</artifactId>
+            <version>1.43.3</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/google-http-client-gson-1.43.3.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.15.2</version>
+            <scope>system</scope>
+            <systemPath>C:/projetjava/projetpi/lib/jackson-annotations-2.15.2.jar</systemPath>
+        </dependency>
+
+    </dependencies>
+
 </project>

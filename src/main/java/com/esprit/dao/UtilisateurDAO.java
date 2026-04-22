@@ -51,17 +51,18 @@ public class UtilisateurDAO implements IUtilisateur {
     @Override
     public void modifier(Utilisateur u) {
         Connection cnx = DatabaseConnection.getInstance();
-        String sql = "UPDATE utilisateur SET nom=?, prenom=?, email=?, role=?, status=?, trust_score=?, risk_level=? WHERE id=?";
+        String sql = "UPDATE utilisateur SET nom=?, prenom=?, email=?, mdp=?, role=?, status=?, trust_score=?, risk_level=? WHERE id=?";
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, u.getNom());
             ps.setString(2, u.getPrenom());
             ps.setString(3, u.getEmail());
-            ps.setString(4, u.getRole());
-            ps.setString(5, u.getStatus());
-            ps.setDouble(6, u.getTrustScore());
-            ps.setString(7, u.getRiskLevel());
-            ps.setInt(8, u.getId());
+            ps.setString(4, u.getMdp());
+            ps.setString(5, u.getRole());
+            ps.setString(6, u.getStatus());
+            ps.setDouble(7, u.getTrustScore());
+            ps.setString(8, u.getRiskLevel());
+            ps.setInt(9, u.getId());
             ps.executeUpdate();
             System.out.println("Utilisateur modifié avec succès !");
         } catch (SQLException e) {
@@ -159,6 +160,34 @@ public class UtilisateurDAO implements IUtilisateur {
             }
         } catch (SQLException e) {
             System.out.println("Erreur login : " + e.getMessage());
+        }
+        return null;
+    }
+
+    // ── Nouveau : utilisé par LoginController et InscriptionController ─────────
+
+    public Utilisateur findByEmail(String email) {
+        Connection cnx = DatabaseConnection.getInstance();
+        String sql = "SELECT * FROM utilisateur WHERE email=?";
+        try {
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Utilisateur u = new Utilisateur();
+                u.setId(rs.getInt("id"));
+                u.setNom(rs.getString("nom"));
+                u.setPrenom(rs.getString("prenom"));
+                u.setEmail(rs.getString("email"));
+                u.setMdp(rs.getString("mdp"));
+                u.setRole(rs.getString("role"));
+                u.setStatus(rs.getString("status"));
+                u.setTrustScore(rs.getDouble("trust_score"));
+                u.setRiskLevel(rs.getString("risk_level"));
+                return u;
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur findByEmail : " + e.getMessage());
         }
         return null;
     }
