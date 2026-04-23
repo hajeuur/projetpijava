@@ -6,6 +6,7 @@ import com.mentorai.services.ExcelExportService;
 import com.mentorai.services.FeedbackService;
 import com.mentorai.services.PdfExportService;
 import com.mentorai.services.PrioriteService;
+import com.mentorai.services.TraductionService;
 import com.mentorai.services.TraitementService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -69,6 +70,8 @@ public class AdminFeedbackController implements Initializable {
     private FeedbackService   feedbackService   = new FeedbackService();
     private TraitementService traitementService = new TraitementService();
     private PrioriteService   prioriteService   = new PrioriteService();
+    // ✅ TRADUCTION
+    private TraductionService traductionService = new TraductionService();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -97,7 +100,7 @@ public class AdminFeedbackController implements Initializable {
     }
 
     // ============================================================
-    // ✅ CALENDRIER
+    // CALENDRIER
     // ============================================================
 
     private void afficherCalendrier() {
@@ -132,7 +135,7 @@ public class AdminFeedbackController implements Initializable {
         Map<LocalDate, List<Feedback>> parDate = tousLesFeedbacks.stream()
                 .collect(Collectors.groupingBy(Feedback::getDatefeedback));
 
-        LocalDate premier  = moisActuel.atDay(1);
+        LocalDate premier = moisActuel.atDay(1);
         int decalage = premier.getDayOfWeek().getValue() - 1;
         int nbJours  = moisActuel.lengthOfMonth();
         int col = decalage, row = 0;
@@ -178,7 +181,6 @@ public class AdminFeedbackController implements Initializable {
                                   List<Feedback> feedbacks, boolean grandFormat) {
         VBox cell = new VBox(2);
         cell.setPadding(new Insets(4));
-        // ✅ CELLULES COMPACTES
         cell.setMinHeight(grandFormat ? 90 : 45);
         cell.setMaxHeight(grandFormat ? 90 : 45);
         cell.setMaxWidth(Double.MAX_VALUE);
@@ -238,7 +240,6 @@ public class AdminFeedbackController implements Initializable {
                 }
             }
         }
-
         return cell;
     }
 
@@ -293,7 +294,7 @@ public class AdminFeedbackController implements Initializable {
             HBox topRow = new HBox(8);
             topRow.setAlignment(Pos.CENTER_LEFT);
 
-            Label lId = new Label("#" + f.getId());
+            Label lId   = new Label("#" + f.getId());
             lId.setStyle("-fx-font-size: 11px; -fx-text-fill: #888;");
 
             Label lType = new Label(f.getTypefeedback());
@@ -324,25 +325,19 @@ public class AdminFeedbackController implements Initializable {
                     VBox reponseBox = new VBox(4);
                     reponseBox.setStyle("-fx-background-color: #eef2ff; -fx-background-radius: 6;" +
                             "-fx-padding: 8;");
-
                     Label lTitre = new Label("Réponse Admin :");
                     lTitre.setStyle("-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 11px;");
-
                     Label lTypeT = new Label("Type : " + t.getTypetraitement());
                     lTypeT.setStyle("-fx-font-size: 11px; -fx-text-fill: #555;");
-
                     Label lDesc = new Label(t.getDescription());
                     lDesc.setWrapText(true);
                     lDesc.setStyle("-fx-font-size: 12px; -fx-text-fill: #333; -fx-font-style: italic;");
-
                     Label lDate = new Label("Date : " + t.getDatetraitement());
                     lDate.setStyle("-fx-font-size: 10px; -fx-text-fill: #888;");
-
                     reponseBox.getChildren().addAll(lTitre, lTypeT, lDesc, lDate);
                     card.getChildren().add(reponseBox);
                 }
             }
-
             cardsContainer.getChildren().add(card);
         }
 
@@ -364,51 +359,39 @@ public class AdminFeedbackController implements Initializable {
         popup.showAndWait();
     }
 
-    @FXML
-    private void moisPrecedent() {
+    @FXML private void moisPrecedent() {
         if (vueMois) moisActuel = moisActuel.minusMonths(1);
         else semaineActuelle = semaineActuelle.minusWeeks(1);
         afficherCalendrier();
     }
 
-    @FXML
-    private void moisSuivant() {
+    @FXML private void moisSuivant() {
         if (vueMois) moisActuel = moisActuel.plusMonths(1);
         else semaineActuelle = semaineActuelle.plusWeeks(1);
         afficherCalendrier();
     }
 
-    @FXML
-    private void switchVueMois() {
+    @FXML private void switchVueMois() {
         vueMois = true;
-        btnVueMois.setStyle(
-                "-fx-background-color: white; -fx-text-fill: #102c59;" +
-                        "-fx-font-weight: bold; -fx-background-radius: 5;" +
-                        "-fx-padding: 4 12 4 12; -fx-cursor: hand; -fx-font-size: 11px;"
-        );
-        btnVueSemaine.setStyle(
-                "-fx-background-color: transparent; -fx-text-fill: white;" +
-                        "-fx-font-weight: bold; -fx-background-radius: 5;" +
-                        "-fx-border-color: white; -fx-border-radius: 5;" +
-                        "-fx-padding: 4 12 4 12; -fx-cursor: hand; -fx-font-size: 11px;"
-        );
+        btnVueMois.setStyle("-fx-background-color: white; -fx-text-fill: #102c59;" +
+                "-fx-font-weight: bold; -fx-background-radius: 5;" +
+                "-fx-padding: 4 12 4 12; -fx-cursor: hand; -fx-font-size: 11px;");
+        btnVueSemaine.setStyle("-fx-background-color: transparent; -fx-text-fill: white;" +
+                "-fx-font-weight: bold; -fx-background-radius: 5;" +
+                "-fx-border-color: white; -fx-border-radius: 5;" +
+                "-fx-padding: 4 12 4 12; -fx-cursor: hand; -fx-font-size: 11px;");
         afficherCalendrier();
     }
 
-    @FXML
-    private void switchVueSemaine() {
+    @FXML private void switchVueSemaine() {
         vueMois = false;
-        btnVueSemaine.setStyle(
-                "-fx-background-color: white; -fx-text-fill: #102c59;" +
-                        "-fx-font-weight: bold; -fx-background-radius: 5;" +
-                        "-fx-padding: 4 12 4 12; -fx-cursor: hand; -fx-font-size: 11px;"
-        );
-        btnVueMois.setStyle(
-                "-fx-background-color: transparent; -fx-text-fill: white;" +
-                        "-fx-font-weight: bold; -fx-background-radius: 5;" +
-                        "-fx-border-color: white; -fx-border-radius: 5;" +
-                        "-fx-padding: 4 12 4 12; -fx-cursor: hand; -fx-font-size: 11px;"
-        );
+        btnVueSemaine.setStyle("-fx-background-color: white; -fx-text-fill: #102c59;" +
+                "-fx-font-weight: bold; -fx-background-radius: 5;" +
+                "-fx-padding: 4 12 4 12; -fx-cursor: hand; -fx-font-size: 11px;");
+        btnVueMois.setStyle("-fx-background-color: transparent; -fx-text-fill: white;" +
+                "-fx-font-weight: bold; -fx-background-radius: 5;" +
+                "-fx-border-color: white; -fx-border-radius: 5;" +
+                "-fx-padding: 4 12 4 12; -fx-cursor: hand; -fx-font-size: 11px;");
         afficherCalendrier();
     }
 
@@ -434,11 +417,9 @@ public class AdminFeedbackController implements Initializable {
                 String priorite = prioriteService.calculerPriorite(f);
                 String couleur  = prioriteService.getCouleurPriorite(priorite);
                 Label badge = new Label(priorite);
-                badge.setStyle(
-                        "-fx-background-color: " + couleur + "; -fx-text-fill: white;" +
-                                "-fx-padding: 3 8 3 8; -fx-background-radius: 10;" +
-                                "-fx-font-size: 11px; -fx-font-weight: bold;"
-                );
+                badge.setStyle("-fx-background-color: " + couleur + "; -fx-text-fill: white;" +
+                        "-fx-padding: 3 8 3 8; -fx-background-radius: 10;" +
+                        "-fx-font-size: 11px; -fx-font-weight: bold;");
                 setGraphic(badge); setText(null);
             }
         });
@@ -448,16 +429,12 @@ public class AdminFeedbackController implements Initializable {
             final Button btnTraiter = new Button("Traiter");
             final HBox   box        = new HBox(6, btnVoir, btnTraiter);
             {
-                btnVoir.setStyle(
-                        "-fx-background-color: #9dbbce; -fx-text-fill: white;" +
-                                "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
-                                "-fx-padding: 5 10 5 10; -fx-font-weight: bold;"
-                );
-                btnTraiter.setStyle(
-                        "-fx-background-color: #102c59; -fx-text-fill: white;" +
-                                "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
-                                "-fx-padding: 5 10 5 10; -fx-font-weight: bold;"
-                );
+                btnVoir.setStyle("-fx-background-color: #9dbbce; -fx-text-fill: white;" +
+                        "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
+                        "-fx-padding: 5 10 5 10; -fx-font-weight: bold;");
+                btnTraiter.setStyle("-fx-background-color: #102c59; -fx-text-fill: white;" +
+                        "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
+                        "-fx-padding: 5 10 5 10; -fx-font-weight: bold;");
                 btnVoir.setOnAction(e -> ouvrirVue(getTableView().getItems().get(getIndex())));
                 btnTraiter.setOnAction(e -> ouvrirFormulaireTraitement(getTableView().getItems().get(getIndex())));
             }
@@ -489,10 +466,8 @@ public class AdminFeedbackController implements Initializable {
                     Traitement t = traitementService.getById(f.getTraitementId());
                     if (t != null) {
                         Label badge = new Label(t.getTypetraitement());
-                        badge.setStyle(
-                                "-fx-background-color: #102c59; -fx-text-fill: white;" +
-                                        "-fx-padding: 3 8 3 8; -fx-background-radius: 10; -fx-font-size: 11px;"
-                        );
+                        badge.setStyle("-fx-background-color: #102c59; -fx-text-fill: white;" +
+                                "-fx-padding: 3 8 3 8; -fx-background-radius: 10; -fx-font-size: 11px;");
                         setGraphic(badge);
                     } else { setGraphic(null); }
                 } else { setGraphic(null); }
@@ -506,21 +481,15 @@ public class AdminFeedbackController implements Initializable {
             final Button btnSupp     = new Button("Supprimer");
             final HBox   box         = new HBox(5, btnVoir, btnModifier, btnSupp);
             {
-                btnVoir.setStyle(
-                        "-fx-background-color: #9dbbce; -fx-text-fill: white;" +
-                                "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
-                                "-fx-padding: 5 10 5 10; -fx-font-weight: bold;"
-                );
-                btnModifier.setStyle(
-                        "-fx-background-color: #f0a500; -fx-text-fill: white;" +
-                                "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
-                                "-fx-padding: 5 10 5 10; -fx-font-weight: bold;"
-                );
-                btnSupp.setStyle(
-                        "-fx-background-color: #d52e28; -fx-text-fill: white;" +
-                                "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
-                                "-fx-padding: 5 10 5 10; -fx-font-weight: bold;"
-                );
+                btnVoir.setStyle("-fx-background-color: #9dbbce; -fx-text-fill: white;" +
+                        "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
+                        "-fx-padding: 5 10 5 10; -fx-font-weight: bold;");
+                btnModifier.setStyle("-fx-background-color: #f0a500; -fx-text-fill: white;" +
+                        "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
+                        "-fx-padding: 5 10 5 10; -fx-font-weight: bold;");
+                btnSupp.setStyle("-fx-background-color: #d52e28; -fx-text-fill: white;" +
+                        "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
+                        "-fx-padding: 5 10 5 10; -fx-font-weight: bold;");
                 btnVoir.setOnAction(e -> ouvrirVue(getTableView().getItems().get(getIndex())));
                 btnModifier.setOnAction(e -> ouvrirModifierTraitement(getTableView().getItems().get(getIndex())));
                 btnSupp.setOnAction(e -> supprimerFeedback(getTableView().getItems().get(getIndex())));
@@ -552,11 +521,9 @@ public class AdminFeedbackController implements Initializable {
                     default             -> "#888";
                 };
                 Label badge = new Label(f.getTypefeedback());
-                badge.setStyle(
-                        "-fx-background-color: " + couleur + "; -fx-text-fill: white;" +
-                                "-fx-padding: 3 8 3 8; -fx-background-radius: 10;" +
-                                "-fx-font-size: 11px; -fx-font-weight: bold;"
-                );
+                badge.setStyle("-fx-background-color: " + couleur + "; -fx-text-fill: white;" +
+                        "-fx-padding: 3 8 3 8; -fx-background-radius: 10;" +
+                        "-fx-font-size: 11px; -fx-font-weight: bold;");
                 setGraphic(badge); setText(null);
             }
         };
@@ -637,19 +604,37 @@ public class AdminFeedbackController implements Initializable {
         }
     }
 
+    // ✅ ouvrirVue AVEC TRADUCTION — une seule méthode !
     private void ouvrirVue(Feedback feedback) {
         Traitement t = feedback.getTraitementId() != 0
                 ? traitementService.getById(feedback.getTraitementId()) : null;
         String reponse = (t != null)
-                ? "Type : " + t.getTypetraitement() + "\nRéponse : " + t.getDescription() + "\nDate : " + t.getDatetraitement()
+                ? "Type : " + t.getTypetraitement() +
+                  "\nReponse : " + t.getDescription() +
+                  "\nDate : " + t.getDatetraitement()
                 : "Pas encore de traitement.";
+
+        String messageOriginal = feedback.getContenu();
+        String messageTraduit  = "";
+
+        String trad = traductionService.traduire(messageOriginal, "en", "fr");
+        if (trad != null && !trad.equalsIgnoreCase(messageOriginal)) {
+            messageTraduit = "\n\nTraduction FR : " + trad;
+        }
+
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Détails #" + feedback.getId());
-        alert.setHeaderText("Type : " + feedback.getTypefeedback() +
-                " | Note : " + feedback.getNote() + "/5" +
-                " | État : " + feedback.getEtatfeedback() +
-                " | Date : " + feedback.getDatefeedback());
-        alert.setContentText("Message :\n" + feedback.getContenu() + "\n\n── Traitement ──\n" + reponse);
+        alert.setTitle("Details #" + feedback.getId());
+        alert.setHeaderText(
+                "Type : " + feedback.getTypefeedback() +
+                        " | Note : " + feedback.getNote() + "/5" +
+                        " | Etat : " + feedback.getEtatfeedback() +
+                        " | Date : " + feedback.getDatefeedback()
+        );
+        alert.setContentText(
+                "Message original :\n" + messageOriginal +
+                        messageTraduit +
+                        "\n\n── Traitement ──\n" + reponse
+        );
         alert.showAndWait();
     }
 
