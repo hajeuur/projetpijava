@@ -94,19 +94,17 @@
                 </HBox>
             </VBox>
 
-            <!-- ✅ CALENDRIER DYNAMIQUE -->
+            <!-- ✅ CALENDRIER COMPACT -->
             <VBox fx:id="calendrierContainer"
                   style="-fx-background-color: white; -fx-background-radius: 8;
                          -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.08),5,0,0,2);
                          -fx-padding: 0;">
 
-                <!-- Header calendrier -->
                 <HBox style="-fx-background-color: #102c59; -fx-padding: 10 15 10 15;
                              -fx-background-radius: 8 8 0 0;" alignment="CENTER_LEFT" spacing="10">
                     <Label text="Calendrier des Feedbacks"
                            style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;"/>
                     <HBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT" spacing="8">
-                        <!-- Switch vue -->
                         <Button fx:id="btnVueMois" text="Mois" onAction="#switchVueMois"
                                 style="-fx-background-color: white; -fx-text-fill: #102c59;
                                        -fx-font-weight: bold; -fx-background-radius: 5;
@@ -119,40 +117,34 @@
                     </HBox>
                 </HBox>
 
-                <!-- Navigation mois/semaine -->
                 <HBox alignment="CENTER" spacing="20"
-                      style="-fx-padding: 10 15 10 15; -fx-border-color: #eee; -fx-border-width: 0 0 1 0;">
+                      style="-fx-padding: 8 15 8 15; -fx-border-color: #eee; -fx-border-width: 0 0 1 0;">
                     <Button text="&lt;" onAction="#moisPrecedent"
                             style="-fx-background-color: #102c59; -fx-text-fill: white;
                                    -fx-font-weight: bold; -fx-background-radius: 20;
-                                   -fx-padding: 5 14 5 14; -fx-cursor: hand; -fx-font-size: 14px;"/>
+                                   -fx-padding: 4 12 4 12; -fx-cursor: hand; -fx-font-size: 13px;"/>
                     <Label fx:id="labelMoisAnnee" text="Avril 2026"
-                           style="-fx-font-size: 15px; -fx-font-weight: bold;
+                           style="-fx-font-size: 14px; -fx-font-weight: bold;
                                   -fx-text-fill: #102c59; -fx-min-width: 160px;"
                            alignment="CENTER"/>
                     <Button text="&gt;" onAction="#moisSuivant"
                             style="-fx-background-color: #102c59; -fx-text-fill: white;
                                    -fx-font-weight: bold; -fx-background-radius: 20;
-                                   -fx-padding: 5 14 5 14; -fx-cursor: hand; -fx-font-size: 14px;"/>
-                    <!-- Légende -->
-                    <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-padding: 0 0 0 20;">
+                                   -fx-padding: 4 12 4 12; -fx-cursor: hand; -fx-font-size: 13px;"/>
+                    <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 0 0 0 15;">
                         <Label text="  " style="-fx-background-color: #d52e28;
-                               -fx-background-radius: 3; -fx-padding: 4 8 4 8;"/>
+                               -fx-background-radius: 3; -fx-padding: 3 6 3 6;"/>
                         <Label text="Probleme" style="-fx-font-size: 11px; -fx-text-fill: #555;"/>
                         <Label text="  " style="-fx-background-color: #28a745;
-                               -fx-background-radius: 3; -fx-padding: 4 8 4 8;"/>
+                               -fx-background-radius: 3; -fx-padding: 3 6 3 6;"/>
                         <Label text="Satisfaction" style="-fx-font-size: 11px; -fx-text-fill: #555;"/>
                         <Label text="  " style="-fx-background-color: #f0a500;
-                               -fx-background-radius: 3; -fx-padding: 4 8 4 8;"/>
+                               -fx-background-radius: 3; -fx-padding: 3 6 3 6;"/>
                         <Label text="Suggestion" style="-fx-font-size: 11px; -fx-text-fill: #555;"/>
-                        <Label text="  " style="-fx-background-color: #9dbbce;
-                               -fx-background-radius: 3; -fx-padding: 4 8 4 8;"/>
-                        <Label text="Multiple" style="-fx-font-size: 11px; -fx-text-fill: #555;"/>
                     </HBox>
                 </HBox>
 
-                <!-- Jours de la semaine -->
-                <GridPane fx:id="headerJours" style="-fx-padding: 5 10 0 10;">
+                <GridPane fx:id="headerJours" style="-fx-padding: 4 8 0 8;">
                     <columnConstraints>
                         <ColumnConstraints percentWidth="14.28"/>
                         <ColumnConstraints percentWidth="14.28"/>
@@ -164,9 +156,9 @@
                     </columnConstraints>
                 </GridPane>
 
-                <!-- Grille du calendrier -->
+                <!-- ✅ GAP RÉDUIT -->
                 <GridPane fx:id="grilleCalendrier"
-                          style="-fx-padding: 5 10 10 10;" hgap="4" vgap="4">
+                          style="-fx-padding: 5 8 8 8;" hgap="3" vgap="3">
                     <columnConstraints>
                         <ColumnConstraints percentWidth="14.28"/>
                         <ColumnConstraints percentWidth="14.28"/>
@@ -186,12 +178,10 @@
                 <HBox style="-fx-background-color: #fff3cd; -fx-padding: 12 15 12 15;
                              -fx-background-radius: 8 8 0 0;" alignment="CENTER_LEFT">
                     <Label text="Feedbacks en attente de traitement"
-                           style="-fx-font-size: 15px; -fx-font-weight: bold;
-                                  -fx-text-fill: #856404;"/>
+                           style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #856404;"/>
                 </HBox>
                 <TableView fx:id="tableNonTraites"
-                           style="-fx-background-color: transparent;"
-                           prefHeight="250">
+                           style="-fx-background-color: transparent;" prefHeight="250">
                     <columns>
                         <TableColumn fx:id="colIdNT"       text="#"        prefWidth="50"/>
                         <TableColumn fx:id="colPrioriteNT" text="Priorite" prefWidth="90"/>
@@ -210,12 +200,10 @@
                 <HBox style="-fx-background-color: #d4edda; -fx-padding: 12 15 12 15;
                              -fx-background-radius: 8 8 0 0;" alignment="CENTER_LEFT">
                     <Label text="Historique des feedbacks traites"
-                           style="-fx-font-size: 15px; -fx-font-weight: bold;
-                                  -fx-text-fill: #155724;"/>
+                           style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #155724;"/>
                 </HBox>
                 <TableView fx:id="tableTraites"
-                           style="-fx-background-color: transparent;"
-                           prefHeight="280">
+                           style="-fx-background-color: transparent;" prefHeight="280">
                     <columns>
                         <TableColumn fx:id="colIdT"         text="#"          prefWidth="55"/>
                         <TableColumn fx:id="colTypeT"       text="Type"       prefWidth="100"/>

@@ -49,24 +49,23 @@ public class AdminFeedbackController implements Initializable {
     @FXML private TableColumn<Feedback, Void>    colTraitementT;
     @FXML private TableColumn<Feedback, Void>    colActionT;
 
-    @FXML private Label          labelEnAttente;
-    @FXML private Label          labelTraites;
-    @FXML private TextField      champRecherche;
+    @FXML private Label            labelEnAttente;
+    @FXML private Label            labelTraites;
+    @FXML private TextField        champRecherche;
     @FXML private ComboBox<String> comboFiltreType;
     @FXML private ComboBox<String> comboTri;
 
-    // ✅ Calendrier
     @FXML private GridPane grilleCalendrier;
     @FXML private GridPane headerJours;
     @FXML private Label    labelMoisAnnee;
     @FXML private Button   btnVueMois;
     @FXML private Button   btnVueSemaine;
 
-    private YearMonth moisActuel   = YearMonth.now();
+    private YearMonth moisActuel      = YearMonth.now();
     private LocalDate semaineActuelle = LocalDate.now();
-    private boolean   vueMois      = true;
+    private boolean   vueMois         = true;
 
-    private List<Feedback> tousLesFeedbacks;
+    private List<Feedback>    tousLesFeedbacks;
     private FeedbackService   feedbackService   = new FeedbackService();
     private TraitementService traitementService = new TraitementService();
     private PrioriteService   prioriteService   = new PrioriteService();
@@ -130,23 +129,19 @@ public class AdminFeedbackController implements Initializable {
                         " " + moisActuel.getYear()
         );
 
-        // Grouper feedbacks par date
         Map<LocalDate, List<Feedback>> parDate = tousLesFeedbacks.stream()
                 .collect(Collectors.groupingBy(Feedback::getDatefeedback));
 
-        LocalDate premier = moisActuel.atDay(1);
-        int decalage = premier.getDayOfWeek().getValue() - 1; // Lundi=0
+        LocalDate premier  = moisActuel.atDay(1);
+        int decalage = premier.getDayOfWeek().getValue() - 1;
         int nbJours  = moisActuel.lengthOfMonth();
-
         int col = decalage, row = 0;
 
         for (int jour = 1; jour <= nbJours; jour++) {
             LocalDate date = moisActuel.atDay(jour);
             List<Feedback> feedbacksDuJour = parDate.getOrDefault(date, new ArrayList<>());
-
             VBox cellule = creerCelluleJour(jour, date, feedbacksDuJour, false);
             grilleCalendrier.add(cellule, col, row);
-
             col++;
             if (col == 7) { col = 0; row++; }
         }
@@ -156,7 +151,6 @@ public class AdminFeedbackController implements Initializable {
         afficherJoursHeader(null);
         grilleCalendrier.getChildren().clear();
 
-        // Trouver le lundi de la semaine
         LocalDate lundi = semaineActuelle.with(
                 java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)
         );
@@ -184,7 +178,9 @@ public class AdminFeedbackController implements Initializable {
                                   List<Feedback> feedbacks, boolean grandFormat) {
         VBox cell = new VBox(2);
         cell.setPadding(new Insets(4));
-        cell.setMinHeight(grandFormat ? 120 : 65);
+        // ✅ CELLULES COMPACTES
+        cell.setMinHeight(grandFormat ? 90 : 45);
+        cell.setMaxHeight(grandFormat ? 90 : 45);
         cell.setMaxWidth(Double.MAX_VALUE);
 
         boolean estAujourdhui = date.equals(LocalDate.now());
@@ -197,15 +193,12 @@ public class AdminFeedbackController implements Initializable {
                     "-fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-border-width: 1;");
         }
 
-        // Numéro du jour
         Label lblNum = new Label(String.valueOf(numero));
-        lblNum.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;" +
+        lblNum.setStyle("-fx-font-size: 11px; -fx-font-weight: bold;" +
                 "-fx-text-fill: " + (estAujourdhui ? "#102c59" : "#555") + ";");
         cell.getChildren().add(lblNum);
 
-        // Badges feedbacks
         if (!feedbacks.isEmpty()) {
-            // Compter par type
             long nbProbleme     = feedbacks.stream().filter(f -> f.getTypefeedback().equals("probleme")).count();
             long nbSatisfaction = feedbacks.stream().filter(f -> f.getTypefeedback().equals("satisfaction")).count();
             long nbSuggestion   = feedbacks.stream().filter(f -> f.getTypefeedback().equals("suggestion")).count();
@@ -216,11 +209,9 @@ public class AdminFeedbackController implements Initializable {
             if (nbSuggestion > 0)   badges.getChildren().add(creerBadge(nbSuggestion + "Su", "#f0a500"));
             cell.getChildren().add(badges);
 
-            // Curseur cliquable
             cell.setStyle(cell.getStyle() + "-fx-cursor: hand;");
             cell.setOnMouseClicked(e -> ouvrirPopupJour(date, feedbacks));
 
-            // En vue semaine → afficher aperçu messages
             if (grandFormat) {
                 for (int i = 0; i < Math.min(feedbacks.size(), 3); i++) {
                     Feedback f = feedbacks.get(i);
@@ -268,18 +259,18 @@ public class AdminFeedbackController implements Initializable {
         root.setPadding(new Insets(0, 0, 10, 0));
         root.setStyle("-fx-background-color: #f5f7fa;");
 
-        // Header popup
         HBox header = new HBox();
         header.setStyle("-fx-background-color: #102c59; -fx-padding: 12 20 12 20;");
         header.setAlignment(Pos.CENTER_LEFT);
-        Label titrePopup = new Label("Feedbacks du " + date.getDayOfMonth() + " " +
-                date.getMonth().getDisplayName(TextStyle.FULL, Locale.FRENCH) +
-                " " + date.getYear() + "  (" + feedbacks.size() + " feedback(s))");
+        Label titrePopup = new Label(
+                "Feedbacks du " + date.getDayOfMonth() + " " +
+                        date.getMonth().getDisplayName(TextStyle.FULL, Locale.FRENCH) +
+                        " " + date.getYear() + "  (" + feedbacks.size() + " feedback(s))"
+        );
         titrePopup.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");
         header.getChildren().add(titrePopup);
         root.getChildren().add(header);
 
-        // Cards feedbacks
         ScrollPane scroll = new ScrollPane();
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
@@ -293,21 +284,25 @@ public class AdminFeedbackController implements Initializable {
                     "-fx-padding: 12;" +
                     "-fx-effect: dropshadow(gaussian,rgba(0,0,0,0.08),4,0,0,2);");
 
-            // Type + état
             String couleurType = switch (f.getTypefeedback()) {
                 case "probleme"     -> "#d52e28";
                 case "satisfaction" -> "#28a745";
                 default             -> "#f0a500";
             };
+
             HBox topRow = new HBox(8);
             topRow.setAlignment(Pos.CENTER_LEFT);
 
+            Label lId = new Label("#" + f.getId());
+            lId.setStyle("-fx-font-size: 11px; -fx-text-fill: #888;");
+
             Label lType = new Label(f.getTypefeedback());
             lType.setStyle("-fx-background-color: " + couleurType + "; -fx-text-fill: white;" +
-                    "-fx-padding: 3 8 3 8; -fx-background-radius: 10; -fx-font-size: 11px; -fx-font-weight: bold;");
+                    "-fx-padding: 3 8 3 8; -fx-background-radius: 10;" +
+                    "-fx-font-size: 11px; -fx-font-weight: bold;");
 
             boolean traite = f.getEtatfeedback().equals("traite");
-            Label lEtat = new Label(traite ? "Traite" : "En attente");
+            Label lEtat = new Label(traite ? "Traité" : "En attente");
             lEtat.setStyle("-fx-background-color: " + (traite ? "#28a745" : "#f0a500") + ";" +
                     "-fx-text-fill: white; -fx-padding: 3 8 3 8;" +
                     "-fx-background-radius: 10; -fx-font-size: 11px; -fx-font-weight: bold;");
@@ -315,26 +310,22 @@ public class AdminFeedbackController implements Initializable {
             Label lNote = new Label("Note : " + f.getNote() + "/5");
             lNote.setStyle("-fx-font-size: 11px; -fx-text-fill: #555;");
 
-            Label lId = new Label("#" + f.getId());
-            lId.setStyle("-fx-font-size: 11px; -fx-text-fill: #888;");
-
             topRow.getChildren().addAll(lId, lType, lEtat, lNote);
             card.getChildren().add(topRow);
 
-            // Message
             Label lMsg = new Label("Message : " + f.getContenu());
             lMsg.setWrapText(true);
             lMsg.setStyle("-fx-font-size: 12px; -fx-text-fill: #333;");
             card.getChildren().add(lMsg);
 
-            // Réponse admin si traité
             if (traite && f.getTraitementId() != 0) {
                 Traitement t = traitementService.getById(f.getTraitementId());
                 if (t != null) {
                     VBox reponseBox = new VBox(4);
                     reponseBox.setStyle("-fx-background-color: #eef2ff; -fx-background-radius: 6;" +
                             "-fx-padding: 8;");
-                    Label lTitre = new Label("Reponse Admin :");
+
+                    Label lTitre = new Label("Réponse Admin :");
                     lTitre.setStyle("-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 11px;");
 
                     Label lTypeT = new Label("Type : " + t.getTypetraitement());
@@ -359,7 +350,6 @@ public class AdminFeedbackController implements Initializable {
         VBox.setVgrow(scroll, Priority.ALWAYS);
         root.getChildren().add(scroll);
 
-        // Bouton fermer
         Button btnFermer = new Button("Fermer");
         btnFermer.setStyle("-fx-background-color: #102c59; -fx-text-fill: white;" +
                 "-fx-font-weight: bold; -fx-background-radius: 6;" +
@@ -444,9 +434,11 @@ public class AdminFeedbackController implements Initializable {
                 String priorite = prioriteService.calculerPriorite(f);
                 String couleur  = prioriteService.getCouleurPriorite(priorite);
                 Label badge = new Label(priorite);
-                badge.setStyle("-fx-background-color: " + couleur + "; -fx-text-fill: white;" +
-                        "-fx-padding: 3 8 3 8; -fx-background-radius: 10;" +
-                        "-fx-font-size: 11px; -fx-font-weight: bold;");
+                badge.setStyle(
+                        "-fx-background-color: " + couleur + "; -fx-text-fill: white;" +
+                                "-fx-padding: 3 8 3 8; -fx-background-radius: 10;" +
+                                "-fx-font-size: 11px; -fx-font-weight: bold;"
+                );
                 setGraphic(badge); setText(null);
             }
         });
@@ -456,12 +448,16 @@ public class AdminFeedbackController implements Initializable {
             final Button btnTraiter = new Button("Traiter");
             final HBox   box        = new HBox(6, btnVoir, btnTraiter);
             {
-                btnVoir.setStyle("-fx-background-color: #9dbbce; -fx-text-fill: white;" +
-                        "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
-                        "-fx-padding: 5 10 5 10; -fx-font-weight: bold;");
-                btnTraiter.setStyle("-fx-background-color: #102c59; -fx-text-fill: white;" +
-                        "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
-                        "-fx-padding: 5 10 5 10; -fx-font-weight: bold;");
+                btnVoir.setStyle(
+                        "-fx-background-color: #9dbbce; -fx-text-fill: white;" +
+                                "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
+                                "-fx-padding: 5 10 5 10; -fx-font-weight: bold;"
+                );
+                btnTraiter.setStyle(
+                        "-fx-background-color: #102c59; -fx-text-fill: white;" +
+                                "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
+                                "-fx-padding: 5 10 5 10; -fx-font-weight: bold;"
+                );
                 btnVoir.setOnAction(e -> ouvrirVue(getTableView().getItems().get(getIndex())));
                 btnTraiter.setOnAction(e -> ouvrirFormulaireTraitement(getTableView().getItems().get(getIndex())));
             }
@@ -493,8 +489,10 @@ public class AdminFeedbackController implements Initializable {
                     Traitement t = traitementService.getById(f.getTraitementId());
                     if (t != null) {
                         Label badge = new Label(t.getTypetraitement());
-                        badge.setStyle("-fx-background-color: #102c59; -fx-text-fill: white;" +
-                                "-fx-padding: 3 8 3 8; -fx-background-radius: 10; -fx-font-size: 11px;");
+                        badge.setStyle(
+                                "-fx-background-color: #102c59; -fx-text-fill: white;" +
+                                        "-fx-padding: 3 8 3 8; -fx-background-radius: 10; -fx-font-size: 11px;"
+                        );
                         setGraphic(badge);
                     } else { setGraphic(null); }
                 } else { setGraphic(null); }
@@ -508,15 +506,21 @@ public class AdminFeedbackController implements Initializable {
             final Button btnSupp     = new Button("Supprimer");
             final HBox   box         = new HBox(5, btnVoir, btnModifier, btnSupp);
             {
-                btnVoir.setStyle("-fx-background-color: #9dbbce; -fx-text-fill: white;" +
-                        "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
-                        "-fx-padding: 5 10 5 10; -fx-font-weight: bold;");
-                btnModifier.setStyle("-fx-background-color: #f0a500; -fx-text-fill: white;" +
-                        "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
-                        "-fx-padding: 5 10 5 10; -fx-font-weight: bold;");
-                btnSupp.setStyle("-fx-background-color: #d52e28; -fx-text-fill: white;" +
-                        "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
-                        "-fx-padding: 5 10 5 10; -fx-font-weight: bold;");
+                btnVoir.setStyle(
+                        "-fx-background-color: #9dbbce; -fx-text-fill: white;" +
+                                "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
+                                "-fx-padding: 5 10 5 10; -fx-font-weight: bold;"
+                );
+                btnModifier.setStyle(
+                        "-fx-background-color: #f0a500; -fx-text-fill: white;" +
+                                "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
+                                "-fx-padding: 5 10 5 10; -fx-font-weight: bold;"
+                );
+                btnSupp.setStyle(
+                        "-fx-background-color: #d52e28; -fx-text-fill: white;" +
+                                "-fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 11px;" +
+                                "-fx-padding: 5 10 5 10; -fx-font-weight: bold;"
+                );
                 btnVoir.setOnAction(e -> ouvrirVue(getTableView().getItems().get(getIndex())));
                 btnModifier.setOnAction(e -> ouvrirModifierTraitement(getTableView().getItems().get(getIndex())));
                 btnSupp.setOnAction(e -> supprimerFeedback(getTableView().getItems().get(getIndex())));
@@ -548,9 +552,11 @@ public class AdminFeedbackController implements Initializable {
                     default             -> "#888";
                 };
                 Label badge = new Label(f.getTypefeedback());
-                badge.setStyle("-fx-background-color: " + couleur + "; -fx-text-fill: white;" +
-                        "-fx-padding: 3 8 3 8; -fx-background-radius: 10;" +
-                        "-fx-font-size: 11px; -fx-font-weight: bold;");
+                badge.setStyle(
+                        "-fx-background-color: " + couleur + "; -fx-text-fill: white;" +
+                                "-fx-padding: 3 8 3 8; -fx-background-radius: 10;" +
+                                "-fx-font-size: 11px; -fx-font-weight: bold;"
+                );
                 setGraphic(badge); setText(null);
             }
         };
@@ -635,13 +641,13 @@ public class AdminFeedbackController implements Initializable {
         Traitement t = feedback.getTraitementId() != 0
                 ? traitementService.getById(feedback.getTraitementId()) : null;
         String reponse = (t != null)
-                ? "Type : " + t.getTypetraitement() + "\nReponse : " + t.getDescription() + "\nDate : " + t.getDatetraitement()
+                ? "Type : " + t.getTypetraitement() + "\nRéponse : " + t.getDescription() + "\nDate : " + t.getDatetraitement()
                 : "Pas encore de traitement.";
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Details #" + feedback.getId());
+        alert.setTitle("Détails #" + feedback.getId());
         alert.setHeaderText("Type : " + feedback.getTypefeedback() +
                 " | Note : " + feedback.getNote() + "/5" +
-                " | Etat : " + feedback.getEtatfeedback() +
+                " | État : " + feedback.getEtatfeedback() +
                 " | Date : " + feedback.getDatefeedback());
         alert.setContentText("Message :\n" + feedback.getContenu() + "\n\n── Traitement ──\n" + reponse);
         alert.showAndWait();
