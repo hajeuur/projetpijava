@@ -65,6 +65,10 @@
                     <Button fx:id="btnProjets" text="Portfolio Projets"
                             onAction="#showProjets" styleClass="header-nav-btn" visible="false" managed="false"/>
 
+                    <!-- Mes Feedbacks (Étudiant) -->
+                    <Button fx:id="btnMesFeedbacks" text="📝 Mes Feedbacks"
+                            onAction="#showMesFeedbacks" styleClass="header-nav-btn" visible="false" managed="false"/>
+
                     <!-- Objectifs personnels (Étudiant) -->
                     <Button fx:id="btnObjectifs" text="🎯 Mes Objectifs"
                             onAction="#showObjectifs" styleClass="header-nav-btn" visible="false" managed="false"/>

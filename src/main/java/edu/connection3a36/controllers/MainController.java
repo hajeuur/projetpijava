@@ -47,6 +47,7 @@ public class MainController {
     @FXML private Button btnBackParcours;
     @FXML private Button btnBackProjets;
     @FXML private Button btnBackFeedbacks;
+    @FXML private Button btnMesFeedbacks;
     @FXML private Button btnObjectifs;
     @FXML private Button btnDashboardObjectifs;
 
@@ -116,7 +117,7 @@ public class MainController {
             for (javafx.scene.Node n : boxBackAdmin.getChildren()) {
                 if (n instanceof Button) {
                     Button b = (Button) n;
-                    if (b == btnBackParcours || b == btnBackProjets) show(b);
+                    if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks) show(b);
                     else hide(b);
                 } else if (n instanceof Label) {
                     show(n); // Garder le titre "BACK CRUD"
@@ -153,6 +154,7 @@ public class MainController {
 
             show(btnParcours);
             show(btnProjets);
+            show(btnMesFeedbacks);
             show(btnObjectifs);
 
             showParcours();
@@ -263,6 +265,12 @@ public class MainController {
         System.out.println("📂 Loading Projects View...");
         loadView("/AfficherProjetsGlobal.fxml");
         setActiveBtn(btnProjets);
+    }
+
+    @FXML
+    void showMesFeedbacks() {
+        loadView("/fxml/MesFeedbacks.fxml");
+        setActiveBtn(btnMesFeedbacks);
     }
 
     @FXML
