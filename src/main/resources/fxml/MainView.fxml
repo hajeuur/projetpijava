@@ -146,6 +146,8 @@
                         styleClass="sidebar-btn" maxWidth="Infinity"/>
                 <Button fx:id="btnBackProjets" text="Gestion des Projets" onAction="#showBackProjets"
                         styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnBackFeedbacks" text="Gestion des Feedbacks" onAction="#showBackFeedbacks"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
                 <Button text="Plans d'Actions" onAction="#showPlanActions"
                         styleClass="sidebar-btn" maxWidth="Infinity"/>
                 <Button text="Articles" onAction="#showArticles"

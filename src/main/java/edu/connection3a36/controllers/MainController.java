@@ -46,6 +46,7 @@ public class MainController {
     @FXML private Button btnProjets;
     @FXML private Button btnBackParcours;
     @FXML private Button btnBackProjets;
+    @FXML private Button btnBackFeedbacks;
     @FXML private Button btnObjectifs;
     @FXML private Button btnDashboardObjectifs;
 
@@ -333,6 +334,12 @@ public class MainController {
     void showBackProjets() {
         loadView("/BackOfficeProjets.fxml");
         setActiveBtn(btnBackProjets);
+    }
+
+    @FXML
+    void showBackFeedbacks() {
+        loadView("/fxml/AdminFeedback.fxml");
+        setActiveBtn(btnBackFeedbacks);
     }
 
     @FXML
