@@ -26,7 +26,7 @@ public class AdminDashboardController {
     @FXML private TableColumn<Objectif, String> colDebut;
     @FXML private TableColumn<Objectif, String> colFin;
 
-    private final ObjectifService objectifService = new ObjectifService();
+    private final ObjectifService ObjectifService = new ObjectifService();
 
     @FXML
     public void initialize() {
@@ -56,7 +56,7 @@ public class AdminDashboardController {
 
     private void loadStats() {
         try {
-            List<Objectif> all = objectifService.findAll();
+            List<Objectif> all = ObjectifService.findAll();
 
             long atteints = all.stream()
                     .filter(o -> o.getStatut() == Statutobj.Atteint).count();

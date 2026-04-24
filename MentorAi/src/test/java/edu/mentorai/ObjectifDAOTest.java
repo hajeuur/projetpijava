@@ -3,8 +3,6 @@ package edu.mentorai;
 import edu.mentorai.entities.Objectif;
 import edu.mentorai.entities.Programme;
 import edu.mentorai.entities.Statutobj;
-import edu.mentorai.interfaces.ObjectifDAO;
-import edu.mentorai.interfaces.ProgrammeDAO;
 import org.junit.jupiter.api.*;
 
 import java.time.LocalDate;

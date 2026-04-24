@@ -14,7 +14,8 @@ public class ProgrammeService implements IProgrammeService {
     @Override
     public Programme save(Programme programme) throws SQLException {
         String sql = "INSERT INTO programme (titre, dategeneration, score_pourcentage) VALUES (?, ?, ?)";
-        try (PreparedStatement stmt = DatabaseConnection.getInstance().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = DatabaseConnection.getInstance()
+                .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, programme.getTitre());
             stmt.setDate(2, Date.valueOf(programme.getDategeneration()));
             stmt.setInt(3, programme.getScorePourcentage());
@@ -48,27 +49,6 @@ public class ProgrammeService implements IProgrammeService {
     }
 
     @Override
-    public void update(Programme programme) throws SQLException {
-        String sql = "UPDATE programme SET titre=?, dategeneration=?, score_pourcentage=? WHERE id=?";
-        try (PreparedStatement stmt = DatabaseConnection.getInstance().prepareStatement(sql)) {
-            stmt.setString(1, programme.getTitre());
-            stmt.setDate(2, Date.valueOf(programme.getDategeneration()));
-            stmt.setInt(3, programme.getScorePourcentage());
-            stmt.setInt(4, programme.getId());
-            stmt.executeUpdate();
-        }
-    }
-
-    @Override
-    public void delete(int id) throws SQLException {
-        String sql = "DELETE FROM programme WHERE id = ?";
-        try (PreparedStatement stmt = DatabaseConnection.getInstance().prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-        }
-    }
-
-    @Override
     public Programme findByObjectifId(int objectifId) throws SQLException {
         String sql = "SELECT p.* FROM programme p INNER JOIN objectif o ON o.programme_id = p.id WHERE o.id = ?";
         try (PreparedStatement stmt = DatabaseConnection.getInstance().prepareStatement(sql)) {
@@ -86,6 +66,27 @@ public class ProgrammeService implements IProgrammeService {
             stmt.setInt(1, score);
             stmt.setString(2, medaille != null ? medaille.getValue() : null);
             stmt.setInt(3, programmeId);
+            stmt.executeUpdate();
+        }
+    }
+
+    @Override
+    public void update(Programme programme) throws SQLException {
+        String sql = "UPDATE programme SET titre=?, dategeneration=?, score_pourcentage=? WHERE id=?";
+        try (PreparedStatement stmt = DatabaseConnection.getInstance().prepareStatement(sql)) {
+            stmt.setString(1, programme.getTitre());
+            stmt.setDate(2, Date.valueOf(programme.getDategeneration()));
+            stmt.setInt(3, programme.getScorePourcentage());
+            stmt.setInt(4, programme.getId());
+            stmt.executeUpdate();
+        }
+    }
+
+    @Override
+    public void delete(int id) throws SQLException {
+        String sql = "DELETE FROM programme WHERE id = ?";
+        try (PreparedStatement stmt = DatabaseConnection.getInstance().prepareStatement(sql)) {
+            stmt.setInt(1, id);
             stmt.executeUpdate();
         }
     }

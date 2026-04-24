@@ -34,15 +34,17 @@ public class ProgrammeShowController {
     @FXML private Label medailleTextLabel;
     @FXML private VBox tachesContainer;
     @FXML private StackPane tacheChartPane;
+    @FXML private TextField tacheSearchField;
+    @FXML private ComboBox<String> tacheSortCombo;
 
     private Objectif objectif;
     private Programme programme;
     private int utilisateurId = 1;
 
-    private final ProgrammeService programmeService = new ProgrammeService();
-    private final TacheService tacheService = new TacheService();
-    private final MotivationService motivationService = new MotivationService();
-    private final ObjectifService objectifService = new ObjectifService();
+    private final IObjectifService objectifService = new ObjectifService();
+    private final IProgrammeService programmeService = new ProgrammeService();
+    private final ITacheService tacheService = new TacheService();
+    private final IMotivationService motivationService = new MotivationService();
 
     public void setObjectif(Objectif obj) { this.objectif = obj; }
     public void setUtilisateurId(int id) { this.utilisateurId = id; }

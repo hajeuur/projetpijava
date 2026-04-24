@@ -106,7 +106,7 @@ public class ObjectifFormController {
                 programme.setTitre(titre);
                 programme.setDategeneration(LocalDate.now());
                 programme.setScorePourcentage(0);
-                programmeService.save(programme);
+                programme = programmeService.save(programme);
 
                 Objectif objectif = new Objectif();
                 objectif.setTitre(titre);
@@ -116,8 +116,7 @@ public class ObjectifFormController {
                 objectif.setStatut(Statutobj.EnCours);
                 objectif.setProgramme(programme);
                 objectif.setUtilisateurId(utilisateurId);
-                objectifService.save(objectif);
-
+                objectif = objectifService.save(objectif);
                 showInfo("Succès", "Objectif créé avec succès !");
             } else {
                 // UPDATE

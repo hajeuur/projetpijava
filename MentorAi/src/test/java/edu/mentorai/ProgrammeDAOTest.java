@@ -2,7 +2,6 @@ package edu.mentorai;
 
 import edu.mentorai.entities.Medaille;
 import edu.mentorai.entities.Programme;
-import edu.mentorai.interfaces.ProgrammeDAO;
 import org.junit.jupiter.api.*;
 
 import java.time.LocalDate;

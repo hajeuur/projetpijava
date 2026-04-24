@@ -96,7 +96,7 @@ public class TacheFormController {
                 tache.setDescription(description.isEmpty() ? null : description);
                 tache.setEtat(etat);
                 tache.setProgrammeId(programme.getId());
-                tacheService.save(tache);
+                tache = tacheService.save(tache);
             } else {
                 tacheToEdit.setOrdre(ordre);
                 tacheToEdit.setTitre(titre);
@@ -142,7 +142,7 @@ public class TacheFormController {
         motivation.setMessagemotivant(msg);
         motivation.setDategeneration(java.time.LocalDate.now());
         motivation.setProgrammeId(programme.getId());
-        motivationService.save(motivation);
+        motivation = motivationService.save(motivation);
     }
 
     @FXML

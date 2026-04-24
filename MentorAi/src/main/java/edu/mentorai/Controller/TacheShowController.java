@@ -23,7 +23,7 @@ public class TacheShowController {
     private Objectif objectif;
     private int utilisateurId = 1;
 
-    private final TacheService tacheService = new TacheService();
+    private final ITacheService tacheService = new TacheService();
     private final ProgrammeService programmeService = new ProgrammeService();
     private final ObjectifService objectifService = new ObjectifService();
 

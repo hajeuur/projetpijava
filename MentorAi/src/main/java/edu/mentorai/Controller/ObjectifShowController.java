@@ -23,7 +23,7 @@ public class ObjectifShowController {
     private Objectif objectif;
     private int utilisateurId = 1;
     private final ObjectifService objectifService = new ObjectifService();
-    private final ProgrammeService programmeService = new ProgrammeService();
+    private final ProgrammeService programmeDAO = new ProgrammeService();
 
     public void setUtilisateurId(int id) { this.utilisateurId = id; }
 
@@ -47,7 +47,7 @@ public class ObjectifShowController {
 
         // Programme
         try {
-            Programme programme = programmeService.findByObjectifId(obj.getId());
+            Programme programme = programmeDAO.findByObjectifId(obj.getId());
             if (programme != null) {
                 programmeTitreLabel.setText(programme.getTitre());
                 programmeDateLabel.setText(programme.getDategeneration() != null

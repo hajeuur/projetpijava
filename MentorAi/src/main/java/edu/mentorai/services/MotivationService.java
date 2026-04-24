@@ -13,7 +13,8 @@ public class MotivationService implements IMotivationService {
     @Override
     public Motivation save(Motivation motivation) throws SQLException {
         String sql = "INSERT INTO motivation (dategeneratiomm, messagemotivant, programme_id) VALUES (?, ?, ?)";
-        try (PreparedStatement stmt = DatabaseConnection.getInstance().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = DatabaseConnection.getInstance()
+                .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setDate(1, Date.valueOf(motivation.getDategeneration()));
             stmt.setString(2, motivation.getMessagemotivant());
             stmt.setInt(3, motivation.getProgrammeId());
@@ -47,27 +48,6 @@ public class MotivationService implements IMotivationService {
     }
 
     @Override
-    public void update(Motivation motivation) throws SQLException {
-        String sql = "UPDATE motivation SET dategeneratiomm=?, messagemotivant=?, programme_id=? WHERE id=?";
-        try (PreparedStatement stmt = DatabaseConnection.getInstance().prepareStatement(sql)) {
-            stmt.setDate(1, Date.valueOf(motivation.getDategeneration()));
-            stmt.setString(2, motivation.getMessagemotivant());
-            stmt.setInt(3, motivation.getProgrammeId());
-            stmt.setInt(4, motivation.getId());
-            stmt.executeUpdate();
-        }
-    }
-
-    @Override
-    public void delete(int id) throws SQLException {
-        String sql = "DELETE FROM motivation WHERE id = ?";
-        try (PreparedStatement stmt = DatabaseConnection.getInstance().prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-        }
-    }
-
-    @Override
     public List<Motivation> findByProgramme(int programmeId) throws SQLException {
         List<Motivation> list = new ArrayList<>();
         String sql = "SELECT * FROM motivation WHERE programme_id = ? ORDER BY dategeneratiomm DESC";
@@ -88,6 +68,25 @@ public class MotivationService implements IMotivationService {
             if (rs.next()) return mapRow(rs);
         }
         return null;
+    }
+
+    @Override
+    public void update(Motivation motivation) throws SQLException {
+        String sql = "UPDATE motivation SET messagemotivant=? WHERE id=?";
+        try (PreparedStatement stmt = DatabaseConnection.getInstance().prepareStatement(sql)) {
+            stmt.setString(1, motivation.getMessagemotivant());
+            stmt.setInt(2, motivation.getId());
+            stmt.executeUpdate();
+        }
+    }
+
+    @Override
+    public void delete(int id) throws SQLException {
+        String sql = "DELETE FROM motivation WHERE id = ?";
+        try (PreparedStatement stmt = DatabaseConnection.getInstance().prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        }
     }
 
     private Motivation mapRow(ResultSet rs) throws SQLException {

@@ -103,6 +103,19 @@
                     <Button text="+ Ajouter une tache" onAction="#handleAddTache"
                             style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 20 10 20; -fx-cursor: hand;"/>
                 </HBox>
+                <!-- FILTRE TACHES -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <TextField fx:id="tacheSearchField" promptText="Rechercher une tache..."
+                               prefWidth="250"
+                               style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #eee; -fx-padding: 8 12 8 12;"/>
+                    <ComboBox fx:id="tacheSortCombo" prefWidth="160"
+                              style="-fx-background-radius: 10;"/>
+                    <Button text="Filtrer" onAction="#handleSearchTache"
+                            style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand; -fx-padding: 8 18 8 18;"/>
+                    <Button text="Reset" onAction="#handleResetTache"
+                            style="-fx-background-color: #f0f4f8; -fx-text-fill: #102c59; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand; -fx-padding: 8 15 8 15;"/>
+                </HBox>
+            </VBox>
 
                 <!-- TACHES LIST -->
                 <VBox fx:id="tachesContainer" spacing="10"/>
