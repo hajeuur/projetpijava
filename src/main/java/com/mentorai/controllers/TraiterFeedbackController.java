@@ -82,12 +82,12 @@ public class TraiterFeedbackController implements Initializable {
                 btnGemini.setText("Suggerer avec Gemini IA");
                 if (suggestion != null && !suggestion.isEmpty()) {
                     textDescription.setText(suggestion);
-                    labelGeminiStatus.setText("Suggestion generee ! Vous pouvez la modifier.");
+                    labelGeminiStatus.setText("Reponse intelligente generee ! Vous pouvez la modifier.");
                     labelGeminiStatus.setStyle(
                             "-fx-text-fill: #28a745; -fx-font-size: 11px; -fx-font-weight: bold;"
                     );
                 } else {
-                    labelGeminiStatus.setText("Erreur Gemini. Ecrivez la reponse manuellement.");
+                    labelGeminiStatus.setText("Erreur systeme. Ecrivez la reponse manuellement.");
                     labelGeminiStatus.setStyle("-fx-text-fill: #d52e28; -fx-font-size: 11px;");
                 }
             });
