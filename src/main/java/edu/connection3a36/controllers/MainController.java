@@ -46,6 +46,8 @@ public class MainController {
     @FXML private Button btnProjets;
     @FXML private Button btnBackParcours;
     @FXML private Button btnBackProjets;
+    @FXML private Button btnObjectifs;
+    @FXML private Button btnDashboardObjectifs;
 
     // ── Sidebar (BACK) ────────────────────────────────────────────────────────
     @FXML private VBox backSidebar;
@@ -99,6 +101,7 @@ public class MainController {
             // On montre tout dans boxBackAdmin pour le superadmin
             for (javafx.scene.Node n : boxBackAdmin.getChildren()) show(n);
             
+            show(btnDashboardObjectifs);
             showCategories();
 
         } else if (isAdmin()) {
@@ -139,17 +142,18 @@ public class MainController {
             showDashboardEnseignant();
 
         } else if (isEtudiant()) {
-            // Étudiant → FRONT uniquement (Parcours + Projets)
+            // Étudiant → FRONT uniquement (Parcours + Projets + Objectifs)
             showFrontMode();
             hide(btnSwitchBack);
             hide(btnDashboardEnseignant); hide(btnDashboardAdmin);
             hide(btnPlanActions);
             hide(btnArticles);
             hide(btnAIPedagogique); hide(btnAIDecisionnel);
-            
+
             show(btnParcours);
             show(btnProjets);
-            
+            show(btnObjectifs);
+
             showParcours();
 
         } else {
@@ -331,6 +335,18 @@ public class MainController {
         setActiveBtn(btnBackProjets);
     }
 
+    @FXML
+    void showObjectifs() {
+        loadView("/fxml/ObjectifList.fxml");
+        setActiveBtn(btnObjectifs);
+    }
+
+    @FXML
+    void showDashboardObjectifs() {
+        loadView("/fxml/DashboardObjectifsAdmin.fxml");
+        setActiveBtn(btnDashboardObjectifs);
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // DÉCONNEXION
     // ─────────────────────────────────────────────────────────────────────────
@@ -416,6 +432,7 @@ public class MainController {
             btnPlanActions, btnArticles,
             btnAIPedagogique, btnAIDecisionnel,
             btnParcours, btnProjets,
+            btnObjectifs,
             btnBackParcours, btnBackProjets
         };
         for (Button b : headerBtns) {
@@ -426,7 +443,7 @@ public class MainController {
         }
 
         // Sidebar buttons
-        Button[] sidebarBtns = {btnUtilisateurs, btnCategories};
+        Button[] sidebarBtns = {btnUtilisateurs, btnCategories, btnDashboardObjectifs};
         for (Button b : sidebarBtns) {
             if (b != null) {
                 b.getStyleClass().remove("sidebar-btn-active");

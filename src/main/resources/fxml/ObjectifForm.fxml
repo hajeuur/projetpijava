@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="edu.connection3a36.controllers.ObjectifFormController"
+            prefWidth="900" prefHeight="750"
+            style="-fx-background-color: #f4f7fb;">
+    <top>
+        <VBox style="-fx-background-color: #102c59;">
+            <padding><Insets top="25" left="40" right="40" bottom="25"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button text="Retour aux objectifs" onAction="#handleAnnuler"
+                        style="-fx-background-color: rgba(255,255,255,0.15); -fx-text-fill: white; -fx-background-radius: 50; -fx-padding: 8 18 8 18; -fx-cursor: hand;"/>
+                <VBox HBox.hgrow="ALWAYS" spacing="3">
+                    <Label fx:id="lblTitre" text="Nouvel objectif"
+                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Remplissez les informations et laissez l IA generer votre plan d action."
+                           style="-fx-font-size: 12px; -fx-text-fill: #9dbbce;"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: #f4f7fb; -fx-background-color: #f4f7fb;">
+            <VBox spacing="20">
+                <padding><Insets top="30" left="80" right="80" bottom="30"/></padding>
+
+                <!-- FORMULAIRE -->
+                <VBox spacing="16"
+                      style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 30;
+                             -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 3);">
+
+                    <Label text="Informations de l objectif"
+                           style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                    <Separator/>
+
+                    <VBox spacing="6">
+                        <Label text="TITRE DE L OBJECTIF *"
+                               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                        <TextField fx:id="tfTitre" promptText="Ex : Apprendre le developpement web"
+                                   style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #eee; -fx-padding: 12 15 12 15;"/>
+                    </VBox>
+
+                    <VBox spacing="6">
+                        <Label text="DESCRIPTION"
+                               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                        <TextArea fx:id="taDescription" promptText="Decrivez votre objectif en detail..."
+                                  prefRowCount="3" wrapText="true"
+                                  style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #eee; -fx-padding: 10 15 10 15;"/>
+                    </VBox>
+
+                    <HBox spacing="20">
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label text="DATE DE DEBUT *"
+                                   style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                            <DatePicker fx:id="dpDebut" maxWidth="Infinity"/>
+                        </VBox>
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label text="DATE LIMITE (DEADLINE) *"
+                                   style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                            <DatePicker fx:id="dpFin" maxWidth="Infinity"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Info : statut géré automatiquement -->
+                    <HBox style="-fx-background-color: #f0f9ff; -fx-background-radius: 8; -fx-padding: 10 15 10 15;">
+                        <Label text="ℹ️  Le statut de l objectif est mis a jour automatiquement selon l avancement des taches."
+                               style="-fx-text-fill: #0369a1; -fx-font-size: 11px;" wrapText="true"/>
+                    </HBox>
+                </VBox>
+
+                <!-- MODULE IA -->
+                <VBox spacing="14"
+                      style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 30;
+                             -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 3);">
+
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <VBox HBox.hgrow="ALWAYS" spacing="3">
+                            <Label text="Generation automatique des taches par l IA"
+                                   style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                            <Label text="Ollama (llama3.1:8b) va analyser votre objectif et proposer un plan d action structure."
+                                   style="-fx-font-size: 12px; -fx-text-fill: #888;"/>
+                        </VBox>
+                        <ProgressIndicator fx:id="progressIA" prefWidth="22" prefHeight="22"
+                                           visible="false" managed="false"/>
+                    </HBox>
+
+                    <Button fx:id="btnGenererTaches" text="Generer les taches avec l IA"
+                            onAction="#handleGenererTaches"
+                            style="-fx-background-color: #7c3aed; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 11 28 11 28; -fx-cursor: hand;"/>
+
+                    <Label fx:id="lblGenerationStatus" wrapText="true" visible="false" managed="false"
+                           style="-fx-text-fill: #198754; -fx-font-weight: bold; -fx-font-size: 12px;"/>
+
+                    <VBox fx:id="vboxTachesPreview" spacing="6"
+                          style="-fx-background-color: #f8fafc; -fx-padding: 15; -fx-background-radius: 10;"/>
+                </VBox>
+
+                <!-- BOUTONS -->
+                <HBox spacing="12" alignment="CENTER_RIGHT">
+                    <Button text="Annuler" onAction="#handleAnnuler"
+                            style="-fx-background-color: transparent; -fx-text-fill: #888; -fx-border-color: #ddd; -fx-border-radius: 50; -fx-background-radius: 50; -fx-padding: 10 25 10 25; -fx-cursor: hand;"/>
+                    <Button text="Sauvegarder" onAction="#handleSauvegarder"
+                            style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 30 10 30; -fx-cursor: hand;"/>
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

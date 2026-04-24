@@ -65,6 +65,10 @@
                     <Button fx:id="btnProjets" text="Portfolio Projets"
                             onAction="#showProjets" styleClass="header-nav-btn" visible="false" managed="false"/>
 
+                    <!-- Objectifs personnels (Étudiant) -->
+                    <Button fx:id="btnObjectifs" text="🎯 Mes Objectifs"
+                            onAction="#showObjectifs" styleClass="header-nav-btn" visible="false" managed="false"/>
+
                     <!-- Preferences -->
                     <Button fx:id="btnPreferences" text="Préférences"
                             onAction="#showPreferences" styleClass="header-nav-btn"/>
@@ -148,6 +152,9 @@
                         styleClass="sidebar-btn" maxWidth="Infinity"/>
                 <Button fx:id="btnCategories" text="Catégories d'Articles"
                         onAction="#showCategories" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnDashboardObjectifs" text="Dashboard Objectifs"
+                        onAction="#showDashboardObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"
+                        visible="false" managed="false"/>
             </VBox>
 
             <!-- Spacer -->
