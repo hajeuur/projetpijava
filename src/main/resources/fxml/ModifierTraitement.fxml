@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mentorai.controllers.ModifierTraitementController"
+      spacing="0"
+      style="-fx-background-color: #f5f7fa;"
+      prefWidth="780" prefHeight="480">
+
+    <HBox style="-fx-background-color: #f0a500; -fx-padding: 16 20 16 20;"
+          alignment="CENTER_LEFT" spacing="10">
+        <Label text="✏"
+               style="-fx-text-fill: white; -fx-font-size: 18px;"/>
+        <VBox spacing="2">
+            <Label text="Modifier le Traitement"
+                   style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+            <Label fx:id="labelSousTitre" text="Feedback #..."
+                   style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-size: 11px;"/>
+        </VBox>
+    </HBox>
+
+    <HBox VBox.vgrow="ALWAYS" spacing="0">
+
+        <!-- GAUCHE : info feedback -->
+        <VBox prefWidth="280"
+              style="-fx-background-color: white; -fx-padding: 20;
+                     -fx-border-color: #e0e0e0; -fx-border-width: 0 1 0 0;">
+            <VBox spacing="4" style="-fx-padding: 0 0 12 0;
+                                     -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
+                <Label text="ℹ  Feedback concerné"
+                       style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+            </VBox>
+            <VBox spacing="10" style="-fx-padding: 15 0 0 0;">
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <Label text="Type :" style="-fx-text-fill: #888; -fx-font-size: 11px;"/>
+                    <Label fx:id="labelTypeFeedback" text="..."
+                           style="-fx-background-color: #d52e28; -fx-text-fill: white;
+                                  -fx-padding: 2 8 2 8; -fx-background-radius: 10;
+                                  -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                </HBox>
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <Label text="Note :" style="-fx-text-fill: #888; -fx-font-size: 11px;"/>
+                    <Label fx:id="labelNoteFeedback" text="..."
+                           style="-fx-text-fill: #333; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                </HBox>
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <Label text="Date :" style="-fx-text-fill: #888; -fx-font-size: 11px;"/>
+                    <Label fx:id="labelDateFeedback" text="..."
+                           style="-fx-text-fill: #333; -fx-font-size: 12px;"/>
+                </HBox>
+                <VBox spacing="4">
+                    <Label text="Message :" style="-fx-text-fill: #888; -fx-font-size: 11px;"/>
+                    <Label fx:id="labelMessageFeedback" text="..."
+                           wrapText="true"
+                           style="-fx-text-fill: #333; -fx-font-size: 12px;
+                                  -fx-background-color: #f8f8f8; -fx-padding: 8;
+                                  -fx-background-radius: 6;"/>
+                </VBox>
+            </VBox>
+        </VBox>
+
+        <!-- DROITE : formulaire -->
+        <VBox HBox.hgrow="ALWAYS" spacing="0" style="-fx-background-color: #f5f7fa;">
+            <HBox style="-fx-background-color: #f0a500; -fx-padding: 10 15 10 15;"
+                  alignment="CENTER_LEFT" spacing="6">
+                <Label text="✏  Formulaire de Modification"
+                       style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px;"/>
+            </HBox>
+
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                        style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                <VBox spacing="14" style="-fx-padding: 16;">
+
+                    <VBox spacing="5">
+                        <Label text="Type de traitement *"
+                               style="-fx-font-weight: bold; -fx-text-fill: #333; -fx-font-size: 12px;"/>
+                        <ComboBox fx:id="comboType" maxWidth="Infinity"
+                                  style="-fx-background-radius: 6; -fx-border-color: #ddd; -fx-border-radius: 6;"/>
+                    </VBox>
+
+                    <VBox spacing="5">
+                        <Label text="Réponse à l'utilisateur *"
+                               style="-fx-font-weight: bold; -fx-text-fill: #333; -fx-font-size: 12px;"/>
+                        <TextArea fx:id="textDescription" prefHeight="120" wrapText="true"
+                                  promptText="Écrivez votre réponse..."
+                                  style="-fx-background-radius: 6; -fx-border-color: #ddd; -fx-border-radius: 6;"/>
+                        <Label text="Minimum 10 caractères, maximum 1000"
+                               style="-fx-text-fill: #aaa; -fx-font-size: 10px;"/>
+                    </VBox>
+
+                    <HBox style="-fx-background-color: #eef2ff; -fx-padding: 10;
+                                 -fx-background-radius: 6;" spacing="8" alignment="CENTER_LEFT">
+                        <Label text="ℹ" style="-fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <VBox spacing="2">
+                            <Label fx:id="labelDateCreation" text="Date de création : ..."
+                                   style="-fx-text-fill: #102c59; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                            <Label text="La date sera automatiquement mise à jour."
+                                   style="-fx-text-fill: #888; -fx-font-size: 10px;"/>
+                        </VBox>
+                    </HBox>
+
+                    <Label fx:id="labelErreur" text=""
+                           style="-fx-text-fill: #d52e28; -fx-font-size: 12px;"/>
+
+                </VBox>
+            </ScrollPane>
+
+            <HBox spacing="10" alignment="CENTER_RIGHT"
+                  style="-fx-padding: 12 16 12 16; -fx-background-color: white;
+                         -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
+                <Button text="✕  Annuler" onAction="#annuler"
+                        style="-fx-background-color: transparent; -fx-text-fill: #555;
+                               -fx-border-color: #ccc; -fx-border-radius: 6;
+                               -fx-background-radius: 6; -fx-padding: 9 20 9 20; -fx-cursor: hand;"/>
+                <Button text="✔  Enregistrer les modifications" onAction="#enregistrer"
+                        style="-fx-background-color: #f0a500; -fx-text-fill: white;
+                               -fx-font-weight: bold; -fx-background-radius: 6;
+                               -fx-padding: 9 20 9 20; -fx-cursor: hand;"/>
+            </HBox>
+        </VBox>
+    </HBox>
+</VBox>
