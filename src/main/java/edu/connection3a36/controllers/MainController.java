@@ -51,6 +51,17 @@ public class MainController {
     @FXML private Button btnObjectifs;
     @FXML private Button btnDashboardObjectifs;
 
+    // ── MentorAI features (sidebar BACK) ─────────────────────────────────────
+    @FXML private VBox    boxMentorAI;
+    @FXML private Button  btnHumeur;
+    @FXML private Button  btnPlanning;
+    @FXML private Button  btnCarnet;
+
+    // ── MentorAI features (header FRONT) ─────────────────────────────────────
+    @FXML private Button  btnHeaderHumeur;
+    @FXML private Button  btnHeaderPlanning;
+    @FXML private Button  btnHeaderCarnet;
+
     // ── Sidebar (BACK) ────────────────────────────────────────────────────────
     @FXML private VBox backSidebar;
     @FXML private VBox boxAdmin;
@@ -99,11 +110,13 @@ public class MainController {
             show(boxAdmin);
             show(boxBackAdmin);
             hide(boxSwitcher); // Pas de front (réservé aux étudiants)
-            
+
             // On montre tout dans boxBackAdmin pour le superadmin
             for (javafx.scene.Node n : boxBackAdmin.getChildren()) show(n);
-            
+
             show(btnDashboardObjectifs);
+            // MentorAI visible en sidebar pour superadmin
+            show(boxMentorAI);
             showCategories();
 
         } else if (isAdmin()) {
@@ -112,7 +125,7 @@ public class MainController {
             hide(boxAdmin);
             show(boxBackAdmin);
             hide(boxSwitcher);
-            
+
             // On cache les autres outils dans la section CRUD pour cet admin
             for (javafx.scene.Node n : boxBackAdmin.getChildren()) {
                 if (n instanceof Button) {
@@ -125,7 +138,9 @@ public class MainController {
                     hide(n); // Cacher les séparateurs etc
                 }
             }
-            
+
+            // MentorAI visible en sidebar pour admin
+            show(boxMentorAI);
             showBackParcours();
 
         } else if (isEnseignant()) {
@@ -140,6 +155,10 @@ public class MainController {
             hide(boxAdmin);
             hide(boxBackAdmin);
             hide(boxSwitcher);
+            // MentorAI dans le header FRONT
+            show(btnHeaderHumeur);
+            show(btnHeaderPlanning);
+            show(btnHeaderCarnet);
 
             showDashboardEnseignant();
 
@@ -156,6 +175,10 @@ public class MainController {
             show(btnProjets);
             show(btnMesFeedbacks);
             show(btnObjectifs);
+            // MentorAI dans le header FRONT
+            show(btnHeaderHumeur);
+            show(btnHeaderPlanning);
+            show(btnHeaderCarnet);
 
             showParcours();
 
@@ -363,6 +386,28 @@ public class MainController {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // MENTORAI NAVIGATION (Humeur / Planning / Carnet)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @FXML
+    void openHumeur() {
+        loadView("/views/humeur.fxml");
+        setActiveBtn(btnHumeur != null && backSidebar.isVisible() ? btnHumeur : btnHeaderHumeur);
+    }
+
+    @FXML
+    void openPlanning() {
+        loadView("/views/planning.fxml");
+        setActiveBtn(btnPlanning != null && backSidebar.isVisible() ? btnPlanning : btnHeaderPlanning);
+    }
+
+    @FXML
+    void openCarnet() {
+        loadView("/views/carnet.fxml");
+        setActiveBtn(btnCarnet != null && backSidebar.isVisible() ? btnCarnet : btnHeaderCarnet);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // DÉCONNEXION
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -439,16 +484,17 @@ public class MainController {
     // HELPERS UI
     // ─────────────────────────────────────────────────────────────────────────
 
-    /** Gère le style actif pour les boutons du header FRONT. */
+    /** Gère le style actif pour les boutons du header FRONT et de la sidebar BACK. */
     private void setActiveBtn(Button btn) {
-        // Header buttons
+        // Header buttons (FRONT mode)
         Button[] headerBtns = {
             btnDashboardEnseignant, btnDashboardAdmin,
             btnPlanActions, btnArticles,
             btnAIPedagogique, btnAIDecisionnel,
             btnParcours, btnProjets,
             btnObjectifs,
-            btnBackParcours, btnBackProjets
+            btnBackParcours, btnBackProjets,
+            btnHeaderHumeur, btnHeaderPlanning, btnHeaderCarnet
         };
         for (Button b : headerBtns) {
             if (b != null) {
@@ -457,8 +503,11 @@ public class MainController {
             }
         }
 
-        // Sidebar buttons
-        Button[] sidebarBtns = {btnUtilisateurs, btnCategories, btnDashboardObjectifs};
+        // Sidebar buttons (BACK mode)
+        Button[] sidebarBtns = {
+            btnUtilisateurs, btnCategories, btnDashboardObjectifs,
+            btnHumeur, btnPlanning, btnCarnet
+        };
         for (Button b : sidebarBtns) {
             if (b != null) {
                 b.getStyleClass().remove("sidebar-btn-active");

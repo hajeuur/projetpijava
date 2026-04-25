@@ -13,7 +13,7 @@ public class CarnetService {
     private final Connection connection;
 
     public CarnetService() {
-        this.connection = MyConnection.getInstance().getConnection();
+        this.connection = MyConnection.getInstance();
         checkDatabaseStructure(); // 🔥 ONLY CHECK (no creation)
     }
 

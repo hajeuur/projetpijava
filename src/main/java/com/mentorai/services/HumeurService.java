@@ -13,7 +13,7 @@ public class HumeurService {
     private final Connection connection;
 
     public HumeurService() {
-        connection = MyConnection.getInstance().getConnection();
+        connection = MyConnection.getInstance();
     }
 
     public List<String> validateMoodData(Humeur humeur) {

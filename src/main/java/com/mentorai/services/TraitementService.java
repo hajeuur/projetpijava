@@ -16,6 +16,8 @@ public class TraitementService {
     }
 
     // ============ CREATE ============
+
+
     public void add(Traitement t) {
         String query = "INSERT INTO traitement (typetraitement, description, datetraitement, decision) VALUES (?, ?, ?, ?)";
         try {

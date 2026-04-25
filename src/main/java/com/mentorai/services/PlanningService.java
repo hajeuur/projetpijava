@@ -33,7 +33,7 @@ public class PlanningService {
                 "WHERE date_seance BETWEEN ? AND ? " +
                 "ORDER BY date_seance, heure_debut";
         List<PlanningEtude> list = new ArrayList<>();
-        Connection conn = MyConnection.getInstance().getConnection();
+        Connection conn = MyConnection.getInstance();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDate(1, Date.valueOf(from));
             ps.setDate(2, Date.valueOf(to));
@@ -50,7 +50,7 @@ public class PlanningService {
                 "WHERE date_seance = ? " +
                 "ORDER BY heure_debut";
         List<PlanningEtude> list = new ArrayList<>();
-        Connection conn = MyConnection.getInstance().getConnection();
+        Connection conn = MyConnection.getInstance();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDate(1, Date.valueOf(date));
             try (ResultSet rs = ps.executeQuery()) {
@@ -63,7 +63,7 @@ public class PlanningService {
     /** Single activity by PK. */
     public Optional<PlanningEtude> findById(int id) throws SQLException {
         String sql = "SELECT * FROM planning_etude WHERE id = ?";
-        Connection conn = MyConnection.getInstance().getConnection();
+        Connection conn = MyConnection.getInstance();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -84,7 +84,7 @@ public class PlanningService {
                 "GROUP BY type_activite, couleur_activite " +
                 "ORDER BY cnt DESC";
         List<String[]> list = new ArrayList<>();
-        Connection conn = MyConnection.getInstance().getConnection();
+        Connection conn = MyConnection.getInstance();
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             Set<String> seen = new LinkedHashSet<>();
@@ -103,7 +103,7 @@ public class PlanningService {
         String sql = "SELECT couleur_activite FROM planning_etude " +
                 "WHERE type_activite = ? AND couleur_activite IS NOT NULL " +
                 "ORDER BY id DESC LIMIT 1";
-        Connection conn = MyConnection.getInstance().getConnection();
+        Connection conn = MyConnection.getInstance();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, type);
             try (ResultSet rs = ps.executeQuery()) {
@@ -122,7 +122,7 @@ public class PlanningService {
         String sql = "SELECT * FROM planning_etude " +
                 "WHERE LOWER(titre_p) LIKE ? " +
                 "ORDER BY id DESC LIMIT 1";
-        Connection conn = MyConnection.getInstance().getConnection();
+        Connection conn = MyConnection.getInstance();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, prefix.toLowerCase() + "%");
             try (ResultSet rs = ps.executeQuery()) {
@@ -162,7 +162,7 @@ public class PlanningService {
                 "couleur_activite, date_creation, date_modification, utilisateur_id) " +
                 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-        Connection conn = MyConnection.getInstance().getConnection();
+        Connection conn = MyConnection.getInstance();
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             bindAll(ps, p);
             ps.executeUpdate();
@@ -190,7 +190,7 @@ public class PlanningService {
                 "duree_reelle=?, etat=?, couleur_activite=?, date_modification=? " +
                 "WHERE id=?";
 
-        Connection conn = MyConnection.getInstance().getConnection();
+        Connection conn = MyConnection.getInstance();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, p.getTitreP());
             ps.setDate(2, Date.valueOf(p.getDateSeance()));
@@ -230,7 +230,7 @@ public class PlanningService {
         if (overlap != null) throw new IllegalArgumentException(overlap);
 
         String sql = "UPDATE planning_etude SET date_seance=?, heure_debut=?, date_modification=? WHERE id=?";
-        Connection conn = MyConnection.getInstance().getConnection();
+        Connection conn = MyConnection.getInstance();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDate(1, Date.valueOf(newDate));
             ps.setTime(2, Time.valueOf(newStart));
@@ -249,7 +249,7 @@ public class PlanningService {
 
     public void delete(int id) throws SQLException {
         String sql = "DELETE FROM planning_etude WHERE id=?";
-        Connection conn = MyConnection.getInstance().getConnection();
+        Connection conn = MyConnection.getInstance();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
@@ -265,7 +265,7 @@ public class PlanningService {
                 .orElseThrow(() -> new IllegalArgumentException("Activité introuvable."));
         String newEtat = "done".equals(p.getEtat()) ? "to do" : "done";
         String sql = "UPDATE planning_etude SET etat=?, date_modification=? WHERE id=?";
-        Connection conn = MyConnection.getInstance().getConnection();
+        Connection conn = MyConnection.getInstance();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, newEtat);
             ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
