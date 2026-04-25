@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.shape.Circle?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="edu.connection3a36.controllers.MainController"
+            styleClass="main-container">
+
+    <!-- ===== TOP HEADER (Mode FRONT — visible quand frontMode = true) ===== -->
+    <top>
+        <VBox fx:id="topHeaderContainer">
+
+            <!-- HEADER FRONT -->
+            <HBox fx:id="frontHeader" styleClass="top-header"
+                  alignment="CENTER_LEFT" spacing="0" visible="false" managed="false">
+                <padding><Insets top="0" right="20" bottom="0" left="20"/></padding>
+
+                <!-- Logo Package (Style Login) -->
+                <VBox alignment="CENTER" spacing="2">
+                    <Label text="🎓 MentorAI" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Plateforme de Gestion Pédagogique" style="-fx-font-size: 8px; -fx-text-fill: rgba(255,255,255,0.7); -fx-font-weight: bold;"/>
+                </VBox>
+
+                <!-- Espace flexible -->
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- Navigation FRONT -->
+                <HBox fx:id="frontNavBox" spacing="4" alignment="CENTER">
+
+                    <!-- Dashboard (varie selon le rôle) -->
+                    <Button fx:id="btnDashboardEnseignant" text="Dashboard"
+                            onAction="#showDashboardEnseignant"
+                            styleClass="header-nav-btn" visible="false" managed="false"/>
+                    <Button fx:id="btnDashboardAdmin" text="Dashboard Stratégique"
+                            onAction="#showDashboardAdmin"
+                            styleClass="header-nav-btn" visible="false" managed="false"/>
+
+                    <!-- Plans d'Actions -->
+                    <Button fx:id="btnPlanActions" text="Plans d'Actions"
+                            onAction="#showPlanActions" styleClass="header-nav-btn"/>
+
+                    <!-- Articles -->
+                    <Button fx:id="btnArticles" text="Articles"
+                            onAction="#showArticles" styleClass="header-nav-btn"/>
+
+                    <!-- IA (varie selon le rôle) -->
+                    <Button fx:id="btnAIPedagogique" text="IA Pédagogique"
+                            onAction="#showAIPedagogique"
+                            styleClass="header-nav-btn" visible="false" managed="false"/>
+                    <Button fx:id="btnAIDecisionnel" text="IA Décisionnelle"
+                            onAction="#showAIDecisionnel"
+                            styleClass="header-nav-btn" visible="false" managed="false"/>
+                    
+                    <!-- Gestion Parcours (Étudiant) -->
+                    <Button fx:id="btnParcours" text="Mon Parcours"
+                            onAction="#showParcours" styleClass="header-nav-btn" visible="false" managed="false"/>
+                    
+                    <!-- Gestion Projets (Étudiant) -->
+                    <Button fx:id="btnProjets" text="Portfolio Projets"
+                            onAction="#showProjets" styleClass="header-nav-btn" visible="false" managed="false"/>
+
+                    <!-- Mes Feedbacks (Étudiant) -->
+                    <Button fx:id="btnMesFeedbacks" text="📝 Mes Feedbacks"
+                            onAction="#showMesFeedbacks" styleClass="header-nav-btn" visible="false" managed="false"/>
+
+                    <!-- Objectifs personnels (Étudiant) -->
+                    <Button fx:id="btnObjectifs" text="🎯 Mes Objectifs"
+                            onAction="#showObjectifs" styleClass="header-nav-btn" visible="false" managed="false"/>
+
+                    <!-- Preferences -->
+                    <Button fx:id="btnPreferences" text="Préférences"
+                            onAction="#showPreferences" styleClass="header-nav-btn"/>
+
+                    <!-- Notifications / Clochette -->
+                    <Button fx:id="btnNotifications" text="🔔 (0)"
+                            onAction="#handleNotifications"
+                            styleClass="header-nav-btn" visible="false" managed="false"/>
+                </HBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- Zone droite : mode switcher + user -->
+                <HBox alignment="CENTER_RIGHT" spacing="10">
+                    <!-- Switcher ADMINM -->
+                    <Button fx:id="btnSwitchBack" text="Mode Back-Office"
+                            onAction="#switchToBack" styleClass="header-switcher-btn"
+                            visible="false" managed="false"/>
+
+                    <Separator orientation="VERTICAL" style="-fx-background-color: rgba(255,255,255,0.15);"/>
+
+                    <HBox alignment="CENTER" spacing="10" style="-fx-background-color: rgba(255,255,255,0.1); -fx-background-radius: 20; -fx-padding: 4 15 4 8;">
+                        <StackPane>
+                            <Circle centerX="15" centerY="15" radius="15" fill="#9dbbce"/>
+                            <Label text="👤" style="-fx-font-size: 14px; -fx-text-fill: #102c59;"/>
+                        </StackPane>
+                        <Label fx:id="lblUser" text="Utilisateur" styleClass="header-user-label" style="-fx-font-weight: bold; -fx-text-fill: white;"/>
+                    </HBox>
+                    <Button text="Déconnexion" onAction="#handleLogout"
+                            styleClass="header-logout-btn"/>
+                </HBox>
+            </HBox>
+
+            <!-- SIDEBAR BACK (visible quand backMode) — on réutilise le top pour le header du back -->
+            <!-- NB: la sidebar sera dans left -->
+        </VBox>
+    </top>
+
+    <!-- ===== SIDEBAR GAUCHE (Mode BACK) ===== -->
+    <left>
+        <VBox fx:id="backSidebar" styleClass="sidebar" spacing="5"
+              prefWidth="240" alignment="TOP_CENTER"
+              visible="false" managed="false">
+            <padding><Insets top="20" right="10" bottom="20" left="10"/></padding>
+
+            <!-- Logo Package (Style Login) -->
+            <VBox alignment="CENTER" spacing="5" style="-fx-padding: 0 0 20 0;">
+                <Label text="🎓 MentorAI" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                <Label text="Plateforme de Gestion Pédagogique" style="-fx-font-size: 10px; -fx-text-fill: #9dbbce; -fx-font-weight: bold; -fx-text-alignment: CENTER;"/>
+            </VBox>
+            <Separator/>
+
+            <!-- Switcher -->
+            <VBox fx:id="boxSwitcher" spacing="8" alignment="CENTER"
+                  style="-fx-padding: 10 0 10 0;">
+                <Button text="Mode Front" onAction="#switchToFront"
+                        styleClass="switch-front-btn" maxWidth="Infinity"/>
+                <Button text="Mode Back-Office" onAction="#switchToBack"
+                        styleClass="switch-back-btn" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Section Administration -->
+            <VBox fx:id="boxAdmin" spacing="5">
+                <Label text="ADMINISTRATION" styleClass="sidebar-section"/>
+                <Button fx:id="btnUtilisateurs" text="Gestion des Users"
+                        onAction="#showUtilisateurs" styleClass="sidebar-btn" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Section Back CRUD Admin -->
+            <VBox fx:id="boxBackAdmin" spacing="5">
+                <Separator/>
+                <Separator/>
+                <Label text="BACK CRUD" styleClass="sidebar-section"/>
+                <Button fx:id="btnBackParcours" text="Gestion des Parcours" onAction="#showBackParcours"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnBackProjets" text="Gestion des Projets" onAction="#showBackProjets"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnBackFeedbacks" text="Gestion des Feedbacks" onAction="#showBackFeedbacks"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button text="Plans d'Actions" onAction="#showPlanActions"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button text="Articles" onAction="#showArticles"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnCategories" text="Catégories d'Articles"
+                        onAction="#showCategories" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnDashboardObjectifs" text="Dashboard Objectifs"
+                        onAction="#showDashboardObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"
+                        visible="false" managed="false"/>
+            </VBox>
+
+            <!-- Spacer -->
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Separator/>
+            <Button text="Préférences" onAction="#showPreferences" styleClass="sidebar-btn" maxWidth="Infinity"/>
+            <VBox alignment="CENTER" spacing="6" style="-fx-padding: 5 0 5 0;">
+                <Label fx:id="lblUserBack" text="Utilisateur" styleClass="sidebar-user"/>
+                <Button text="Déconnexion" onAction="#handleLogout"
+                        styleClass="btn-danger" style="-fx-font-size: 11px;"/>
+            </VBox>
+        </VBox>
+    </left>
+
+    <!-- ===== CONTENU PRINCIPAL (CENTER) ===== -->
+    <center>
+        <StackPane fx:id="contentArea" styleClass="content-area">
+            <padding><Insets top="25" right="25" bottom="25" left="25"/></padding>
+
+            <!-- Vue de bienvenue par défaut -->
+            <VBox alignment="CENTER" spacing="18">
+                <Label text="🎓 Bienvenue sur MentorAI"
+                       style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
+                <Label text="Chargement de votre espace personnalisé..."
+                       style="-fx-font-size: 15px; -fx-text-fill: #8e92a9;"/>
+            </VBox>
+        </StackPane>
+    </center>
+
+</BorderPane>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.UtilisateurListController"
+      spacing="16">
+
+    <!-- ===== PAGE HEADER ===== -->
+    <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="15">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="👥 Gestion des Utilisateurs" styleClass="section-title"/>
+            <Label text="Administrez les comptes enseignants, administrateurs et étudiants"
+                   styleClass="section-subtitle"/>
+        </VBox>
+        <Label fx:id="lblTotal" text="Total: 0"
+               style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #5a5b7c;"/>
+        <Button text="＋ Nouvel Utilisateur" onAction="#handleAdd" styleClass="btn-success"/>
+    </HBox>
+
+    <!-- ===== FILTRES ===== -->
+    <HBox styleClass="card" spacing="10" alignment="CENTER_LEFT"
+          style="-fx-padding: 12 18;">
+        <Label text="Filtrer par rôle :" style="-fx-font-weight: bold; -fx-text-fill: #5a5b7c;"/>
+        <ComboBox fx:id="roleFilter" promptText="Tous les rôles" prefWidth="220"
+                  onAction="#handleFilter"/>
+        <Button text="Réinitialiser" onAction="#handleReset" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- ===== TABLE ===== -->
+    <TableView fx:id="tableUtilisateurs" VBox.vgrow="ALWAYS" styleClass="table-view">
+        <columns>
+            <TableColumn fx:id="colId"      text="ID"          prefWidth="55"/>
+            <TableColumn fx:id="colNom"     text="Nom complet" prefWidth="210"/>
+            <TableColumn fx:id="colEmail"   text="Email"       prefWidth="250"/>
+            <TableColumn fx:id="colRole"    text="Rôle"        prefWidth="155"/>
+            <TableColumn fx:id="colStatus"  text="Statut"      prefWidth="105"/>
+            <TableColumn fx:id="colActions" text="Actions"     prefWidth="185"/>
+        </columns>
+        <placeholder>
+            <Label text="Aucun utilisateur trouvé."
+                   style="-fx-text-fill: #8e92a9; -fx-font-style: italic;"/>
+        </placeholder>
+    </TableView>
+
+</VBox>

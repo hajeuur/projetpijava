@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.AIPedagogiqueController"
+      spacing="16">
+
+    <!-- ===== PAGE HEADER ===== -->
+    <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="15">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="🤖 Assistant IA Pédagogique" styleClass="section-title"/>
+            <Label text="Analysez les performances, détectez les risques, créez des plans et des articles"
+                   styleClass="section-subtitle"/>
+        </VBox>
+        <Label fx:id="lblStatus" text="" style="-fx-text-fill: #7a8fa5; -fx-font-size: 12px;"/>
+        <Button text="🕐 Historique"   onAction="#handleShowHistory"  styleClass="btn-secondary"/>
+        <Button text="🗑️ Effacer"      onAction="#handleClear"        styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- ===== SUGGESTIONS RAPIDES ===== -->
+    <VBox styleClass="card" spacing="10">
+        <Label text="💡 Questions suggérées"
+               style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #102c59;"/>
+        <HBox spacing="8">
+            <Button text="📊 Analyser les performances"    onAction="#handleSuggestion1" styleClass="chip-primary"/>
+            <Button text="⚠️ Détecter les risques"         onAction="#handleSuggestion2" styleClass="chip-warning"/>
+            <Button text="📋 Plan d'action recommandé"     onAction="#handleSuggestion3" styleClass="chip-success"/>
+            <Button text="📚 Voir articles recommandés"    onAction="#handleRecommendArticles" styleClass="chip-steel"/>
+        </HBox>
+    </VBox>
+
+    <!-- ===== ZONE DE CHAT ===== -->
+    <ScrollPane fx:id="chatScroll" VBox.vgrow="ALWAYS" fitToWidth="true"
+                styleClass="chat-container" style="-fx-min-height: 280px;">
+        <VBox fx:id="chatBox" spacing="12">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+        </VBox>
+    </ScrollPane>
+
+    <!-- ===== ACTIONS IA ===== -->
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <Button text="📋 → Plan d'Action IA" onAction="#handleCreatePlan"
+                styleClass="chip-success" style="-fx-font-size: 12px;"/>
+        <Button text="✍️ Générer un Article" onAction="#handleGenerateArticle"
+                styleClass="chip-steel" style="-fx-font-size: 12px;"/>
+    </HBox>
+
+    <!-- ===== BARRE D'ENVOI ===== -->
+    <HBox styleClass="chat-input-area" spacing="10" alignment="CENTER_LEFT">
+        <TextField fx:id="inputField"
+                   promptText="✏️  Posez une question pédagogique..."
+                   HBox.hgrow="ALWAYS" styleClass="search-bar" onAction="#handleSend"
+                   style="-fx-padding: 11 15; -fx-border-width: 0; -fx-background-radius: 10;"/>
+        <Button fx:id="btnSend" text="📤 Envoyer" onAction="#handleSend"
+                styleClass="btn-primary" style="-fx-padding: 10 22;"/>
+    </HBox>
+
+</VBox>

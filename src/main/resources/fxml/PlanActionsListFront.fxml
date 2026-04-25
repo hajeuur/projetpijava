@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  PlanActionsListFront.fxml — vue FRONT (enseignant/admin front) en CARTES
+  Le back-office garde PlanActionsList.fxml (tableau)
+-->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.PlanActionsListController"
+      spacing="16">
+
+    <!-- ===== PAGE HEADER ===== -->
+    <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="15">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="📋 Plans d'Actions" styleClass="section-title"/>
+            <Label text="Consultez et gérez vos plans d'actions pédagogiques et stratégiques"
+                   styleClass="section-subtitle"/>
+        </VBox>
+        <Button fx:id="btnNewPlan" text="＋ Nouveau Plan" onAction="#handleAdd" styleClass="btn-success"/>
+        <Button text="📄 Export PDF" onAction="#handleExportPdf" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- ===== BARRE DE RECHERCHE &amp; FILTRES ===== -->
+    <HBox styleClass="card" spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 12 18;">
+        <TextField fx:id="searchField"
+                   promptText="🔍 Rechercher un plan..."
+                   prefWidth="260" styleClass="search-bar" onAction="#handleSearch"
+                   HBox.hgrow="ALWAYS"/>
+        <ComboBox fx:id="statutFilter"    promptText="Statut"    prefWidth="145"/>
+        <ComboBox fx:id="categorieFilter" promptText="Catégorie" prefWidth="160"/>
+        <Button text="Rechercher"   onAction="#handleSearch" styleClass="btn-primary"/>
+        <Button text="Réinitialiser" onAction="#handleReset"  styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- ===== STATS RAPIDES ===== -->
+    <HBox fx:id="statsBar" styleClass="stats-bar" spacing="22" alignment="CENTER_LEFT">
+        <Label fx:id="lblTotal"     text="Total: 0"        style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #102c59;"/>
+        <Label fx:id="lblEnAttente" text="⏳ En attente: 0" style="-fx-text-fill: #e67e22; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+        <Label fx:id="lblEnCours"   text="🔄 En cours: 0"  style="-fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+        <Label fx:id="lblFini"      text="✅ Terminé: 0"   style="-fx-text-fill: #27ae60; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+        <Label fx:id="lblRejete"    text="❌ Rejeté: 0"    style="-fx-text-fill: #d52e28; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+    </HBox>
+
+    <!-- ===== GRILLE DE CARTES ===== -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane"
+                style="-fx-background-color: transparent;">
+        <FlowPane fx:id="cardsContainer" hgap="15" vgap="15"
+                  style="-fx-background-color: transparent; -fx-padding: 5;">
+            <!-- Les cartes sont ajoutées dynamiquement par le contrôleur -->
+        </FlowPane>
+    </ScrollPane>
+
+    <!-- Tableau caché (gardé pour compatibilité contrôleur — non visible) -->
+    <TableView fx:id="tablePlans" visible="false" managed="false">
+        <columns>
+            <TableColumn fx:id="colId"        text="ID"        prefWidth="55"/>
+            <TableColumn fx:id="colDecision"  text="Décision"  prefWidth="260"/>
+            <TableColumn fx:id="colStatut"    text="Statut"    prefWidth="115"/>
+            <TableColumn fx:id="colCategorie" text="Catégorie" prefWidth="140"/>
+            <TableColumn fx:id="colDate"      text="Date"      prefWidth="135"/>
+            <TableColumn fx:id="colActions"   text="Actions"   prefWidth="210"/>
+        </columns>
+    </TableView>
+
+</VBox>

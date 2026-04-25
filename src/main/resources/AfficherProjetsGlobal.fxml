@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.AfficherProjetsGlobalController"
+      spacing="0" style="-fx-background-color: #f0f4f8;" prefWidth="1200" prefHeight="800">
+
+    <!-- Banner Header -->
+    <VBox alignment="CENTER_LEFT" style="-fx-background-color: #102c59; -fx-padding: 30 50;">
+        <HBox alignment="CENTER_LEFT" spacing="20">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Portfolio de Mes Projets" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                <Label text="Visionnez vos documents, images et vidéos directement depuis votre espace personnel." style="-fx-font-size: 15px; -fx-text-fill: #9dbbce;"/>
+            </VBox>
+            <Button fx:id="btnAjouter" text="+ Nouveau Projet" onAction="#ajouterProjet"
+                    style="-fx-background-color: #0d1e3c; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 12 25; -fx-cursor: hand; -fx-border-color: #9dbbce; -fx-border-radius: 50;"/>
+        </HBox>
+    </VBox>
+
+    <!-- Search Bar -->
+    <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-padding: 20 50; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);">
+        <TextField fx:id="txtRecherche" promptText="🔍 Rechercher un projet, une technologie..." prefWidth="500"
+                   style="-fx-background-radius: 8; -fx-border-color: #dcdde1; -fx-border-radius: 8; -fx-padding: 12;"/>
+    </HBox>
+
+    <!-- Content Area -->
+    <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #f0f4f8; -fx-border-color: transparent;">
+        <padding><Insets top="30" right="50" bottom="30" left="50"/></padding>
+        <FlowPane fx:id="flowPaneProjets" hgap="30" vgap="30" alignment="TOP_LEFT">
+            <!-- Project cards injected here -->
+        </FlowPane>
+    </ScrollPane>
+
+</VBox>

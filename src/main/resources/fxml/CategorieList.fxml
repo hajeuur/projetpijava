@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.CategorieListController"
+      spacing="16">
+
+    <!-- ===== PAGE HEADER ===== -->
+    <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="15">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="📂 Catégories d'Articles" styleClass="section-title"/>
+            <Label text="Organisez vos articles en catégories thématiques"
+                   styleClass="section-subtitle"/>
+        </VBox>
+        <Label fx:id="lblTotal" text="Total: 0"
+               style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #5a5b7c;"/>
+        <Button text="＋ Nouvelle Catégorie" onAction="#handleAdd" styleClass="btn-success"/>
+    </HBox>
+
+    <!-- ===== BARRE DE RECHERCHE ===== -->
+    <HBox styleClass="card" spacing="10" alignment="CENTER_LEFT"
+          style="-fx-padding: 12 18;">
+        <TextField fx:id="searchField" promptText="🔍 Rechercher une catégorie..."
+                   prefWidth="320" styleClass="search-bar" onAction="#handleSearch"
+                   HBox.hgrow="ALWAYS"/>
+        <Button text="Rechercher" onAction="#handleSearch" styleClass="btn-primary"/>
+        <Button text="Réinitialiser" onAction="#handleReset" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- ===== TABLE ===== -->
+    <TableView fx:id="tableCategories" VBox.vgrow="ALWAYS" styleClass="table-view">
+        <columns>
+            <TableColumn fx:id="colId"         text="ID"          prefWidth="55"/>
+            <TableColumn fx:id="colNom"         text="Nom"         prefWidth="220"/>
+            <TableColumn fx:id="colDescription" text="Description" prefWidth="320"/>
+            <TableColumn fx:id="colNbArticles"  text="Articles"    prefWidth="90"/>
+            <TableColumn fx:id="colDate"        text="Créée le"    prefWidth="130"/>
+            <TableColumn fx:id="colActions"     text="Actions"     prefWidth="160"/>
+        </columns>
+        <placeholder>
+            <Label text="Aucune catégorie trouvée. Créez-en une avec le bouton «Nouvelle Catégorie»."
+                   style="-fx-text-fill: #8e92a9; -fx-font-style: italic;"/>
+        </placeholder>
+    </TableView>
+
+</VBox>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.DashboardEnseignantController"
+      spacing="18">
+
+    <!-- ===== PAGE HEADER ===== -->
+    <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="15">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="Dashboard Enseignant" styleClass="section-title"/>
+            <Label text="Vue d'ensemble de vos classes, étudiants et alertes pédagogiques"
+                   styleClass="section-subtitle"/>
+        </VBox>
+    </HBox>
+
+    <!-- ===== CARTES STATISTIQUES ===== -->
+    <HBox spacing="15">
+        <VBox styleClass="stat-card-blue" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="4">
+            <Label text="42" styleClass="stat-number"/>
+            <Label text="Étudiants suivis" styleClass="stat-label"/>
+            <Label text="" style="-fx-font-size: 18px; -fx-opacity: 0.85;"/>
+        </VBox>
+        <VBox styleClass="stat-card-green" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="4">
+            <Label fx:id="lblPlans" text="0" styleClass="stat-number"/>
+            <Label text="Mes Plans d'Actions" styleClass="stat-label"/>
+            <Label text="" style="-fx-font-size: 18px; -fx-opacity: 0.85;"/>
+        </VBox>
+        <VBox styleClass="stat-card-orange" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="4">
+            <Label fx:id="lblArticles" text="0" styleClass="stat-number"/>
+            <Label text="Mes Articles / Cours" styleClass="stat-label"/>
+            <Label text="" style="-fx-font-size: 18px; -fx-opacity: 0.85;"/>
+        </VBox>
+        <VBox styleClass="stat-card-red" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="4">
+            <Label text="3" styleClass="stat-number"/>
+            <Label text="Alertes Décrochage (IA)" styleClass="stat-label"/>
+            <Label text="" style="-fx-font-size: 18px; -fx-opacity: 0.85;"/>
+        </VBox>
+    </HBox>
+
+    <!-- ===== TABLEAUX ===== -->
+    <HBox spacing="18" VBox.vgrow="ALWAYS">
+
+        <!-- Étudiants à risque -->
+        <VBox VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS" spacing="10" styleClass="card">
+            <Label text="Étudiants en risque de décrochage" styleClass="risk-table-header"/>
+            <TableView fx:id="tableRisk" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colNomRisk"    text="Étudiant"          prefWidth="150"/>
+                    <TableColumn fx:id="colScoreRisk"   text="Assiduité (%)"    prefWidth="110"/>
+                    <TableColumn fx:id="colMatiereRisk" text="Matière faible"   prefWidth="140"/>
+                </columns>
+                <placeholder>
+                    <Label text="Aucun étudiant à risque détecté"
+                           style="-fx-text-fill: #27ae60; -fx-font-style: italic;"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+
+        <!-- Réclamations & Feedback -->
+        <VBox VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS" spacing="10" styleClass="card">
+            <Label text="Mes Derniers Feedbacks" styleClass="feedback-table-header"/>
+            <TableView fx:id="tableFeedbacks" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colFeedbackPlan"    text="Plan d'Action"             prefWidth="160"/>
+                    <TableColumn fx:id="colFeedbackTexte"   text="Mon Feedback"              prefWidth="230"/>
+                </columns>
+                <placeholder>
+                    <Label text="Aucun feedback soumis"
+                           style="-fx-text-fill: #27ae60; -fx-font-style: italic;"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+
+    </HBox>
+
+</VBox>

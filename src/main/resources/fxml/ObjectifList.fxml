@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="edu.connection3a36.controllers.ObjectifListController"
+            prefWidth="1100" prefHeight="750"
+            style="-fx-background-color: #f4f7fb;">
+    <top>
+        <VBox style="-fx-background-color: #102c59;">
+            <padding><Insets top="30" left="40" right="40" bottom="30"/></padding>
+            <HBox alignment="CENTER_LEFT">
+                <VBox HBox.hgrow="ALWAYS" spacing="5">
+                    <Label text="Mes Objectifs et Progression"
+                           style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Definissez vos buts, suivez vos etapes et visualisez vos reussites."
+                           style="-fx-font-size: 13px; -fx-text-fill: #9dbbce;"/>
+                </VBox>
+                <Button text="+ Nouvel Objectif" onAction="#handleNouvelObjectif"
+                        style="-fx-background-color: white; -fx-text-fill: #102c59; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 25 10 25; -fx-cursor: hand;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: #f4f7fb; -fx-background-color: #f4f7fb;">
+            <VBox spacing="20">
+                <padding><Insets top="25" left="30" right="30" bottom="25"/></padding>
+
+                <!-- ALERTE DEADLINE -->
+                <Label fx:id="lblAlertes" wrapText="true" visible="false" managed="false"
+                       style="-fx-background-color: #fff3cd; -fx-text-fill: #856404; -fx-padding: 12 20 12 20;
+                              -fx-background-radius: 10; -fx-font-weight: bold; -fx-font-size: 12px;"/>
+
+                <!-- SEARCH BAR -->
+                <HBox spacing="15" alignment="CENTER_LEFT"
+                      style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20 25 20 25;
+                             -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 3);">
+                    <VBox HBox.hgrow="ALWAYS" spacing="5">
+                        <Label text="RECHERCHER UN OBJECTIF"
+                               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                        <TextField fx:id="tfRecherche" promptText="Titre de l objectif..."
+                                   style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #eee; -fx-padding: 10 15 10 15;"/>
+                    </VBox>
+                    <VBox spacing="5">
+                        <Label text="FILTRER PAR STATUT"
+                               style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                        <ComboBox fx:id="cbStatut" prefWidth="180"/>
+                    </VBox>
+                    <VBox spacing="5">
+                        <Label text=" "/>
+                        <Button text="Filtrer" onAction="#handleFiltrer"
+                                style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 25 10 25; -fx-cursor: hand;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- CONTENT ROW -->
+                <HBox spacing="20" alignment="TOP_LEFT">
+
+                    <!-- STATS CARD -->
+                    <VBox spacing="12" prefWidth="270"
+                          style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 25;
+                                 -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 3);">
+
+                        <Label text="Repartition des Objectifs"
+                               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+
+                        <StackPane fx:id="objectifChartPane" prefHeight="160" alignment="CENTER"/>
+
+                        <Separator/>
+
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <Label text="●" style="-fx-text-fill: #198754; -fx-font-size: 16px;"/>
+                            <Label text="Atteints :" style="-fx-text-fill: #555;"/>
+                            <Label fx:id="atteintsLabel" text="0"
+                                   style="-fx-font-weight: bold; -fx-text-fill: #198754;"/>
+                        </HBox>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <Label text="●" style="-fx-text-fill: #ffc107; -fx-font-size: 16px;"/>
+                            <Label text="En cours :" style="-fx-text-fill: #555;"/>
+                            <Label fx:id="enCoursLabel" text="0"
+                                   style="-fx-font-weight: bold; -fx-text-fill: #ffc107;"/>
+                        </HBox>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <Label text="●" style="-fx-text-fill: #d52e28; -fx-font-size: 16px;"/>
+                            <Label text="Abandonnes :" style="-fx-text-fill: #555;"/>
+                            <Label fx:id="abandonnesLabel" text="0"
+                                   style="-fx-font-weight: bold; -fx-text-fill: #d52e28;"/>
+                        </HBox>
+
+                        <Separator/>
+
+                        <HBox spacing="10">
+                            <Button text="Excel" onAction="#handleExportExcel"
+                                    maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                                    style="-fx-background-color: #198754; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-cursor: hand; -fx-padding: 8 10 8 10;"/>
+                            <Button text="Word" onAction="#handleExportWord"
+                                    maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                                    style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-cursor: hand; -fx-padding: 8 10 8 10;"/>
+                        </HBox>
+
+                        <Button text="Reinitialiser mes donnees" onAction="#handleReinitialiserTout"
+                                maxWidth="Infinity"
+                                style="-fx-background-color: transparent; -fx-text-fill: #d52e28; -fx-border-color: #d52e28; -fx-border-radius: 50; -fx-background-radius: 50; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 10 8 10;"/>
+
+                        <Separator/>
+
+                        <!-- CALENDRIER — date du jour -->
+                        <VBox spacing="6" alignment="CENTER">
+                            <Label text="AUJOURD HUI"
+                                   style="-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #888;"/>
+
+                            <!-- Jour + mois en grand -->
+                            <VBox alignment="CENTER" spacing="0"
+                                  style="-fx-background-color: #102c59; -fx-background-radius: 12; -fx-padding: 0;">
+                                <!-- Bandeau mois/année -->
+                                <HBox alignment="CENTER"
+                                      style="-fx-background-color: #d52e28; -fx-background-radius: 12 12 0 0; -fx-padding: 6 10 6 10;">
+                                    <Label fx:id="lblCalMoisAnnee" text=""
+                                           style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                                </HBox>
+                                <!-- Numéro du jour -->
+                                <VBox alignment="CENTER" style="-fx-padding: 10 20 10 20;">
+                                    <Label fx:id="lblCalJour" text=""
+                                           style="-fx-font-size: 42px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                                    <Label fx:id="lblCalJourSemaine" text=""
+                                           style="-fx-font-size: 11px; -fx-text-fill: #9dbbce; -fx-font-weight: bold;"/>
+                                </VBox>
+                            </VBox>
+
+                            <!-- Grille des jours du mois -->
+                            <VBox fx:id="vboxCalGrille" spacing="2" alignment="CENTER"
+                                  style="-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-padding: 8;"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- OBJECTIF LIST -->
+                    <VBox fx:id="objectifContainer" spacing="15" HBox.hgrow="ALWAYS"/>
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

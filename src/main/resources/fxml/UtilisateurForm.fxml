@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.UtilisateurFormController"
+      spacing="18" styleClass="form-card">
+    <padding><Insets top="25" right="30" bottom="25" left="30"/></padding>
+
+    <!-- Titre -->
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label text="👤" style="-fx-font-size: 24px;"/>
+        <Label fx:id="formTitle" text="Nouvel Utilisateur" styleClass="section-title"/>
+    </HBox>
+    <Separator/>
+
+    <!-- Prénom &amp; Nom -->
+    <HBox spacing="20">
+        <VBox spacing="5" HBox.hgrow="ALWAYS">
+            <Label text="Prénom *" styleClass="form-label"/>
+            <TextField fx:id="tfPrenom" promptText="Ex: Ali" maxWidth="Infinity"/>
+            <Label fx:id="errPrenom" styleClass="error-label" text=""
+                   managed="false" visible="false"/>
+        </VBox>
+        <VBox spacing="5" HBox.hgrow="ALWAYS">
+            <Label text="Nom *" styleClass="form-label"/>
+            <TextField fx:id="tfNom" promptText="Ex: Ben Salah" maxWidth="Infinity"/>
+            <Label fx:id="errNom" styleClass="error-label" text=""
+                   managed="false" visible="false"/>
+        </VBox>
+    </HBox>
+
+    <!-- Email -->
+    <VBox spacing="5">
+        <Label text="Email *" styleClass="form-label"/>
+        <TextField fx:id="tfEmail" promptText="Ex: ali.bensalah@esprit.tn" maxWidth="Infinity"/>
+        <Label fx:id="errEmail" styleClass="error-label" text="" managed="false" visible="false"/>
+    </VBox>
+
+    <!-- Mot de passe -->
+    <VBox spacing="5">
+        <Label text="Mot de passe *" styleClass="form-label"/>
+        <PasswordField fx:id="tfMdp" promptText="Votre mot de passe" maxWidth="Infinity"/>
+        <Label fx:id="errMdp" styleClass="error-label" text="" managed="false" visible="false"/>
+    </VBox>
+
+    <!-- Rôle &amp; Statut -->
+    <HBox spacing="20">
+        <VBox spacing="5" HBox.hgrow="ALWAYS">
+            <Label text="Rôle *" styleClass="form-label"/>
+            <ComboBox fx:id="cbRole" maxWidth="Infinity" promptText="Sélectionner un rôle"/>
+        </VBox>
+        <VBox spacing="5" HBox.hgrow="ALWAYS">
+            <Label text="Statut *" styleClass="form-label"/>
+            <ComboBox fx:id="cbStatus" maxWidth="Infinity" promptText="Sélectionner un statut"/>
+        </VBox>
+    </HBox>
+
+    <!-- Boutons -->
+    <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 5 0 0 0;">
+        <Button text="Annuler" onAction="#handleCancel" styleClass="btn-secondary"/>
+        <Button text="💾 Sauvegarder" onAction="#handleSave" styleClass="btn-success"/>
+    </HBox>
+
+</VBox>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.AIDecisionnelController"
+      spacing="16">
+
+    <!-- ===== PAGE HEADER ===== -->
+    <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="15">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="IA Décisionnelle" styleClass="section-title"/>
+            <Label text="Analyse intelligente et support décisionnel pour la direction"
+                   styleClass="section-subtitle"/>
+        </VBox>
+        <Button text="Historique" onAction="#handleShowHistory" styleClass="btn-secondary"/>
+        <Button text="Analyser les données globales" onAction="#handleAnalyse"
+                styleClass="btn-primary" style="-fx-padding: 9 20;"/>
+        <Button text="Effacer" onAction="#handleClear" styleClass="btn-secondary"/>
+    </HBox>
+
+    <HBox spacing="14" VBox.vgrow="ALWAYS">
+
+        <!-- Zone analyse textuelle IA -->
+        <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="10" prefWidth="350">
+            <Label text="Analyse IA — Vue Globale"
+                   style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #102c59;"/>
+            <Separator/>
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane"
+                        style="-fx-background-color: transparent; -fx-min-height: 160;">
+                <VBox fx:id="boxAnalyse" spacing="10" style="-fx-padding: 4;">
+                    <Label text="Cliquez sur «Analyser les données globales» pour obtenir des recommandations stratégiques sur l'ensemble de l'établissement."
+                           wrapText="true"
+                           style="-fx-font-size: 13px; -fx-text-fill: #8e9aaa; -fx-font-style: italic;"/>
+                </VBox>
+            </ScrollPane>
+        </VBox>
+
+        <!-- CHATBOT DÉCISIONNEL -->
+        <VBox HBox.hgrow="ALWAYS" spacing="12">
+            <VBox styleClass="card" spacing="10">
+                <Label text="Suggestions de discussion"
+                       style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #102c59;"/>
+                <HBox spacing="8">
+                    <Button text="Situation globale" onAction="#handleSuggestion1" styleClass="chip-primary"/>
+                    <Button text="Détecter pbs" onAction="#handleSuggestion2" styleClass="chip-danger"/>
+                    <Button text="Plan stratégique" onAction="#handleSuggestion3" styleClass="chip-steel"/>
+                </HBox>
+            </VBox>
+
+            <!-- Zone de chat -->
+            <ScrollPane fx:id="chatScroll" VBox.vgrow="ALWAYS" fitToWidth="true"
+                        styleClass="chat-container" style="-fx-min-height: 250px;">
+                <VBox fx:id="chatBox" spacing="12">
+                    <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+                </VBox>
+            </ScrollPane>
+
+            <!-- Actions chatbot -->
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Button text="Transformer en Plan d'Action" onAction="#handleCreatePlan"
+                        styleClass="chip-success" style="-fx-font-size: 12px;"/>
+                <Button text="Rédiger Article IA" onAction="#handleGenerateArticle"
+                        styleClass="chip-steel" style="-fx-font-size: 12px;"/>
+                <Label fx:id="lblChatStatus" text="" style="-fx-text-fill: #7a8fa5; -fx-font-size: 12px;"/>
+            </HBox>
+
+            <!-- Barre d'envoi -->
+            <HBox styleClass="chat-input-area" spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="inputField"
+                           promptText="Posez votre question décisionnelle à l'IA..."
+                           HBox.hgrow="ALWAYS" styleClass="search-bar"
+                           onAction="#handleSend"
+                           style="-fx-padding: 11 15; -fx-border-width: 0; -fx-background-radius: 10;"/>
+                <Button fx:id="btnSend" text="Envoyer" onAction="#handleSend"
+                        styleClass="btn-primary" style="-fx-padding: 10 22;"/>
+            </HBox>
+        </VBox>
+    </HBox>
+</VBox>

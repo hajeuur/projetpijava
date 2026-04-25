@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="edu.connection3a36.controllers.AjouterParcoursController"
+            style="-fx-background-color: #f0f4f8;" fitToWidth="true" prefWidth="900" prefHeight="700">
+            
+    <VBox spacing="0" style="-fx-background-color: #f0f4f8;">
+        
+        <!-- Top Blue Banner -->
+        <VBox alignment="CENTER" style="-fx-background-color: #102c59; -fx-padding: 40 0;">
+            <Label text="Nouveau Parcours" style="-fx-font-size: 32px; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Label text="Enregistrez vos formations et expériences pour valoriser votre profil." style="-fx-font-size: 15px; -fx-text-fill: #9dbbce; -fx-padding: 10 0 0 0;"/>
+            <Label fx:id="lblErreur" text="" style="-fx-text-fill: #ff7675; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 15 0 0 0;" wrapText="true"/>
+        </VBox>
+        
+        <!-- Main content: centered white card -->
+        <HBox alignment="CENTER" style="-fx-padding: 30;">
+            <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 5);" prefWidth="800" spacing="20">
+                <padding><Insets top="30" right="40" bottom="30" left="40"/></padding>
+                
+                <!-- Card Header -->
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="🎓" style="-fx-font-size: 30px;"/>
+                    <VBox>
+                        <Label text="Détails du parcours" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                        <Label text="Remplissez les champs ci-dessous pour ajouter une étape à votre carrière." style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;"/>
+                    </VBox>
+                </HBox>
+                
+                <Separator style="-fx-padding: 5 0 10 0;"/>
+                
+                <!-- Form Grid -->
+                <GridPane vgap="25" hgap="30">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50" />
+                        <ColumnConstraints percentWidth="50" />
+                    </columnConstraints>
+
+                    <!-- Titre -->
+                    <VBox GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="8">
+                        <Label text="Titre du parcours *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <TextField fx:id="txtTitre" promptText="Ex: Licence en Informatique, Développeur Web PHP..." style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 10; -fx-font-size: 14px;"/>
+                        <Label fx:id="errTitre" text="• Le titre est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
+                    </VBox>
+                    
+                    <!-- Type / Diplome -->
+                    <VBox GridPane.rowIndex="1" GridPane.columnIndex="0" spacing="8">
+                        <Label text="Type de parcours *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <ComboBox fx:id="cbTypeParcours" promptText="Ex: Formation, Expérience..." maxWidth="Infinity" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 5; -fx-font-size: 14px; -fx-background-color: #f8f9fa;"/>
+                        <Label fx:id="errType" text="• Le type est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
+                    </VBox>
+                    
+                    <VBox GridPane.rowIndex="1" GridPane.columnIndex="1" spacing="8">
+                        <Label text="Diplôme / Certification *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <TextField fx:id="txtDiplome" promptText="Ex: Bac+3, Certificat d'aptitude..." style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 10; -fx-font-size: 14px;"/>
+                        <Label fx:id="errDiplome" text="• Le diplôme est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
+                    </VBox>
+                    
+                    <!-- Etablissement -->
+                    <VBox GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="8">
+                        <Label text="Établissement ou Organisme *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <TextField fx:id="txtEtablissement" promptText="Le nom de votre école ou de l'entreprise" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 10; -fx-font-size: 14px;"/>
+                        <Label fx:id="errEtablissement" text="• L'établissement est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
+                    </VBox>
+                    
+                    <!-- Dates -->
+                    <VBox GridPane.rowIndex="3" GridPane.columnIndex="0" spacing="8">
+                        <Label text="Date de début *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <DatePicker fx:id="dpDateDebut" promptText="jj/mm/aaaa" maxWidth="Infinity" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 5; -fx-font-size: 14px;"/>
+                        <Label fx:id="errDateDebut" text="• La date de début est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
+                    </VBox>
+                    
+                    <VBox GridPane.rowIndex="3" GridPane.columnIndex="1" spacing="8">
+                        <Label text="Date de fin" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <DatePicker fx:id="dpDateFin" promptText="jj/mm/aaaa" maxWidth="Infinity" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 5; -fx-font-size: 14px;"/>
+                        <Label fx:id="errDateFin" text="• La date de fin doit être après le début." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
+                    </VBox>
+                    
+                    <!-- Description -->
+                    <VBox GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" spacing="8">
+                        <Label text="Description de vos missions et acquis *" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <TextArea fx:id="taDescription" promptText="Détaillez vos responsabilités, technologies utilisées..." prefRowCount="4" wrapText="true" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 4; -fx-font-size: 14px;"/>
+                        <Label fx:id="errDescription" text="• La description est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false"/>
+                    </VBox>
+                    
+                    <!-- Optionnels : Spécialité & Entreprise -->
+                    <VBox GridPane.rowIndex="5" GridPane.columnIndex="0" spacing="8">
+                        <Label text="Spécialité (Optionnel)" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <TextField fx:id="txtSpecialite" promptText="Ex: Génie Logiciel" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 10; -fx-font-size: 14px;"/>
+                    </VBox>
+                    <VBox GridPane.rowIndex="5" GridPane.columnIndex="1" spacing="8">
+                        <Label text="Entreprise (Optionnel)" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <TextField fx:id="txtEntreprise" promptText="Société d'accueil" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 10; -fx-font-size: 14px;"/>
+                    </VBox>
+
+                    <!-- Optionnels : Poste & Type Contrat -->
+                    <VBox GridPane.rowIndex="6" GridPane.columnIndex="0" spacing="8">
+                        <Label text="Poste (Optionnel)" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <TextField fx:id="txtPoste" promptText="Ex: Stagiaire, Développeur Junior" style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 10; -fx-font-size: 14px;"/>
+                    </VBox>
+                    <VBox GridPane.rowIndex="6" GridPane.columnIndex="1" spacing="8">
+                        <Label text="Type de contrat (Optionnel)" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;"/>
+                        <TextField fx:id="txtTypeContrat" promptText="CDI, CDD, Alternance..." style="-fx-background-radius: 6; -fx-border-color: #dcdde1; -fx-border-radius: 6; -fx-padding: 10; -fx-font-size: 14px;"/>
+                    </VBox>
+                </GridPane>
+                
+                <Separator style="-fx-padding: 15 0 20 0;"/>
+                
+                <!-- Buttons Bottom -->
+                <HBox spacing="15" alignment="CENTER_RIGHT">
+                    <Button text="✕ Annuler" onAction="#annuler" 
+                            style="-fx-background-color: white; -fx-border-color: #bdc3c7; -fx-border-radius: 8; -fx-text-fill: #7f8c8d; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10 25; -fx-cursor: hand;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="💾 Enregistrer le parcours" onAction="#enregistrer" 
+                            style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 8; -fx-padding: 10 35; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.3), 8, 0, 0, 2);"/>
+                </HBox>
+                
+            </VBox>
+        </HBox>
+        <Region prefHeight="40"/> <!-- Bottom Margin -->
+    </VBox>
+</ScrollPane>

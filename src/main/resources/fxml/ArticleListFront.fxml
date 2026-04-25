@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  ArticleListFront.fxml — vue FRONT (enseignant/admin front) en CARTES
+-->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.ArticleListController"
+      spacing="16">
+
+    <!-- ===== PAGE HEADER ===== -->
+    <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="15">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="📝 Articles de Référence" styleClass="section-title"/>
+            <Label text="Explorez les ressources pédagogiques disponibles"
+                   styleClass="section-subtitle"/>
+        </VBox>
+        <Button fx:id="btnNewArticle" text="＋ Nouvel Article" onAction="#handleAdd" styleClass="btn-success"/>
+    </HBox>
+
+    <!-- ===== BARRE DE RECHERCHE &amp; FILTRES ===== -->
+    <HBox styleClass="card" spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 12 18;">
+        <TextField fx:id="searchField"
+                   promptText="🔍 Rechercher un article..."
+                   HBox.hgrow="ALWAYS" styleClass="search-bar" onAction="#handleSearch"/>
+        <ComboBox fx:id="categorieFilter" promptText="Catégorie"    prefWidth="155"/>
+        <ComboBox fx:id="publishedFilter" promptText="Publication"  prefWidth="135"/>
+        <Button text="Rechercher"    onAction="#handleSearch" styleClass="btn-primary"/>
+        <Button text="Réinitialiser" onAction="#handleReset"  styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- ===== STATS ===== -->
+    <HBox styleClass="stats-bar" spacing="25" alignment="CENTER_LEFT">
+        <Label fx:id="lblTotal"    text="Total: 0"      style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #102c59;"/>
+        <Label fx:id="lblPublished" text="📗 Publiés: 0" style="-fx-text-fill: #27ae60; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+        <Label fx:id="lblDraft"    text="📝 Brouillons: 0" style="-fx-text-fill: #7a8fa5; -fx-font-size: 13px;"/>
+    </HBox>
+
+    <!-- ===== GRILLE DE CARTES ===== -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane"
+                style="-fx-background-color: transparent;">
+        <FlowPane fx:id="cardsContainer" hgap="16" vgap="16"
+                  style="-fx-background-color: transparent; -fx-padding: 5;">
+            <!-- Les cartes d'articles sont ajoutées dynamiquement -->
+        </FlowPane>
+    </ScrollPane>
+
+    <!-- Tableau caché pour compatibilité contrôleur -->
+    <TableView fx:id="tableArticles" visible="false" managed="false">
+        <columns>
+            <TableColumn fx:id="colId"        text="ID"        prefWidth="55"/>
+            <TableColumn fx:id="colTitre"     text="Titre"     prefWidth="260"/>
+            <TableColumn fx:id="colCategorie" text="Catégorie" prefWidth="150"/>
+            <TableColumn fx:id="colPublished" text="Statut"    prefWidth="110"/>
+            <TableColumn fx:id="colDate"      text="Créé le"   prefWidth="115"/>
+            <TableColumn fx:id="colActions"   text="Actions"   prefWidth="240"/>
+        </columns>
+    </TableView>
+
+</VBox>
