@@ -28,8 +28,8 @@
                 <Button text="Parcours" onAction="#loadParcours" style="-fx-background-color: transparent; -fx-text-fill: #102c59; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
                 <Button text="Projets" onAction="#loadProjets" style="-fx-background-color: transparent; -fx-text-fill: #102c59; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
                 <Button text="Contact" style="-fx-background-color: transparent; -fx-text-fill: #34495e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                <Button text="Pricing" style="-fx-background-color: transparent; -fx-text-fill: #34495e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                <Button text="About" style="-fx-background-color: transparent; -fx-text-fill: #34495e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <Button text="Pricing" onAction="#loadPricing" style="-fx-background-color: transparent; -fx-text-fill: #34495e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <Button text="About" onAction="#loadAbout" style="-fx-background-color: transparent; -fx-text-fill: #34495e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
             </HBox>
 
             <Region HBox.hgrow="ALWAYS"/>

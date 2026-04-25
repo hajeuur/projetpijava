@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Line?>
+
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #f8fafc;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.connection3a36.Controller.PricingController">
+    <VBox alignment="TOP_CENTER" spacing="40" style="-fx-background-color: #f8fafc;">
+        <padding>
+            <Insets bottom="50" left="20" right="20" top="40" />
+        </padding>
+
+        <!-- Header Toggle Section -->
+        <VBox alignment="CENTER" spacing="15">
+            <HBox alignment="CENTER" spacing="15">
+                <Label style="-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 16px;" text="Mensuel" />
+                <ToggleButton fx:id="pricingToggle" style="-fx-background-color: #cbd5e1; -fx-background-radius: 20; -fx-min-width: 50; -fx-min-height: 25; -fx-cursor: hand;" />
+                <Label style="-fx-text-fill: #64748b; -fx-font-size: 16px;" text="Annuel" />
+                <Label style="-fx-background-color: #dcfce7; -fx-text-fill: #166534; -fx-padding: 2 10; -fx-background-radius: 10; -fx-font-size: 12px; -fx-font-weight: bold;" text="20% de RÉDUCTION" />
+            </HBox>
+        </VBox>
+
+        <!-- Pricing Cards Grid -->
+        <HBox alignment="CENTER" spacing="30">
+            
+            <!-- Basique Plan -->
+            <VBox prefWidth="320" style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 0); -fx-padding: 30;" spacing="25">
+                <VBox spacing="10">
+                    <Label style="-fx-text-fill: #1e293b; -fx-font-size: 18px; -fx-font-weight: bold;" text="Basique" />
+                    <Label style="-fx-text-fill: #1e293b; -fx-font-size: 42px; -fx-font-weight: bold;" text="Gratuit" />
+                    <Label style="-fx-text-fill: #64748b; -fx-font-size: 14px;" text="Idéal pour découvrir MentorAI" />
+                </VBox>
+                
+                <Button fx:id="btnBasique" onAction="#handleFreePlan" prefWidth="300" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 12; -fx-background-radius: 8; -fx-cursor: hand;" text="Continuer" />
+                
+                <VBox spacing="15">
+                    <Label style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 14px;" text="Le plan Basique inclut :" />
+                    <VBox spacing="10">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                            <Label text="Accès aux projets publics" style="-fx-text-fill: #475569;"/>
+                        </HBox>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                            <Label text="5 conversations IA / jour" style="-fx-text-fill: #475569;"/>
+                        </HBox>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                            <Label text="Ressources communautaires" style="-fx-text-fill: #475569;"/>
+                        </HBox>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                            <Label text="Support par e-mail standard" style="-fx-text-fill: #475569;"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </VBox>
+
+            <!-- Plus Plan -->
+            <VBox prefWidth="320" style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 0); -fx-padding: 30;" spacing="25">
+                <VBox spacing="10">
+                    <Label style="-fx-text-fill: #1e293b; -fx-font-size: 18px; -fx-font-weight: bold;" text="Plus" />
+                    <HBox alignment="BASELINE_LEFT" spacing="2">
+                        <Label style="-fx-text-fill: #1e293b; -fx-font-size: 20px; -fx-font-weight: bold;" text="dt" />
+                        <Label fx:id="pricePlus" style="-fx-text-fill: #1e293b; -fx-font-size: 42px; -fx-font-weight: bold;" text="75" />
+                        <Label style="-fx-text-fill: #64748b; -fx-font-size: 18px;" text="/m" />
+                    </HBox>
+                    <Label style="-fx-text-fill: #64748b; -fx-font-size: 14px;" text="Pour les utilisateurs avancés" />
+                </VBox>
+                
+                <Button fx:id="btnPlus" onAction="#handlePlusPlan" prefWidth="300" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 12; -fx-background-radius: 8; -fx-cursor: hand;" text="Acheter Maintenant" />
+                
+                <VBox spacing="15">
+                    <Label style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 14px;" text="Tout de Basique, plus :" />
+                    <VBox spacing="10">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                            <Label text="Conversations IA illimitées" style="-fx-text-fill: #475569;"/>
+                        </HBox>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                            <Label text="Accès aux projets premium" style="-fx-text-fill: #475569;"/>
+                        </HBox>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                            <Label text="Exportation de ressources" style="-fx-text-fill: #475569;"/>
+                        </HBox>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                            <Label text="Support prioritaire" style="-fx-text-fill: #475569;"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </VBox>
+
+            <!-- Business Plan -->
+            <VBox prefWidth="320" style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 20, 0, 0, 0); -fx-padding: 30; -fx-border-color: #e74c3c; -fx-border-radius: 15; -fx-border-width: 1;" spacing="25">
+                <StackPane alignment="TOP_RIGHT">
+                    <Label style="-fx-background-color: #f3e8ff; -fx-text-fill: #7e22ce; -fx-padding: 4 12; -fx-background-radius: 20; -fx-font-size: 11px; -fx-font-weight: bold;" text="Le plus populaire" />
+                </StackPane>
+                
+                <VBox spacing="10">
+                    <Label style="-fx-text-fill: #1e293b; -fx-font-size: 18px; -fx-font-weight: bold;" text="Business" />
+                    <HBox alignment="BASELINE_LEFT" spacing="2">
+                        <Label style="-fx-text-fill: #1e293b; -fx-font-size: 20px; -fx-font-weight: bold;" text="dt" />
+                        <Label fx:id="priceBusiness" style="-fx-text-fill: #1e293b; -fx-font-size: 42px; -fx-font-weight: bold;" text="135" />
+                        <Label style="-fx-text-fill: #64748b; -fx-font-size: 18px;" text="/m" />
+                    </HBox>
+                    <Label style="-fx-text-fill: #64748b; -fx-font-size: 14px;" text="Solution complète pour les professionnels" />
+                </VBox>
+                
+                <Button fx:id="btnBusiness" onAction="#handleBusinessPlan" prefWidth="300" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 12; -fx-background-radius: 8; -fx-cursor: hand;" text="Acheter Maintenant" />
+                
+                <VBox spacing="15">
+                    <Label style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 14px;" text="Tout de Plus, plus :" />
+                    <VBox spacing="10">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                            <Label text="Projets collaboratifs" style="-fx-text-fill: #475569;"/>
+                        </HBox>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                            <Label text="Statistiques avancées" style="-fx-text-fill: #475569;"/>
+                        </HBox>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                            <Label text="Gestion d'équipe" style="-fx-text-fill: #475569;"/>
+                        </HBox>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                            <Label text="Support dédié 24/7" style="-fx-text-fill: #475569;"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </VBox>
+
+        </HBox>
+    </VBox>
+</ScrollPane>

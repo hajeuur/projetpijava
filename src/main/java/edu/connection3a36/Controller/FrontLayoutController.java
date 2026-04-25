@@ -43,6 +43,16 @@ public class FrontLayoutController implements Initializable {
     }
 
     @FXML
+    private void loadPricing() {
+        loadView("/Pricing.fxml");
+    }
+
+    @FXML
+    private void loadAbout() {
+        loadView("/About.fxml");
+    }
+
+    @FXML
     private void logout() {
         SessionManager.getInstance().logout();
         try {
