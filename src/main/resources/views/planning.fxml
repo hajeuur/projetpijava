@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.shape.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.mentorai.controllers.PlanningController"
+            stylesheets="@../css/planning.css"
+            prefWidth="1280" prefHeight="800">
+
+    <!-- ══════════════════════════════════════════════════════
+         TOP BAR  –  Page title + breadcrumb
+    ══════════════════════════════════════════════════════ -->
+    <top>
+        <HBox styleClass="page-title" alignment="CENTER_LEFT" spacing="12" BorderPane.alignment="CENTER">
+            <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
+            <Label text="Planning" styleClass="page-title-label"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="❓ Guide" styleClass="btn-nav" onAction="#handleGuide"/>
+            <HBox alignment="CENTER_RIGHT" spacing="4">
+                <Label text="Accueil  ›  " styleClass="breadcrumb-muted"/>
+                <Label text="Planning" styleClass="breadcrumb-current"/>
+            </HBox>
+        </HBox>
+    </top>
+
+    <!-- ══════════════════════════════════════════════════════
+         PERSONALITY BANNER  –  shown/hidden by controller
+    ══════════════════════════════════════════════════════ -->
+    <!-- Placed inside a VBox wrapper so controller can show/hide -->
+
+    <!-- ══════════════════════════════════════════════════════
+         MAIN CONTENT
+    ══════════════════════════════════════════════════════ -->
+    <center>
+        <VBox spacing="0">
+
+            <!-- Personality alert bar (hidden by default, controller toggles) -->
+            <HBox fx:id="personalityBanner" styleClass="alert-info-bar" alignment="CENTER_LEFT"
+                  spacing="12" managed="false" visible="false">
+                <padding><Insets top="10" right="20" bottom="10" left="20"/></padding>
+                <Label fx:id="personalityLabel" text="Votre type de personnalité : —" styleClass="alert-text"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Refaire le test" styleClass="btn-outline-primary-sm"
+                        onAction="#onRefaireTest"/>
+            </HBox>
+
+            <!-- Personality test prompt bar (shown when no type set) -->
+            <HBox fx:id="personalityTestBar" styleClass="alert-test-bar" alignment="CENTER_RIGHT"
+                  managed="true" visible="true">
+                <padding><Insets top="10" right="20" bottom="10" left="20"/></padding>
+                <Button text="Test de personnalité" styleClass="btn-primary"
+                        onAction="#onPersonalityTest"/>
+            </HBox>
+
+            <!-- ─────────────────────────────────────────────
+                 PLANNING LAYOUT  =  left panel + right panel
+            ───────────────────────────────────────────── -->
+            <HBox fx:id="planningLayout" spacing="24" VBox.vgrow="ALWAYS">
+                <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+
+                <!-- ══════════════════════════
+                     LEFT PANEL – Calendar
+                ══════════════════════════ -->
+                <VBox fx:id="calendarPanel" styleClass="planning-panel"
+                      prefWidth="300" maxWidth="320" minWidth="260" spacing="10">
+                    <HBox.hgrow>NEVER</HBox.hgrow>
+
+                    <!-- Header row: title + nav buttons -->
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label fx:id="calendarTitle" text="Calendrier" styleClass="panel-heading"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="calPrev" text="‹" styleClass="btn-nav" onAction="#onCalPrev"/>
+                        <Button fx:id="calNext" text="›" styleClass="btn-nav" onAction="#onCalNext"/>
+                        <Button fx:id="calPrevYear" text="-1 an" styleClass="btn-nav" onAction="#onCalPrevYear"/>
+                        <Button fx:id="calNextYear" text="+1 an" styleClass="btn-nav" onAction="#onCalNextYear"/>
+                    </HBox>
+
+                    <!-- Selected date label -->
+                    <Label fx:id="selectedDateLabel" text="Date sélectionnée : —" styleClass="planning-meta"/>
+
+                    <!-- Calendar grid (7 cols × up to 7 rows, populated by controller) -->
+                    <GridPane fx:id="calendarGrid" hgap="4" vgap="4">
+                        <!-- Day-of-week headers (L M M J V S D) – added by controller -->
+                    </GridPane>
+
+                    <Separator/>
+
+                    <!-- Type filter label -->
+                    <Label text="Filtrer par type" styleClass="planning-meta"/>
+
+                    <!-- Type filter pills – populated by controller -->
+                    <FlowPane fx:id="typeFilter" hgap="8" vgap="8"/>
+
+                </VBox>
+
+                <!-- ══════════════════════════════════════════
+                     RIGHT PANEL – Weekly grid
+                ══════════════════════════════════════════ -->
+                <VBox fx:id="weekPanel" styleClass="planning-panel" spacing="10" HBox.hgrow="ALWAYS">
+
+                    <!-- Week panel header -->
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label text="Planning hebdomadaire" styleClass="panel-heading"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="weekRange" text="—" styleClass="planning-meta"/>
+                    </HBox>
+
+                    <!-- Error / reminder banners -->
+                    <Label fx:id="planningErrors" styleClass="alert-danger-bar"
+                           managed="false" visible="false" wrapText="true"/>
+                    <Label fx:id="planningReminders" styleClass="alert-info-bar-inline"
+                           managed="false" visible="false" wrapText="true"/>
+
+                    <Label text="Double-cliquez sur une case pour ajouter une activité."
+                           styleClass="planning-meta"/>
+
+                    <!-- ── Week grid wrapper (scrollable horizontally + vertically) ── -->
+                    <ScrollPane fx:id="weekScrollPane" fitToWidth="true"
+                                VBox.vgrow="ALWAYS" styleClass="week-scroll">
+
+                        <!-- Outer column: axis labels | day columns -->
+                        <GridPane fx:id="weekGridPane" styleClass="week-grid-pane">
+                            <columnConstraints>
+                                <!-- axis column -->
+                                <ColumnConstraints minWidth="70" prefWidth="70" maxWidth="70"/>
+                                <!-- 7 day columns -->
+                                <ColumnConstraints minWidth="140" prefWidth="160" hgrow="ALWAYS"/>
+                                <ColumnConstraints minWidth="140" prefWidth="160" hgrow="ALWAYS"/>
+                                <ColumnConstraints minWidth="140" prefWidth="160" hgrow="ALWAYS"/>
+                                <ColumnConstraints minWidth="140" prefWidth="160" hgrow="ALWAYS"/>
+                                <ColumnConstraints minWidth="140" prefWidth="160" hgrow="ALWAYS"/>
+                                <ColumnConstraints minWidth="140" prefWidth="160" hgrow="ALWAYS"/>
+                                <ColumnConstraints minWidth="140" prefWidth="160" hgrow="ALWAYS"/>
+                            </columnConstraints>
+
+                            <!-- Row 0: sticky header (day names) -->
+                            <rowConstraints>
+                                <RowConstraints minHeight="36" prefHeight="36" maxHeight="36"/>
+                                <!-- Row 1: scrollable body (fixed height = 24 * rowHeight) -->
+                                <RowConstraints minHeight="1344" prefHeight="1344"/>
+                            </rowConstraints>
+
+                            <!-- ── Header row ── -->
+                            <!-- Empty top-left corner -->
+                            <Pane styleClass="week-header-corner" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+
+                            <!-- Day header labels – populated by controller -->
+                            <!-- fx:id="dayHeader0" … "dayHeader6" set by controller -->
+                            <Label fx:id="dayHeader0" text="Lun 00/00" styleClass="week-day-header"
+                                   GridPane.rowIndex="0" GridPane.columnIndex="1"
+                                   maxWidth="Infinity" alignment="CENTER"/>
+                            <Label fx:id="dayHeader1" text="Mar 00/00" styleClass="week-day-header"
+                                   GridPane.rowIndex="0" GridPane.columnIndex="2"
+                                   maxWidth="Infinity" alignment="CENTER"/>
+                            <Label fx:id="dayHeader2" text="Mer 00/00" styleClass="week-day-header"
+                                   GridPane.rowIndex="0" GridPane.columnIndex="3"
+                                   maxWidth="Infinity" alignment="CENTER"/>
+                            <Label fx:id="dayHeader3" text="Jeu 00/00" styleClass="week-day-header"
+                                   GridPane.rowIndex="0" GridPane.columnIndex="4"
+                                   maxWidth="Infinity" alignment="CENTER"/>
+                            <Label fx:id="dayHeader4" text="Ven 00/00" styleClass="week-day-header"
+                                   GridPane.rowIndex="0" GridPane.columnIndex="5"
+                                   maxWidth="Infinity" alignment="CENTER"/>
+                            <Label fx:id="dayHeader5" text="Sam 00/00" styleClass="week-day-header"
+                                   GridPane.rowIndex="0" GridPane.columnIndex="6"
+                                   maxWidth="Infinity" alignment="CENTER"/>
+                            <Label fx:id="dayHeader6" text="Dim 00/00" styleClass="week-day-header"
+                                   GridPane.rowIndex="0" GridPane.columnIndex="7"
+                                   maxWidth="Infinity" alignment="CENTER"/>
+
+                            <!-- ── Body row: axis + 7 day Panes ── -->
+
+                            <!-- Hour-axis VBox -->
+                            <VBox fx:id="weekAxis" styleClass="week-axis"
+                                  GridPane.rowIndex="1" GridPane.columnIndex="0">
+                                <!-- 24 hour labels added by controller -->
+                                <Label text="00h" styleClass="hour-label"/>
+                                <Label text="01h" styleClass="hour-label"/>
+                                <Label text="02h" styleClass="hour-label"/>
+                                <Label text="03h" styleClass="hour-label"/>
+                                <Label text="04h" styleClass="hour-label"/>
+                                <Label text="05h" styleClass="hour-label"/>
+                                <Label text="06h" styleClass="hour-label"/>
+                                <Label text="07h" styleClass="hour-label"/>
+                                <Label text="08h" styleClass="hour-label"/>
+                                <Label text="09h" styleClass="hour-label"/>
+                                <Label text="10h" styleClass="hour-label"/>
+                                <Label text="11h" styleClass="hour-label"/>
+                                <Label text="12h" styleClass="hour-label"/>
+                                <Label text="13h" styleClass="hour-label"/>
+                                <Label text="14h" styleClass="hour-label"/>
+                                <Label text="15h" styleClass="hour-label"/>
+                                <Label text="16h" styleClass="hour-label"/>
+                                <Label text="17h" styleClass="hour-label"/>
+                                <Label text="18h" styleClass="hour-label"/>
+                                <Label text="19h" styleClass="hour-label"/>
+                                <Label text="20h" styleClass="hour-label"/>
+                                <Label text="21h" styleClass="hour-label"/>
+                                <Label text="22h" styleClass="hour-label"/>
+                                <Label text="23h" styleClass="hour-label"/>
+                            </VBox>
+
+                            <!-- 7 Day columns (Pane so controller can absolutely-position activity cards) -->
+                            <Pane fx:id="dayCol0" styleClass="week-day-column"
+                                  GridPane.rowIndex="1" GridPane.columnIndex="1"
+                                  prefHeight="1344" minHeight="1344"
+                                  onMouseClicked="#onDayColClick"
+                                  onMousePressed="#onDayColMousePressed"/>
+                            <Pane fx:id="dayCol1" styleClass="week-day-column"
+                                  GridPane.rowIndex="1" GridPane.columnIndex="2"
+                                  prefHeight="1344" minHeight="1344"
+                                  onMouseClicked="#onDayColClick"
+                                  onMousePressed="#onDayColMousePressed"/>
+                            <Pane fx:id="dayCol2" styleClass="week-day-column"
+                                  GridPane.rowIndex="1" GridPane.columnIndex="3"
+                                  prefHeight="1344" minHeight="1344"
+                                  onMouseClicked="#onDayColClick"
+                                  onMousePressed="#onDayColMousePressed"/>
+                            <Pane fx:id="dayCol3" styleClass="week-day-column"
+                                  GridPane.rowIndex="1" GridPane.columnIndex="4"
+                                  prefHeight="1344" minHeight="1344"
+                                  onMouseClicked="#onDayColClick"
+                                  onMousePressed="#onDayColMousePressed"/>
+                            <Pane fx:id="dayCol4" styleClass="week-day-column"
+                                  GridPane.rowIndex="1" GridPane.columnIndex="5"
+                                  prefHeight="1344" minHeight="1344"
+                                  onMouseClicked="#onDayColClick"
+                                  onMousePressed="#onDayColMousePressed"/>
+                            <Pane fx:id="dayCol5" styleClass="week-day-column"
+                                  GridPane.rowIndex="1" GridPane.columnIndex="6"
+                                  prefHeight="1344" minHeight="1344"
+                                  onMouseClicked="#onDayColClick"
+                                  onMousePressed="#onDayColMousePressed"/>
+                            <Pane fx:id="dayCol6" styleClass="week-day-column"
+                                  GridPane.rowIndex="1" GridPane.columnIndex="7"
+                                  prefHeight="1344" minHeight="1344"
+                                  onMouseClicked="#onDayColClick"
+                                  onMousePressed="#onDayColMousePressed"/>
+
+                        </GridPane>
+                    </ScrollPane>
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+
+    <!-- ══════════════════════════════════════════════════════
+         MODAL OVERLAY  –  always present, toggled visible
+    ══════════════════════════════════════════════════════ -->
+    <!-- JavaFX doesn't support true CSS overlays; we use a StackPane
+         overlay child managed/visible by the controller.
+         Add it via code in the controller after FXML load, OR nest in
+         a StackPane root.  The Dialog approach below keeps FXML simple. -->
+
+</BorderPane>
