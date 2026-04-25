@@ -4,17 +4,24 @@ import com.esprit.dao.UtilisateurDAO;
 import com.esprit.models.Utilisateur;
 import com.esprit.utils.GoogleAuthService;
 import com.esprit.utils.GoogleUserInfo;
+import com.sun.net.httpserver.HttpServer;
 import javafx.application.Platform;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import netscape.javascript.JSObject;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -23,12 +30,82 @@ public class LoginController {
     @FXML private TextField emailField;
     @FXML private PasswordField passwordField;
     @FXML private Label errorLabel;
+    @FXML private Button loginButton;
     @FXML private Button googleLoginButton;
+    @FXML private VBox captchaContainer;
 
     private UtilisateurDAO dao = new UtilisateurDAO();
+    private boolean captchaVerified = false;
+    private WebEngine webEngine;
+    private HttpServer captchaServer;
+
+    public class JavaBridge {
+        public void captchaVerified(String token) {
+            System.out.println(">>> hCaptcha OK !");
+            captchaVerified = true;
+            Platform.runLater(() -> errorLabel.setText(""));
+        }
+        public void captchaExpired() {
+            captchaVerified = false;
+        }
+    }
+
+    private int findFreePort() {
+        try (ServerSocket s = new ServerSocket(0)) { return s.getLocalPort(); }
+        catch (Exception e) { return 7777; }
+    }
+
+    @FXML
+    public void initialize() {
+        // ✅ Bouton Se connecter TOUJOURS actif
+        // La validation du captcha se fait dans handleLogin()
+
+        if (captchaContainer != null) {
+            try {
+                int port = findFreePort();
+                captchaServer = HttpServer.create(new InetSocketAddress("localhost", port), 0);
+                captchaServer.createContext("/hcaptcha.html", exchange -> {
+                    InputStream in = getClass().getResourceAsStream("/com/esprit/views/hcaptcha.html");
+                    byte[] bytes = in.readAllBytes();
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.sendResponseHeaders(200, bytes.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(bytes);
+                    os.close();
+                });
+                captchaServer.start();
+
+                WebView webView = new WebView();
+                webView.setPrefWidth(320);
+                webView.setPrefHeight(120);
+                webView.setMinHeight(120);
+                webView.setMaxHeight(120);
+                webEngine = webView.getEngine();
+
+                webEngine.getLoadWorker().stateProperty().addListener((obs, old, newState) -> {
+                    if (newState == Worker.State.SUCCEEDED) {
+                        try {
+                            JSObject window = (JSObject) webEngine.executeScript("window");
+                            window.setMember("javabridge", new JavaBridge());
+                            System.out.println(">>> Bridge injecté !");
+                        } catch (Exception e) {
+                            System.out.println(">>> Erreur bridge: " + e.getMessage());
+                        }
+                    }
+                });
+
+                webEngine.load("http://localhost:" + port + "/hcaptcha.html");
+                captchaContainer.getChildren().add(webView);
+
+            } catch (Exception e) {
+                System.out.println(">>> Erreur serveur captcha: " + e.getMessage());
+            }
+        }
+    }
 
     @FXML
     public void handleLogin() {
+        // ✅ 1. Vérifier email et mdp d'abord
         String email = emailField.getText().trim();
         String mdp = passwordField.getText().trim();
 
@@ -37,10 +114,18 @@ public class LoginController {
             return;
         }
 
+        // ✅ 2. Vérifier en base
         Utilisateur u = dao.login(email, mdp);
 
         if (u == null) {
             errorLabel.setText("Email ou mot de passe incorrect !");
+            captchaVerified = false;
+            if (webEngine != null) {
+                Platform.runLater(() -> {
+                    try { webEngine.executeScript("hcaptcha.reset()"); }
+                    catch (Exception ignored) {}
+                });
+            }
             return;
         }
 
@@ -49,6 +134,7 @@ public class LoginController {
             return;
         }
 
+        if (captchaServer != null) captchaServer.stop(0);
         redirectByRole(u);
     }
 
@@ -60,55 +146,39 @@ public class LoginController {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             try {
-                System.out.println(">>> Début authentification Google...");
                 GoogleUserInfo googleUser = GoogleAuthService.authenticate();
-                System.out.println(">>> Authentification OK : " + googleUser);
-
                 if (googleUser == null || googleUser.getEmail() == null) {
                     Platform.runLater(() -> errorLabel.setText("Authentification Google échouée."));
                     return;
                 }
-
-                System.out.println(">>> Recherche en base : " + googleUser.getEmail());
                 Utilisateur existing = dao.findByEmail(googleUser.getEmail());
-                System.out.println(">>> Résultat findByEmail : " + (existing != null ? "TROUVÉ id=" + existing.getId() : "NON TROUVÉ"));
-
                 if (existing != null) {
-                    System.out.println(">>> Status : " + existing.getStatus());
                     if (existing.getStatus().equals("desactiver")) {
-                        Platform.runLater(() ->
-                                errorLabel.setText("Votre compte est désactivé. Contactez l'administrateur !"));
+                        Platform.runLater(() -> errorLabel.setText("Votre compte est désactivé."));
                         return;
                     }
-                    System.out.println(">>> Redirection vers rôle : " + existing.getRole());
+                    if (captchaServer != null) captchaServer.stop(0);
                     Platform.runLater(() -> redirectByRole(existing));
-
                 } else {
-                    System.out.println(">>> Création nouveau compte Google...");
                     Utilisateur nouveau = new Utilisateur();
                     nouveau.setEmail(googleUser.getEmail());
-                    nouveau.setNom(googleUser.getNom()    != null ? googleUser.getNom()    : "");
+                    nouveau.setNom(googleUser.getNom() != null ? googleUser.getNom() : "");
                     nouveau.setPrenom(googleUser.getPrenom() != null ? googleUser.getPrenom() : "");
                     nouveau.setMdp("");
                     nouveau.setRole("etudiant");
                     nouveau.setStatus("activer");
-
+                    nouveau.setTrustScore(0.0);
+                    nouveau.setRiskLevel("low");
                     dao.ajouter(nouveau);
-                    System.out.println(">>> Compte créé !");
-
                     Utilisateur created = dao.findByEmail(googleUser.getEmail());
-                    System.out.println(">>> Compte récupéré : " + (created != null ? "id=" + created.getId() : "NULL !"));
+                    if (captchaServer != null) captchaServer.stop(0);
                     Platform.runLater(() -> redirectByRole(created));
                 }
-
             } catch (Exception e) {
-                System.out.println(">>> ERREUR GOOGLE : " + e.getClass().getName() + " : " + e.getMessage());
                 e.printStackTrace();
                 Platform.runLater(() -> errorLabel.setText(e.getClass().getSimpleName() + ": " + e.getMessage()));
             } finally {
-                Platform.runLater(() -> {
-                    if (googleLoginButton != null) googleLoginButton.setDisable(false);
-                });
+                Platform.runLater(() -> { if (googleLoginButton != null) googleLoginButton.setDisable(false); });
                 executor.shutdown();
             }
         });
@@ -123,56 +193,37 @@ public class LoginController {
             stage.setTitle("Inscription");
             stage.setScene(new Scene(root));
             stage.show();
-        } catch (Exception e) {
-            errorLabel.setText("Erreur : " + e.getMessage());
-        }
+        } catch (Exception e) { errorLabel.setText("Erreur : " + e.getMessage()); }
     }
 
     @FXML
     public void handleForgetPassword() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/com/esprit/views/ForgetPassword.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/views/ForgetPassword.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) emailField.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-        } catch (Exception e) {
-            errorLabel.setText("Erreur : " + e.getMessage());
-        }
+        } catch (Exception e) { errorLabel.setText("Erreur : " + e.getMessage()); }
     }
 
     private void redirectByRole(Utilisateur u) {
         try {
-            if (u == null) {
-                System.out.println(">>> ERREUR: utilisateur NULL dans redirectByRole !");
-                errorLabel.setText("Erreur : utilisateur introuvable.");
-                return;
-            }
+            if (u == null) { errorLabel.setText("Erreur : utilisateur introuvable."); return; }
             String role = u.getRole();
-            System.out.println(">>> redirectByRole : role=" + role + " id=" + u.getId());
-
             String fxmlPath = role.equals("admin")
                     ? "/com/esprit/views/BackOffice.fxml"
                     : "/com/esprit/views/FrontOffice.fxml";
-
-            System.out.println(">>> Chargement FXML : " + fxmlPath);
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-            System.out.println(">>> FXML chargé !");
-
             if (!role.equals("admin")) {
                 FrontOfficeController controller = loader.getController();
                 controller.setUtilisateur(u);
             }
-
             Stage stage = (Stage) emailField.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-            System.out.println(">>> Redirection effectuée !");
-
         } catch (Exception e) {
-            System.out.println(">>> ERREUR redirectByRole : " + e.getClass() + " : " + e.getMessage());
             e.printStackTrace();
             errorLabel.setText("Erreur navigation : " + e.getMessage());
         }

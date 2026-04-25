@@ -30,7 +30,7 @@ public class UtilisateurDAO implements IUtilisateur {
     @Override
     public void ajouter(Utilisateur u) {
         Connection cnx = DatabaseConnection.getInstance();
-        String sql = "INSERT INTO utilisateur (nom, prenom, email, mdp, role, status, trust_score, risk_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO utilisateur (nom, prenom, email, mdp, role, status, trust_score, risk_level, flagged_duplicate, login_attempts, registration_ip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, u.getNom());
@@ -41,6 +41,9 @@ public class UtilisateurDAO implements IUtilisateur {
             ps.setString(6, u.getStatus());
             ps.setDouble(7, u.getTrustScore());
             ps.setString(8, u.getRiskLevel());
+            ps.setInt(9, u.getFlaggedDuplicate());
+            ps.setInt(10, u.getLoginAttempts());
+            ps.setString(11, u.getRegistrationIp());
             ps.executeUpdate();
             System.out.println("Utilisateur ajouté avec succès !");
         } catch (SQLException e) {
@@ -51,7 +54,7 @@ public class UtilisateurDAO implements IUtilisateur {
     @Override
     public void modifier(Utilisateur u) {
         Connection cnx = DatabaseConnection.getInstance();
-        String sql = "UPDATE utilisateur SET nom=?, prenom=?, email=?, mdp=?, role=?, status=?, trust_score=?, risk_level=? WHERE id=?";
+        String sql = "UPDATE utilisateur SET nom=?, prenom=?, email=?, mdp=?, role=?, status=?, trust_score=?, risk_level=?, flagged_duplicate=?, login_attempts=? WHERE id=?";
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, u.getNom());
@@ -62,7 +65,9 @@ public class UtilisateurDAO implements IUtilisateur {
             ps.setString(6, u.getStatus());
             ps.setDouble(7, u.getTrustScore());
             ps.setString(8, u.getRiskLevel());
-            ps.setInt(9, u.getId());
+            ps.setInt(9, u.getFlaggedDuplicate());
+            ps.setInt(10, u.getLoginAttempts());
+            ps.setInt(11, u.getId());
             ps.executeUpdate();
             System.out.println("Utilisateur modifié avec succès !");
         } catch (SQLException e) {
@@ -92,19 +97,7 @@ public class UtilisateurDAO implements IUtilisateur {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                Utilisateur u = new Utilisateur();
-                u.setId(rs.getInt("id"));
-                u.setNom(rs.getString("nom"));
-                u.setPrenom(rs.getString("prenom"));
-                u.setEmail(rs.getString("email"));
-                u.setMdp(rs.getString("mdp"));
-                u.setRole(rs.getString("role"));
-                u.setStatus(rs.getString("status"));
-                u.setTrustScore(rs.getDouble("trust_score"));
-                u.setRiskLevel(rs.getString("risk_level"));
-                return u;
-            }
+            if (rs.next()) return mapRow(rs);
         } catch (SQLException e) {
             System.out.println("Erreur getOne : " + e.getMessage());
         }
@@ -119,19 +112,7 @@ public class UtilisateurDAO implements IUtilisateur {
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Utilisateur u = new Utilisateur();
-                u.setId(rs.getInt("id"));
-                u.setNom(rs.getString("nom"));
-                u.setPrenom(rs.getString("prenom"));
-                u.setEmail(rs.getString("email"));
-                u.setMdp(rs.getString("mdp"));
-                u.setRole(rs.getString("role"));
-                u.setStatus(rs.getString("status"));
-                u.setTrustScore(rs.getDouble("trust_score"));
-                u.setRiskLevel(rs.getString("risk_level"));
-                list.add(u);
-            }
+            while (rs.next()) list.add(mapRow(rs));
         } catch (SQLException e) {
             System.out.println("Erreur getAll : " + e.getMessage());
         }
@@ -148,23 +129,12 @@ public class UtilisateurDAO implements IUtilisateur {
             ps.setString(1, email);
             ps.setString(2, mdpHache);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                Utilisateur u = new Utilisateur();
-                u.setId(rs.getInt("id"));
-                u.setNom(rs.getString("nom"));
-                u.setPrenom(rs.getString("prenom"));
-                u.setEmail(rs.getString("email"));
-                u.setRole(rs.getString("role"));
-                u.setStatus(rs.getString("status"));
-                return u;
-            }
+            if (rs.next()) return mapRow(rs);
         } catch (SQLException e) {
             System.out.println("Erreur login : " + e.getMessage());
         }
         return null;
     }
-
-    // ── Nouveau : utilisé par LoginController et InscriptionController ─────────
 
     public Utilisateur findByEmail(String email) {
         Connection cnx = DatabaseConnection.getInstance();
@@ -173,22 +143,88 @@ public class UtilisateurDAO implements IUtilisateur {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                Utilisateur u = new Utilisateur();
-                u.setId(rs.getInt("id"));
-                u.setNom(rs.getString("nom"));
-                u.setPrenom(rs.getString("prenom"));
-                u.setEmail(rs.getString("email"));
-                u.setMdp(rs.getString("mdp"));
-                u.setRole(rs.getString("role"));
-                u.setStatus(rs.getString("status"));
-                u.setTrustScore(rs.getDouble("trust_score"));
-                u.setRiskLevel(rs.getString("risk_level"));
-                return u;
-            }
+            if (rs.next()) return mapRow(rs);
         } catch (SQLException e) {
             System.out.println("Erreur findByEmail : " + e.getMessage());
         }
         return null;
+    }
+
+    // ── Incrémenter les tentatives de connexion échouées ──────────────────────
+    public void incrementLoginAttempts(String email) {
+        Connection cnx = DatabaseConnection.getInstance();
+        String sql = "UPDATE utilisateur SET login_attempts = login_attempts + 1 WHERE email=?";
+        try {
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setString(1, email);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Erreur incrementLoginAttempts : " + e.getMessage());
+        }
+    }
+
+    // ── Réinitialiser les tentatives après connexion réussie ──────────────────
+    public void resetLoginAttempts(String email) {
+        Connection cnx = DatabaseConnection.getInstance();
+        String sql = "UPDATE utilisateur SET login_attempts = 0 WHERE email=?";
+        try {
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setString(1, email);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Erreur resetLoginAttempts : " + e.getMessage());
+        }
+    }
+
+    // ── Mettre à jour trust_score et risk_level ───────────────────────────────
+    public void updateRisk(Utilisateur u) {
+        Connection cnx = DatabaseConnection.getInstance();
+        String sql = "UPDATE utilisateur SET trust_score=?, risk_level=?, flagged_duplicate=? WHERE id=?";
+        try {
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setDouble(1, u.getTrustScore());
+            ps.setString(2, u.getRiskLevel());
+            ps.setInt(3, u.getFlaggedDuplicate());
+            ps.setInt(4, u.getId());
+            ps.executeUpdate();
+            System.out.println("Risk mis à jour pour : " + u.getEmail());
+        } catch (SQLException e) {
+            System.out.println("Erreur updateRisk : " + e.getMessage());
+        }
+    }
+
+    // ── Mapping ResultSet → Utilisateur ──────────────────────────────────────
+    private Utilisateur mapRow(ResultSet rs) throws SQLException {
+        Utilisateur u = new Utilisateur();
+        u.setId(rs.getInt("id"));
+        u.setNom(rs.getString("nom"));
+        u.setPrenom(rs.getString("prenom"));
+        u.setEmail(rs.getString("email"));
+        u.setMdp(rs.getString("mdp"));
+        u.setRole(rs.getString("role"));
+        u.setStatus(rs.getString("status"));
+        u.setTrustScore(rs.getDouble("trust_score"));
+        u.setRiskLevel(rs.getString("risk_level"));
+        try { u.setFlaggedDuplicate(rs.getInt("flagged_duplicate")); } catch (Exception ignored) {}
+        try { u.setLoginAttempts(rs.getInt("login_attempts")); } catch (Exception ignored) {}
+        try { u.setRegistrationIp(rs.getString("registration_ip")); } catch (Exception ignored) {}
+        try { u.setPdpUrl(rs.getString("pdp_url")); } catch (Exception ignored) {}
+        try { u.setAiVerdict(rs.getString("ai_verdict")); } catch (Exception ignored) {}
+        return u;
+    }
+
+    // ── Sauvegarder le verdict IA ─────────────────────────────────────────────
+    public void saveAiVerdict(Utilisateur u) {
+        Connection cnx = DatabaseConnection.getInstance();
+        String sql = "UPDATE utilisateur SET ai_verdict=? WHERE id=?";
+        try {
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setString(1, u.getAiVerdict());
+            ps.setInt(2, u.getId());
+            ps.executeUpdate();
+            System.out.println("AI Verdict sauvegardé pour : " + u.getEmail());
+        } catch (SQLException e) {
+            System.out.println("Erreur saveAiVerdict : " + e.getMessage());
+        }
     }
 }

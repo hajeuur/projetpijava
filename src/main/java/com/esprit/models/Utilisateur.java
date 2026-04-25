@@ -88,6 +88,8 @@ public class Utilisateur {
     public String getPreferences() { return preferences; }
     public void setPreferences(String preferences) { this.preferences = preferences; }
 
+    public int getFlaggedDuplicate() { return flaggedDuplicate; }
+    public void setFlaggedDuplicate(int f) { this.flaggedDuplicate = f; }
     @Override
     public String toString() {
         return "Utilisateur{id=" + id + ", nom=" + nom + ", prenom=" + prenom +
