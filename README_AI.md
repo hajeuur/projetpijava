@@ -15,10 +15,13 @@ Le module fonctionne sur un modèle **Hybride Java/Python** :
 
 ### 🐍 Partie Python (Moteur IA)
 *   **`python_app/job_requirements.json`** : 
-    *   La base de connaissances. Elle contient les listes de compétences (mots-clés) requises pour chaque métier (ex: React pour Frontend, Docker pour DevOps).
+    *   La base de connaissances. Elle contient les listes de compétences (mots-clés) requises pour chaque métier.
 *   **`python_app/skill_gap_analyzer.py`** : 
-    *   Le cerveau de l'analyse. Il lit les compétences de l'utilisateur envoyées par Java, compare avec le JSON, calcule un score de similarité et génère une recommandation textuelle.
-    *   Il prépare également les données pour le graphique Radar (valeurs de 0 à 100).
+    *   Le cerveau de l'analyse initiale. Il compare les compétences et prépare les données du graphique Radar.
+
+### 🤖 Partie Générative (Groq API)
+*   **Générateur de Roadmap Dynamique** : 
+    *   Directement intégré dans `SkillGapController.java`. Lorsqu'une compétence manquante est cliquée, l'application sollicite l'API Groq pour générer un plan de formation personnalisé sur 3 mois.
 
 ### ☕ Partie Java (Intégration & UI)
 *   **`src/main/java/edu/connection3a36/services/PythonIAIService.java`** : 
