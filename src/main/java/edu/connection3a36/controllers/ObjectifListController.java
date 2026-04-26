@@ -61,11 +61,7 @@ public class ObjectifListController {
     private void charger() {
         try {
             int userId = SessionManager.getCurrentUser().getId();
-            String emailUser = SessionManager.getCurrentUser().getEmail();
             tousObjectifs = objectifService.getByUtilisateur(userId);
-
-            // Envoi automatique des alertes email en arrière-plan
-            notifService.envoyerAlerteAutomatique(emailUser, tousObjectifs);
 
             afficherAlertes();
             mettreAJourStats();
