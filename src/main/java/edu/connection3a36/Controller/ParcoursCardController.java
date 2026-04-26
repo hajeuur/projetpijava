@@ -90,16 +90,16 @@ public class ParcoursCardController {
 
     @FXML
     private void modifierParcours() {
-        mainController.modifierParcoursSpecific(parcours);
+        mainController.modifierParcours(parcours);
     }
 
     @FXML
     private void supprimerParcours() {
-        mainController.supprimerParcoursSpecific(parcours);
+        mainController.supprimerParcours(parcours);
     }
 
     @FXML
     private void voirProjets() {
-        mainController.voirProjetsSpecific(parcours);
+        mainController.voirProjets(parcours);
     }
 }

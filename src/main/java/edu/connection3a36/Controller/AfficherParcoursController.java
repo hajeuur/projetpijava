@@ -123,11 +123,11 @@ public class AfficherParcoursController implements Initializable {
         ouvrirFormulaire(null);
     }
 
-    private void modifierParcours(Parcours p) {
+    public void modifierParcours(Parcours p) {
         ouvrirFormulaire(p);
     }
 
-    private void supprimerParcours(Parcours p) {
+    public void supprimerParcours(Parcours p) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer ce parcours ?", ButtonType.YES, ButtonType.NO);
         alert.showAndWait().ifPresent(res -> {
             if (res == ButtonType.YES) {
@@ -139,6 +139,24 @@ public class AfficherParcoursController implements Initializable {
                 }
             }
         });
+    }
+
+    public void voirProjets(Parcours p) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherProjets.fxml"));
+            Parent view = loader.load();
+            AfficherProjetsController controller = loader.getController();
+            controller.initData(p);
+            
+            Scene scene = flowPaneParcours.getScene();
+            if (scene != null) {
+                BorderPane mainLayout = (BorderPane) scene.lookup("#mainContainer");
+                if (mainLayout != null) mainLayout.setCenter(view);
+                else if (scene.getRoot() instanceof BorderPane) ((BorderPane) scene.getRoot()).setCenter(view);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void ouvrirFormulaire(Parcours p) {

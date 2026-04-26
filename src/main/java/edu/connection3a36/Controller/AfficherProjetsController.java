@@ -3,6 +3,7 @@ package edu.connection3a36.Controller;
 import edu.connection3a36.entities.Parcours;
 import edu.connection3a36.entities.Projet;
 import edu.connection3a36.services.ProjetService;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -12,6 +13,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -63,6 +67,109 @@ public class AfficherProjetsController implements Initializable {
     private Parcours parcoursActuel;
     private ObservableList<Projet> projetsData = FXCollections.observableArrayList();
     private Projet selectedProjet = null; // null = mode ajout, non-null = mode édition
+
+    @FXML
+    private VBox vboxChat, paneChat;
+    @FXML
+    private TextField txtChatInput;
+    @FXML
+    private ScrollPane scrollChat;
+
+    @FXML
+    private void toggleChat() {
+        boolean isVisible = paneChat.isVisible();
+        paneChat.setVisible(!isVisible);
+        paneChat.setManaged(!isVisible);
+        if (!isVisible) {
+            txtChatInput.requestFocus();
+        }
+    }
+
+    @FXML
+    private void envoyerMessageChat() {
+        String msg = txtChatInput.getText().trim();
+        if (msg.isEmpty())
+            return;
+
+        ajouterMessageUser(msg);
+        txtChatInput.clear();
+
+        boolean isPropose = msg.toLowerCase().contains("propose");
+
+        edu.connection3a36.services.GroqService.getResponse(msg, isPropose)
+                .thenAccept(response -> {
+                    javafx.application.Platform.runLater(() -> {
+                        // On affiche toujours l'intégralité de la réponse textuelle à l'utilisateur
+                        String fullResponse = response;
+
+                        // On tente d'extraire le bloc JSON s'il existe (entre [JSON] et [/JSON])
+                        if (fullResponse.contains("[JSON]")) {
+                            try {
+                                int start = fullResponse.indexOf("[JSON]") + 6;
+                                int end = fullResponse.indexOf("[/JSON]");
+                                String jsonStr = fullResponse.substring(start, end).trim();
+
+                                // On retire le tag JSON du texte affiché pour que ce soit propre
+                                String displayMsg = fullResponse.replace("[JSON]", "").replace("[/JSON]", "")
+                                        .replace(jsonStr, "").trim();
+                                ajouterMessageBot(displayMsg);
+
+                                org.json.JSONObject suggestion = new org.json.JSONObject(jsonStr);
+                                proposerRemplissage(suggestion);
+                            } catch (Exception e) {
+                                ajouterMessageBot(fullResponse);
+                            }
+                        } else {
+                            // Réponse purement textuelle (conseils, questions diverses)
+                            ajouterMessageBot(fullResponse);
+                        }
+                    });
+                });
+
+        // Message de bienvenue du bot IA
+        ajouterMessageBot(
+                "Bonjour ! 👋 Je suis votre assistant MentorAI. Comment puis-je vous aider dans vos projets aujourd'hui ?");
+    }
+
+    private void ajouterMessageUser(String text) {
+        Label lbl = new Label(text);
+        lbl.setWrapText(true);
+        lbl.setStyle(
+                "-fx-background-color: #6366f1; -fx-text-fill: white; -fx-padding: 10; -fx-background-radius: 15 15 0 15;");
+        HBox container = new HBox(lbl);
+        container.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+        vboxChat.getChildren().add(container);
+        scrollChat.setVvalue(1.0);
+    }
+
+    private void ajouterMessageBot(String text) {
+        Label lbl = new Label(text);
+        lbl.setWrapText(true);
+        lbl.setStyle(
+                "-fx-background-color: #f1f5f9; -fx-text-fill: #1e293b; -fx-padding: 10; -fx-background-radius: 15 15 15 0;");
+        HBox container = new HBox(lbl);
+        container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        vboxChat.getChildren().add(container);
+        scrollChat.setVvalue(1.0);
+    }
+
+    private void proposerRemplissage(org.json.JSONObject suggestion) {
+        ajouterMessageBot("Voici une idée de projet ! 💡\n\n" +
+                "TITRE : " + suggestion.getString("titre") + "\n" +
+                "Voulez-vous remplir le formulaire ?");
+
+        Button btnValider = new Button("✅ Remplir le formulaire");
+        btnValider.setStyle(
+                "-fx-background-color: #22c55e; -fx-text-fill: white; -fx-background-radius: 10; -fx-cursor: hand;");
+        btnValider.setOnAction(e -> {
+            txtTitre.setText(suggestion.getString("titre"));
+            taDescription.setText(suggestion.getString("description"));
+            txtTechnologies.setText(suggestion.getString("technologies"));
+            txtType.setText("Personnel");
+            ajouterMessageBot("Formulaire rempli ! 😊");
+        });
+        vboxChat.getChildren().add(btnValider);
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

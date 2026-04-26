@@ -3,59 +3,90 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="edu.connection3a36.Controller.AjouterProjetController"
-      spacing="12" style="-fx-background-color: #f4f6f9;" prefWidth="520" prefHeight="520">
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="edu.connection3a36.Controller.AjouterProjetController"
+           style="-fx-background-color: transparent;">
 
-    <padding><Insets top="25" right="30" bottom="25" left="30"/></padding>
+    <!-- Contenu Principal -->
+    <VBox spacing="15" style="-fx-background-color: #f8fafc; -fx-background-radius: 15;"
+          AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" 
+          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <padding><Insets top="25" right="30" bottom="25" left="30"/></padding>
 
-    <Label text="➕ Nouveau Projet" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-    <Label fx:id="lblParcoursNom" text="Parcours : ..."
-           style="-fx-font-size: 13px; -fx-text-fill: #8e44ad; -fx-font-style: italic;"/>
+        <!-- Titre Modifié pour Vérification -->
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <Label text="🚀 Créer un projet [Assistant IA]" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+            
+            <Button fx:id="btnFloatingChat" onAction="#toggleChat" 
+                    text="✨ Aide IA"
+                    style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 10; 
+                           -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 5 15;"/>
+        </HBox>
 
-    <Label fx:id="lblErreur" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 13px; -fx-wrap-text: true;"/>
+        <Label fx:id="lblParcoursNom" text="Parcours : ..." style="-fx-text-fill: #64748b; -fx-font-style: italic;"/>
+        
+        <Separator/>
 
-    <GridPane hgap="10" vgap="10">
-        <columnConstraints>
-            <ColumnConstraints prefWidth="140"/>
-            <ColumnConstraints prefWidth="300" hgrow="ALWAYS"/>
-        </columnConstraints>
+        <VBox spacing="8">
+            <Label text="Titre du projet *" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+            <TextField fx:id="txtTitre" promptText="Saisissez le titre..." style="-fx-background-radius: 8; -fx-padding: 10;"/>
+        </VBox>
 
-        <Label text="Titre *" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-        <TextField fx:id="txtTitre" promptText="Titre du projet (min 3 caractères)"
-                   GridPane.rowIndex="0" GridPane.columnIndex="1"
-                   style="-fx-background-radius: 6; -fx-padding: 7;"/>
-        <Label fx:id="errTitre" text="• Le titre est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <HBox spacing="15">
+            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                <Label text="Type *" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                <ComboBox fx:id="cbType" prefWidth="1000"/>
+            </VBox>
+            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                <Label text="Technologies *" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                <TextField fx:id="txtTechnologies" promptText="Java, AI..." style="-fx-background-radius: 8; -fx-padding: 10;"/>
+            </VBox>
+        </HBox>
 
-        <Label text="Type *" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-        <ComboBox fx:id="cbType" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="300"/>
-        <Label fx:id="errType" text="• Le type est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <VBox spacing="8">
+            <Label text="Description *" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+            <TextArea fx:id="taDescription" prefRowCount="3" wrapText="true" style="-fx-background-radius: 8;"/>
+        </VBox>
 
-        <Label text="Technologies *" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-        <TextField fx:id="txtTechnologies" promptText="Ex: Java, JavaFX, MySQL..."
-                   GridPane.rowIndex="4" GridPane.columnIndex="1"
-                   style="-fx-background-radius: 6; -fx-padding: 7;"/>
-        <Label fx:id="errTechnologies" text="• Les technologies sont obligatoires." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+        <HBox spacing="15">
+            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                <Label text="Date de Début *" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                <DatePicker fx:id="dpDateDebut" prefWidth="1000"/>
+            </VBox>
+            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                <Label text="Date de Fin" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                <DatePicker fx:id="dpDateFin" prefWidth="1000"/>
+            </VBox>
+        </HBox>
 
-        <Label text="Description" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-        <TextArea fx:id="taDescription" promptText="Description du projet (optionnel)"
-                  GridPane.rowIndex="3" GridPane.columnIndex="1"
-                  prefRowCount="3" style="-fx-background-radius: 6;" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+        <HBox spacing="15" alignment="CENTER_RIGHT">
+            <Button text="Annuler" onAction="#annuler" style="-fx-background-color: transparent; -fx-text-fill: #64748b;"/>
+            <Button text="Enregistrer" onAction="#enregistrer" style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 10 25;"/>
+        </HBox>
+    </VBox>
 
-        <Label text="Date de Début *" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-        <DatePicker fx:id="dpDateDebut" GridPane.rowIndex="7" GridPane.columnIndex="1" prefWidth="300"/>
-        <Label fx:id="errDateDebut" text="• La date de début est obligatoire." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+    <!-- Overlay Chatbot -->
+    <VBox fx:id="paneChat" visible="false" managed="false" prefWidth="300" prefHeight="350" 
+          style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 5);"
+          AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0">
 
-        <Label text="Date de Fin" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-        <DatePicker fx:id="dpDateFin" GridPane.rowIndex="9" GridPane.columnIndex="1" prefWidth="300"/>
-        <Label fx:id="errDateFin" text="• La date de fin doit être après le début." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px;" visible="false" managed="false" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
-    </GridPane>
+        <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #1e293b; -fx-background-radius: 15 15 0 0; -fx-padding: 10;">
+            <Label text="Assistant" style="-fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="✕" onAction="#toggleChat" style="-fx-background-color: transparent; -fx-text-fill: white;"/>
+        </HBox>
 
-    <HBox spacing="15" alignment="CENTER">
-        <Button text="💾 Enregistrer" onAction="#enregistrer"
-                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 8; -fx-padding: 10 25;"/>
-        <Button text="❌ Annuler" onAction="#annuler"
-                style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 8; -fx-padding: 10 25;"/>
-    </HBox>
-</VBox>
+        <ScrollPane fx:id="scrollChat" VBox.vgrow="ALWAYS" fitToWidth="true">
+            <VBox fx:id="vboxChat" spacing="8" style="-fx-padding: 10;"/>
+        </ScrollPane>
+
+        <HBox spacing="5" style="-fx-padding: 10;">
+            <TextField fx:id="txtChatInput" HBox.hgrow="ALWAYS" promptText="Question..."/>
+            <Button onAction="#envoyerMessage" text="🚀" />
+        </HBox>
+    </VBox>
+
+</AnchorPane>
