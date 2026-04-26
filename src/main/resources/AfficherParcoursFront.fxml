@@ -11,8 +11,11 @@
     <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
 
     <!-- Header Front Office -->
-    <HBox alignment="CENTER_LEFT" spacing="10">
+    <HBox alignment="CENTER_LEFT" spacing="20">
         <Label text="🎓 Découvrir les Parcours" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="🤖 Embauche IA" onAction="#ouvrirRecommandationsIA"
+                style="-fx-background-color: #d52e28; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 8 20; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(213, 46, 40, 0.3), 10, 0, 0, 0);"/>
     </HBox>
 
     <Label fx:id="lblStats" text="Chargement..." style="-fx-font-size: 13px; -fx-text-fill: #102c59; -fx-background-color: #9dbbce; -fx-padding: 6 12 6 12; -fx-background-radius: 6;"/>

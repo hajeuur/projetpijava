@@ -166,6 +166,33 @@ public class AfficherParcoursController implements Initializable {
         filterData();
     }
 
+    @FXML
+    private void ouvrirRecommandationsIA() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/RecommendationIA.fxml"));
+            Parent view = loader.load();
+            
+            // Trouver le conteneur principal (BorderPane) dans la scène actuelle
+            // On cherche par ID "#mainContainer" qui est défini dans FrontLayout.fxml
+            BorderPane mainLayout = (BorderPane) txtRecherche.getScene().lookup("#mainContainer");
+            
+            if (mainLayout != null) {
+                mainLayout.setCenter(view);
+            } else {
+                // Secours : si pas trouvé par ID, on essaie de remonter les parents
+                Parent parent = txtRecherche.getParent();
+                while (parent != null && !(parent instanceof BorderPane)) {
+                    parent = parent.getParent();
+                }
+                if (parent instanceof BorderPane) {
+                    ((BorderPane) parent).setCenter(view);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void afficherErreur(String titre, String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(titre);

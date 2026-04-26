@@ -15,8 +15,12 @@
                 <Label text="Gestion des Parcours" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;"/>
                 <Label text="Visualisez, modifiez et organisez vos expériences vécues et vos formations." style="-fx-font-size: 15px; -fx-text-fill: #9dbbce;"/>
             </VBox>
-            <Button fx:id="btnAjouter" text="+ Nouveau Parcours" onAction="#ajouterParcours"
-                    style="-fx-background-color: #0d1e3c; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 12 25; -fx-cursor: hand; -fx-border-color: #9dbbce; -fx-border-radius: 50;"/>
+            <HBox spacing="10">
+                <Button text="🤖 Embauche IA" onAction="#ouvrirRecommandationsIA"
+                        style="-fx-background-color: #d52e28; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 8 20; -fx-cursor: hand;"/>
+                <Button fx:id="btnAjouter" text="+ Nouveau Parcours" onAction="#ajouterParcours"
+                        style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 20; -fx-text-fill: white; -fx-padding: 8 20; -fx-cursor: hand;"/>
+            </HBox>
         </HBox>
     </VBox>
 
