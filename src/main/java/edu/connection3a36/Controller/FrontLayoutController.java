@@ -43,6 +43,11 @@ public class FrontLayoutController implements Initializable {
     }
 
     @FXML
+    private void loadSkillGap() {
+        loadView("/SkillGap.fxml");
+    }
+
+    @FXML
     private void loadPricing() {
         loadView("/Pricing.fxml");
     }

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.canvas.Canvas?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.Controller.SkillGapController"
+      spacing="0" style="-fx-background-color: #f8fafc;">
+
+    <!-- Header Section -->
+    <VBox alignment="CENTER" spacing="10" style="-fx-background-color: #1e293b; -fx-padding: 40 50;">
+        <Label text="🎯 Skill Gap Analysis" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+        <Label text="Compare ton profil actuel avec les standards du marché." style="-fx-font-size: 16px; -fx-text-fill: #94a3b8;"/>
+        
+        <HBox alignment="CENTER" spacing="15" style="-fx-padding: 20 0 0 0;">
+            <ComboBox fx:id="cbTargetJob" prefWidth="300" promptText="Choisir un métier cible..." 
+                      style="-fx-background-radius: 8; -fx-padding: 8;"/>
+            <Button text="Analyser mon profil" onAction="#lancerAnalyse"
+                    style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 25; -fx-cursor: hand;"/>
+        </HBox>
+    </VBox>
+
+    <StackPane VBox.vgrow="ALWAYS">
+        <!-- Results Area (Hidden by default) -->
+        <ScrollPane fx:id="scrollResults" fitToWidth="true" visible="false" style="-fx-background-color: transparent; -fx-background: transparent;">
+            <VBox spacing="30" style="-fx-padding: 30 50;">
+                
+                <HBox spacing="30">
+                    <!-- Radar Chart Column -->
+                    <VBox spacing="15" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);" prefWidth="450">
+                        <Label text="Visualisation des Compétences" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #1e293b;"/>
+                        <StackPane fx:id="chartContainer" prefHeight="300" prefWidth="400">
+                             <!-- Radar Chart will be drawn here -->
+                        </StackPane>
+                    </VBox>
+
+                    <!-- Stats & Suggestion Column -->
+                    <VBox spacing="20" HBox.hgrow="ALWAYS">
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                            <Label text="Score de Compatibilité" style="-fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                            <HBox alignment="CENTER_LEFT" spacing="15">
+                                <Label fx:id="lblScore" text="0%" style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #6366f1;"/>
+                                <ProgressIndicator fx:id="progressScore" progress="0" prefWidth="60" prefHeight="60"/>
+                            </HBox>
+                        </VBox>
+
+                        <VBox spacing="10" style="-fx-background-color: #f1f5f9; -fx-padding: 25; -fx-background-radius: 15; -fx-border-color: #6366f1; -fx-border-width: 0 0 0 5;">
+                            <Label text="💡 Recommandation IA" style="-fx-font-weight: bold; -fx-text-fill: #6366f1; -fx-font-size: 15px;"/>
+                            <Label fx:id="lblSuggestion" text="..." wrapText="true" style="-fx-text-fill: #1e293b; -fx-font-size: 15px; -fx-font-style: italic;"/>
+                        </VBox>
+                    </VBox>
+                </HBox>
+
+                <!-- Detailed Lists -->
+                <HBox spacing="25">
+                    <VBox spacing="15" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                        <Label text="✅ Compétences Acquises" style="-fx-font-weight: bold; -fx-text-fill: #10b981;"/>
+                        <FlowPane fx:id="flowMastered" hgap="10" vgap="10"/>
+                    </VBox>
+                    
+                    <VBox spacing="15" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                        <Label text="🛑 À Développer" style="-fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
+                        <FlowPane fx:id="flowMissing" hgap="10" vgap="10"/>
+                    </VBox>
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+
+        <!-- Placeholder when no analysis -->
+        <VBox fx:id="paneEmpty" alignment="CENTER" spacing="20">
+            <Text text="🔭" style="-fx-font-size: 60px;"/>
+            <Label text="Sélectionne un métier pour voir où tu en es." style="-fx-text-fill: #94a3b8; -fx-font-size: 18px;"/>
+        </VBox>
+
+        <!-- Loading Overlay -->
+        <VBox fx:id="paneLoading" visible="false" alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.8);">
+            <ProgressIndicator prefWidth="50" prefHeight="50"/>
+            <Label text="Analyse IA en cours..." style="-fx-padding: 15; -fx-font-weight: bold;"/>
+        </VBox>
+    </StackPane>
+
+</VBox>

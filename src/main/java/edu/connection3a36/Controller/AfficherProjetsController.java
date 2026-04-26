@@ -126,10 +126,8 @@ public class AfficherProjetsController implements Initializable {
                     });
                 });
 
-        // Message de bienvenue du bot IA
-        ajouterMessageBot(
-                "Bonjour ! 👋 Je suis votre assistant MentorAI. Comment puis-je vous aider dans vos projets aujourd'hui ?");
     }
+
 
     private void ajouterMessageUser(String text) {
         Label lbl = new Label(text);
@@ -232,8 +230,10 @@ public class AfficherProjetsController implements Initializable {
          * dpDateDebut.setDisable(true);
          * dpDateFin.setDisable(true);
          * }
-         * }
          */
+        // Message de bienvenue du bot IA (affiché une seule fois au début)
+        ajouterMessageBot(
+                "Bonjour ! 👋 Je suis votre assistant MentorAI. Comment puis-je vous aider dans vos projets aujourd'hui ?");
     }
 
     public void initData(Parcours parcours) {

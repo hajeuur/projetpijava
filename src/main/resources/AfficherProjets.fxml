@@ -59,9 +59,8 @@
                     <VBox spacing="20">
                         <padding><Insets top="25" right="35" bottom="25" left="35"/></padding>
 
-                        <!-- Titre avec Icône -->
                         <HBox spacing="12" alignment="CENTER_LEFT">
-                            <Text text="Folder" style="-fx-font-family: 'FontAwesome'; -fx-font-size: 20px; -fx-fill: #102c59;"/>
+                            <Text text="📁" style="-fx-font-size: 20px; -fx-fill: #102c59;"/>
                             <Label fx:id="lblFormTitle" text="Créer un projet" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
                         </HBox>
 
