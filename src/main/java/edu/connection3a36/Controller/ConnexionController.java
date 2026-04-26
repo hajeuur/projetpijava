@@ -37,7 +37,7 @@ public class ConnexionController {
         try {
             Utilisateur user = utilisateurService.login(email, mdp);
             if (user != null) {
-                // Stocker la session
+                System.out.println("✅ Connexion réussie pour : " + user.getEmail());
                 SessionManager.getInstance().setCurrentUser(user);
 
                 String fxmlToLoad;
@@ -50,27 +50,43 @@ public class ConnexionController {
                     title = "MentorAI - Espace Étudiant";
                 }
 
-                // Rediriger
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlToLoad));
                 Parent root = loader.load();
                 Stage stage = (Stage) txtEmail.getScene().getWindow();
                 stage.setTitle(title);
 
-                // Correction erreur disposition de fenetres (toujours extensible, bien centrée)
-                Scene scene = new Scene(root, 1200, 800);
+                Scene scene = new Scene(root);
                 stage.setScene(scene);
-                stage.setMaximized(true);
-                stage.setResizable(true);
-                stage.setMinWidth(1000);
-                stage.setMinHeight(700);
-                stage.centerOnScreen();
 
+                // Forcer le plein écran (Maximisé)
+                stage.setMaximized(true);
+                stage.show();
+                
+                // Centrage de sécurité
+                stage.centerOnScreen();
             } else {
-                lblErreur.setText("❌ Identifiants incorrects. Testez admin@mentor.com ou etudiant@mentor.com.");
+                lblErreur.setText("❌ Identifiants incorrects.");
+                System.out.println("⚠️ Échec de connexion : identifiants non reconnus.");
             }
         } catch (Exception e) {
-            lblErreur.setText("❌ Erreur de base de données : " + e.getMessage());
+            lblErreur.setText("❌ Erreur : " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void loginArslen() {
+        System.out.println("🚀 Tentative Connexion Rapide : Arslen");
+        txtEmail.setText("arslene.amira@gmail.com");
+        txtMdp.setText("arslen");
+        seConnecter();
+    }
+
+    @FXML
+    private void loginAdmin() {
+        System.out.println("🚀 Tentative Connexion Rapide : Admin");
+        txtEmail.setText("admin");
+        txtMdp.setText("12345678910");
+        seConnecter();
     }
 }

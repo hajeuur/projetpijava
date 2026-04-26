@@ -35,6 +35,14 @@ public class UtilisateurService {
         }
 
         // Mock si base vide
+        // Mocks pour tests rapides
+        if (email.equalsIgnoreCase("arslene.amira@gmail.com")) {
+            return new Utilisateur("arslene.amira@gmail.com", "arslen", "ROLE_ETUDIANT");
+        }
+        if (email.equalsIgnoreCase("admin")) {
+            return new Utilisateur("admin", "12345678910", "ROLE_ADMIN");
+        }
+
         if (email.equals("admin@mentor.com")) {
             return new Utilisateur("admin@mentor.com", "admin", "ROLE_ADMIN");
         }

@@ -36,7 +36,7 @@
                         style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
                 <Button text="✉  Contact" maxWidth="Infinity" alignment="BASELINE_LEFT"
                         style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
-                <Button text="＄  Pricing" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                <Button text="＄  Pricing" fx:id="btnPricing" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#loadPricing"
                         style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
                 <Button text="ⓘ  About" maxWidth="Infinity" alignment="BASELINE_LEFT"
                         style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>

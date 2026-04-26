@@ -73,7 +73,8 @@ public class PricingController implements Initializable {
             SessionCreateParams params = SessionCreateParams.builder()
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl("https://example.com/success") // Dans un projet réel, ceci redirigerait vers une page de succès
+                .setCustomerEmail(edu.connection3a36.tools.SessionManager.getInstance().getCurrentUser().getEmail())
+                .setSuccessUrl("https://example.com/success") 
                 .setCancelUrl("https://example.com/cancel")
                 .addLineItem(
                     SessionCreateParams.LineItem.builder()

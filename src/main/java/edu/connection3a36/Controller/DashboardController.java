@@ -23,7 +23,7 @@ public class DashboardController implements Initializable {
     @FXML
     private Label lblSidebarName, lblSidebarRole;
     @FXML
-    private Button btnHome, btnProjets, btnParcours;
+    private Button btnHome, btnProjets, btnParcours, btnPricing;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -50,12 +50,21 @@ public class DashboardController implements Initializable {
         loadView("/BackOfficeParcours.fxml");
     }
 
+    @FXML
+    private void loadPricing() {
+        setActive(btnPricing);
+        loadView("/PricingBack.fxml");
+    }
+
     private void setActive(Button activeBtn) {
         btnHome.setStyle(
                 "-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;");
         btnProjets.setStyle(
                 "-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;");
         btnParcours.setStyle(
+                "-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;");
+
+        btnPricing.setStyle(
                 "-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;");
 
         activeBtn.setStyle(

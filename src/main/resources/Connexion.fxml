@@ -31,6 +31,13 @@
 
         <Button text="Se Connecter" onAction="#seConnecter" prefWidth="320"
                 style="-fx-background-color: linear-gradient(to right, #102c59, #0a1a36); -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12; -fx-cursor: hand;"/>
+
+        <HBox spacing="15" alignment="CENTER">
+            <Button text="👤 Etudiant (Arslen)" onAction="#loginArslen"
+                    style="-fx-background-color: #f0f4f8; -fx-text-fill: #102c59; -fx-font-size: 12px; -fx-background-radius: 20; -fx-padding: 8 15; -fx-cursor: hand; -fx-border-color: #9dbbce; -fx-border-radius: 20;"/>
+            <Button text="🛠 Admin" onAction="#loginAdmin"
+                    style="-fx-background-color: #f0f4f8; -fx-text-fill: #d52e28; -fx-font-size: 12px; -fx-background-radius: 20; -fx-padding: 8 15; -fx-cursor: hand; -fx-border-color: #d52e28; -fx-border-radius: 20;"/>
+        </HBox>
     </VBox>
 
 </StackPane>
