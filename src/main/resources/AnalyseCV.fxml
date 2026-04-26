@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.connection3a36.Controller.AnalyseCVController"
+      spacing="0" style="-fx-background-color: #f8fafc;" prefWidth="1100" prefHeight="850">
+    
+    <!-- Header -->
+    <VBox spacing="10" style="-fx-background-color: #102c59; -fx-padding: 30 50;">
+        <HBox alignment="CENTER_LEFT" spacing="20">
+            <Button text="⬅ Retour" onAction="#retourParcours"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-border-color: rgba(255,255,255,0.3); -fx-border-radius: 20; -fx-padding: 5 15; -fx-cursor: hand;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="AI CV PARSER • AFFINDA" 
+                   style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-padding: 3 12; -fx-background-radius: 20; -fx-font-size: 10px; -fx-font-weight: bold;"/>
+        </HBox>
+        <Label text="Analyseur de CV Intelligent" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+        <Label text="Uploadez votre CV pour extraire vos données et vérifier sa conformité aux standards." style="-fx-font-size: 14px; -fx-text-fill: #9dbbce;"/>
+    </VBox>
+
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+        <VBox spacing="30" style="-fx-padding: 30 50;">
+            
+            <!-- Upload Box -->
+            <VBox alignment="CENTER" spacing="15" fx:id="uploadBox"
+                  style="-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-border-width: 2; -fx-border-style: dashed; -fx-border-radius: 15; -fx-background-radius: 15; -fx-padding: 50;">
+                <Label text="📁" style="-fx-font-size: 50px;"/>
+                <Label text="Sélectionnez votre CV (PDF)" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                <Button text="CHOISIR UN FICHIER" onAction="#choisirFichier"
+                        style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 30; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                <Label fx:id="lblFileName" text="Aucun fichier sélectionné" style="-fx-text-fill: #64748b;"/>
+            </VBox>
+
+            <!-- Results Section (Visible after analysis) -->
+            <VBox fx:id="resultsBox" spacing="20" visible="false" managed="false">
+                
+                <!-- Summary Card -->
+                <HBox spacing="20">
+                    <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                        <Label text="📊 Résumé de l'analyse" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                        <Separator style="-fx-padding: 10 0;"/>
+                        <GridPane vgap="10" hgap="20">
+                            <Label text="Candidat :" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lblNomCandidat" text="..." GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                            
+                            <Label text="Email :" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lblEmailCandidat" text="..." GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                            
+                            <Label text="Poste identifié :" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lblPosteLabel" text="..." GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        </GridPane>
+                    </VBox>
+
+                    <!-- Score Card -->
+                    <VBox prefWidth="300" alignment="CENTER" style="-fx-background-color: #102c59; -fx-background-radius: 15; -fx-padding: 25;">
+                        <Label text="SCORE DE CONFORMITÉ" style="-fx-text-fill: #9dbbce; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                        <StackPane style="-fx-padding: 15 0;">
+                            <ProgressBar fx:id="progressScore" progress="0.0" prefWidth="200" prefHeight="20" style="-fx-accent: #10b981;"/>
+                        </StackPane>
+                        <Label fx:id="lblScorePercent" text="0%" style="-fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;"/>
+                        <Label fx:id="lblScoreComment" text="En attente" style="-fx-text-fill: #10b981; -fx-font-size: 14px;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Detailed Analysis -->
+                <VBox style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                    <Label text="🎯 Points Clés Extraits" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                    <Separator style="-fx-padding: 10 0;"/>
+                    <VBox fx:id="boxDetails" spacing="10">
+                        <!-- Dynamic lines injected here -->
+                    </VBox>
+                </VBox>
+
+            </VBox>
+        </VBox>
+    </ScrollPane>
+
+    <!-- Loading Overlay -->
+    <StackPane fx:id="paneLoading" visible="false" managed="false" style="-fx-background-color: rgba(255, 255, 255, 0.8);">
+        <VBox alignment="CENTER" spacing="15">
+            <ProgressIndicator prefWidth="50" prefHeight="50" />
+            <Label text="Affinda AI analyse votre CV..." style="-fx-text-fill: #102c59; -fx-font-weight: bold; -fx-font-size: 18px;"/>
+        </VBox>
+    </StackPane>
+
+</VBox>

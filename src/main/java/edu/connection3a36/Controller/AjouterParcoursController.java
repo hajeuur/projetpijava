@@ -56,6 +56,24 @@ public class AjouterParcoursController implements Initializable {
         lblErreur.setText("");
     }
 
+    private int idToUpdate = -1;
+
+    public void setParcours(Parcours p) {
+        if (p == null) return;
+        this.idToUpdate = p.getId();
+        cbTypeParcours.setValue(p.getTypeParcours());
+        txtTitre.setText(p.getTitre());
+        dpDateDebut.setValue(p.getDateDebut());
+        dpDateFin.setValue(p.getDateFin());
+        taDescription.setText(p.getDescription());
+        txtEtablissement.setText(p.getEtablissement());
+        txtDiplome.setText(p.getDiplome());
+        txtSpecialite.setText(p.getSpecialite());
+        txtEntreprise.setText(p.getEntreprise());
+        txtPoste.setText(p.getPoste());
+        txtTypeContrat.setText(p.getTypeContrat());
+    }
+
     @FXML
     private void enregistrer() {
         boolean isValid = true;
@@ -64,45 +82,23 @@ public class AjouterParcoursController implements Initializable {
         if (txtTitre.getText().trim().isEmpty()) {
             showErr(errTitre, "• Le titre est obligatoire.");
             isValid = false;
-        } else if (txtTitre.getText().trim().length() < 3) {
-            showErr(errTitre, "• Minimum 3 caractères.");
-            isValid = false;
         }
 
         if (cbTypeParcours.getValue() == null) {
             showErr(errType, "• Le type est obligatoire.");
             isValid = false;
         }
-        if (txtDiplome.getText().trim().isEmpty()) {
-            showErr(errDiplome, "• Le diplôme est obligatoire.");
-            isValid = false;
-        }
-        if (txtEtablissement.getText().trim().isEmpty()) {
-            showErr(errEtablissement, "• L'établissement est obligatoire.");
-            isValid = false;
-        }
+        
         if (dpDateDebut.getValue() == null) {
             showErr(errDateDebut, "• La date de début est obligatoire.");
             isValid = false;
         }
-        if (taDescription.getText().trim().isEmpty()) {
-            showErr(errDescription, "• La description est obligatoire.");
-            isValid = false;
-        }
 
-        if (dpDateDebut.getValue() != null && dpDateFin.getValue() != null
-                && dpDateFin.getValue().isBefore(dpDateDebut.getValue())) {
-            showErr(errDateFin, "• La date de fin doit être après le début.");
-            isValid = false;
-        }
-
-        if (!isValid)
-            return;
+        if (!isValid) return;
 
         Parcours p = new Parcours();
         p.setTypeParcours(cbTypeParcours.getValue());
         p.setTitre(txtTitre.getText().trim());
-        // ... (rest of fields set in original code)
         p.setDateDebut(dpDateDebut.getValue());
         p.setDateFin(dpDateFin.getValue());
         p.setDescription(taDescription.getText().trim());
@@ -114,13 +110,21 @@ public class AjouterParcoursController implements Initializable {
         p.setTypeContrat(txtTypeContrat.getText().trim());
 
         try {
-            if (parcoursService.existsByTitre(p.getTitre())) {
-                showErr(errTitre, "• Ce titre de parcours existe déjà.");
-                return;
+            if (idToUpdate == -1) {
+                // Ajout
+                if (parcoursService.existsByTitre(p.getTitre())) {
+                    showErr(errTitre, "• Ce titre existe déjà.");
+                    return;
+                }
+                parcoursService.addEntity(p);
+                new Alert(Alert.AlertType.INFORMATION, "Parcours ajouté !").show();
+            } else {
+                // Modification
+                p.setId(idToUpdate);
+                parcoursService.updateEntity(idToUpdate, p);
+                new Alert(Alert.AlertType.INFORMATION, "Parcours mis à jour !").show();
             }
-            parcoursService.addEntity(p);
             fermer();
-            new Alert(Alert.AlertType.INFORMATION, "Parcours ajouté !").show();
         } catch (SQLException e) {
             lblErreur.setText("❌ " + e.getMessage());
         }

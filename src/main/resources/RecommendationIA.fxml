@@ -24,8 +24,10 @@
                 <Label text="Assistant de Carrière Intelligent" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: white;"/>
                 <Label text="Analyse temps réel de vos opportunités sur le marché du travail." style="-fx-font-size: 13px; -fx-text-fill: #9dbbce;"/>
             </VBox>
-            <Button text="🚀 LANCER L'ANALYSE IA" onAction="#lancerAnalyse"
-                    style="-fx-background-color: #d52e28; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 30; -fx-cursor: hand;"/>
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button text="🚀 LANCER L'ANALYSE IA" onAction="#lancerAnalyse"
+                        style="-fx-background-color: #d52e28; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;"/>
+            </HBox>
         </HBox>
     </VBox>
 

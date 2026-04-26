@@ -16,6 +16,10 @@
                 <Label text="Visualisez, modifiez et organisez vos expériences vécues et vos formations." style="-fx-font-size: 15px; -fx-text-fill: #9dbbce;"/>
             </VBox>
             <HBox spacing="10">
+                <Button text="🔍 Analyser un CV" onAction="#ouvrirAnalyseCV"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-border-color: white; -fx-border-radius: 50; -fx-font-weight: bold; -fx-padding: 8 20; -fx-cursor: hand;"/>
+                <Button text="📄 Générer CV" onAction="#genererCV"
+                        style="-fx-background-color: white; -fx-text-fill: #102c59; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 8 20; -fx-cursor: hand;"/>
                 <Button text="🤖 Embauche IA" onAction="#ouvrirRecommandationsIA"
                         style="-fx-background-color: #d52e28; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 8 20; -fx-cursor: hand;"/>
                 <Button fx:id="btnAjouter" text="+ Nouveau Parcours" onAction="#ajouterParcours"

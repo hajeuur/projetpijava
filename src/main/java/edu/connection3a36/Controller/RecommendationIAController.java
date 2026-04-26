@@ -2,8 +2,10 @@ package edu.connection3a36.Controller;
 
 import edu.connection3a36.entities.Parcours;
 import edu.connection3a36.entities.Projet;
+import edu.connection3a36.entities.Utilisateur;
 import edu.connection3a36.services.ParcoursService;
 import edu.connection3a36.services.ProjetService;
+import edu.connection3a36.tools.SessionManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,6 +18,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -24,6 +28,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.List;
 
 public class RecommendationIAController implements Initializable {
 
@@ -70,7 +75,6 @@ public class RecommendationIAController implements Initializable {
                 Platform.runLater(() -> {
                     paneLoading.setVisible(false);
                     paneLoading.setManaged(false);
-
                     for (int i = 0; i < results.length(); i++) {
                         JSONObject job = results.getJSONObject(i);
                         double score = calculateMatchingScore(job, userParcours, userProjets, userTechs);
@@ -83,6 +87,8 @@ public class RecommendationIAController implements Initializable {
             }
         }).start();
     }
+
+
 
     @FXML
     private void retourParcours() {
