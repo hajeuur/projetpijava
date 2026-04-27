@@ -61,7 +61,7 @@ public class ConnexionController {
                 // Forcer le plein écran (Maximisé)
                 stage.setMaximized(true);
                 stage.show();
-                
+
                 // Centrage de sécurité
                 stage.centerOnScreen();
             } else {
