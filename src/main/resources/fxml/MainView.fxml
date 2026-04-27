@@ -64,6 +64,10 @@
                     <!-- Gestion Projets (Étudiant) -->
                     <Button fx:id="btnProjets" text="Portfolio Projets"
                             onAction="#showProjets" styleClass="header-nav-btn" visible="false" managed="false"/>
+                            
+                    <!-- Games Hub (Point #7) -->
+                    <Button fx:id="btnGamesHub" text="🎮 Hub Accessibilité"
+                            onAction="#showGamesHub" styleClass="header-nav-btn" />
 
                     <!-- Preferences -->
                     <Button fx:id="btnPreferences" text="Préférences"
@@ -142,6 +146,10 @@
                         styleClass="sidebar-btn" maxWidth="Infinity"/>
                 <Button fx:id="btnBackProjets" text="Gestion des Projets" onAction="#showBackProjets"
                         styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnIoT" text="IoT &amp; Présences" onAction="#showIoT"
+                        styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnAtRisk" text="🚨 Étudiant à Risque" onAction="#showAtRisk"
+                        styleClass="sidebar-btn" maxWidth="Infinity" style="-fx-text-fill:#dc2626;"/>
                 <Button text="Plans d'Actions" onAction="#showPlanActions"
                         styleClass="sidebar-btn" maxWidth="Infinity"/>
                 <Button text="Articles" onAction="#showArticles"
@@ -155,6 +163,11 @@
 
             <Separator/>
             <Button text="Préférences" onAction="#showPreferences" styleClass="sidebar-btn" maxWidth="Infinity"/>
+            <!-- Bouton Notifications (superadmin uniquement, géré par code) -->
+            <Button fx:id="btnNotifSidebar" text="🔔 Notifications"
+                    onAction="#handleNotifications"
+                    styleClass="sidebar-btn" maxWidth="Infinity"
+                    visible="false" managed="false"/>
             <VBox alignment="CENTER" spacing="6" style="-fx-padding: 5 0 5 0;">
                 <Label fx:id="lblUserBack" text="Utilisateur" styleClass="sidebar-user"/>
                 <Button text="Déconnexion" onAction="#handleLogout"

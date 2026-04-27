@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -33,7 +34,7 @@ public class MainController {
     @FXML private HBox frontNavBox;
     @FXML private Label lblUser;
 
-    // Boutons header FRONT
+    // ── Boutons header FRONT
     @FXML private Button btnDashboardEnseignant;
     @FXML private Button btnDashboardAdmin;
     @FXML private Button btnPlanActions;
@@ -44,8 +45,12 @@ public class MainController {
     @FXML private Button btnNotifications;
     @FXML private Button btnParcours;
     @FXML private Button btnProjets;
+    @FXML private Button btnGamesHub;
+    @FXML private Button btnIoT;
+    @FXML private Button btnAtRisk;
     @FXML private Button btnBackParcours;
     @FXML private Button btnBackProjets;
+    @FXML private Button btnNotifSidebar; // Bouton clochette dans la sidebar
 
     // ── Sidebar (BACK) ────────────────────────────────────────────────────────
     @FXML private VBox backSidebar;
@@ -83,6 +88,8 @@ public class MainController {
         userRole = user.getRole() != null ? user.getRole().toUpperCase() : "";
 
         configureByRole();
+        // Charger le badge de notifications en arrière-plan
+        updateNotifications();
     }
 
     /**
@@ -90,15 +97,16 @@ public class MainController {
      */
     private void configureByRole() {
         if (isSuperAdmin()) {
-            // SUPERADMIN (admin@esprit.tn) → Back-Office Complet uniquement
+            // SUPERADMIN (admin@esprit.tn) → BACK-Office complet au démarrage + accès FRONT
             showBackMode();
             show(boxAdmin);
             show(boxBackAdmin);
-            hide(boxSwitcher); // Pas de front (réservé aux étudiants)
-            
-            // On montre tout dans boxBackAdmin pour le superadmin
+            show(boxSwitcher); // ADMINM peut basculer vers le FRONT
+            show(btnNotifSidebar); // Bouton notifications visible
+
+            // Tous les boutons CRUD visibles
             for (javafx.scene.Node n : boxBackAdmin.getChildren()) show(n);
-            
+
             showCategories();
 
         } else if (isAdmin()) {
@@ -112,7 +120,7 @@ public class MainController {
             for (javafx.scene.Node n : boxBackAdmin.getChildren()) {
                 if (n instanceof Button) {
                     Button b = (Button) n;
-                    if (b == btnBackParcours || b == btnBackProjets) show(b);
+                    if (b == btnBackParcours || b == btnBackProjets || b == btnIoT || b == btnAtRisk) show(b);
                     else hide(b);
                 } else if (n instanceof Label) {
                     show(n); // Garder le titre "BACK CRUD"
@@ -124,17 +132,20 @@ public class MainController {
             showBackParcours();
 
         } else if (isEnseignant()) {
-            // Enseignant → FRONT uniquement (dashboard pédagogique + IA)
+            // Enseignant → FRONT uniquement (dashboard pédagogique + IA + Plans + Articles)
             showFrontMode();
-            hide(btnSwitchBack);
-            show(btnDashboardEnseignant);
             hide(btnDashboardAdmin);
-            show(btnAIPedagogique);
+            hide(btnSwitchBack);
             hide(btnAIDecisionnel);
-            // Sidebar masquée
+            hide(btnParcours);
+            hide(btnProjets);
             hide(boxAdmin);
             hide(boxBackAdmin);
             hide(boxSwitcher);
+            show(btnDashboardEnseignant);
+            show(btnAIPedagogique);
+            show(btnPlanActions);
+            show(btnArticles);
 
             showDashboardEnseignant();
 
@@ -149,6 +160,7 @@ public class MainController {
             
             show(btnParcours);
             show(btnProjets);
+            show(btnGamesHub);
             
             showParcours();
 
@@ -160,7 +172,7 @@ public class MainController {
             hide(btnPlanActions);
             hide(btnArticles);
             hide(btnAIPedagogique); hide(btnAIDecisionnel);
-            hide(btnParcours); hide(btnProjets);
+            hide(btnParcours); hide(btnProjets); hide(btnGamesHub);
             contentArea.getChildren().clear();
         }
     }
@@ -173,26 +185,56 @@ public class MainController {
     void switchToFront() {
         SessionManager.setFrontMode(true);
         showFrontMode();
-        showAIDecisionnel();
+        configureFrontButtons();
+    }
+
+    /** Configure les boutons visibles dans le header FRONT selon le rôle. */
+    private void configureFrontButtons() {
+        // Cacher tout d'abord
+        hide(btnDashboardEnseignant); hide(btnDashboardAdmin);
+        hide(btnPlanActions); hide(btnArticles);
+        hide(btnAIPedagogique); hide(btnAIDecisionnel);
+        hide(btnParcours); hide(btnProjets); hide(btnGamesHub);
+        hide(btnSwitchBack); hide(btnNotifications);
+
+        if (isSuperAdmin()) {
+            // ADMINM front : Dashboard Stratégique + Plans + Articles + IA Décisionnelle + switcher back
+            show(btnDashboardAdmin);
+            show(btnPlanActions);
+            show(btnArticles);
+            show(btnAIDecisionnel);
+            show(btnSwitchBack);
+            show(btnNotifications);
+            show(btnGamesHub);
+            showDashboardAdmin();
+        } else if (isEnseignant()) {
+            show(btnDashboardEnseignant);
+            show(btnPlanActions);
+            show(btnArticles);
+            show(btnAIPedagogique);
+            show(btnGamesHub);
+            showDashboardEnseignant();
+        }
     }
 
     @FXML
     void switchToBack() {
         SessionManager.setFrontMode(false);
         showBackMode();
-        
+
         // Gestion visibilité sidebar selon le niveau d'admin
         if (isSuperAdmin()) {
             show(boxAdmin);
             show(boxBackAdmin);
             show(boxSwitcher);
+            for (javafx.scene.Node n : boxBackAdmin.getChildren()) show(n);
         } else if (isAdmin()) {
-            hide(boxAdmin);      // Un simple admin ne gère pas les utilisateurs
-            show(boxBackAdmin);  // Mais gère Parcours/Projets/Plans/Articles
+            hide(boxAdmin);
+            show(boxBackAdmin);
             show(boxSwitcher);
         }
-        
-        // Par défaut au switch
+
+        // Par défaut au switch back
         if (isAdmin()) showBackParcours();
         else showCategories();
     }
@@ -261,38 +303,70 @@ public class MainController {
     }
 
     @FXML
+    void showGamesHub() {
+        System.out.println("🎮 Loading Games Hub View...");
+        loadView("/fxml/GamesHub.fxml");
+        setActiveBtn(btnGamesHub);
+    }
+
+    @FXML
+    void showIoT() {
+        System.out.println("📡 Loading IoT View...");
+        loadView("/fxml/IoTClustering.fxml");
+        setActiveBtn(btnIoT);
+    }
+
+    @FXML
     void showPreferences() {
         loadView("/fxml/Preferences.fxml");
     }
 
+    @FXML
+    void showAtRisk() {
+        System.out.println("🚨 Loading At-Risk Scenario...");
+        loadView("/fxml/AtRiskScenario.fxml");
+        setActiveBtn(btnAtRisk);
+    }
+
     private void updateNotifications() {
-        if (btnNotifications == null) return;
-        try {
-            edu.connection3a36.services.PlanActionsService ps = new edu.connection3a36.services.PlanActionsService();
-            int count = ps.getRecentFeedbacks().size();
-            btnNotifications.setText("🔔 (" + count + ")");
-            if (count > 0) {
-                btnNotifications.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
-            } else {
-                btnNotifications.setStyle("");
-            }
-        } catch (Exception e) {}
+        // Mise à jour du badge notifications depuis le NotificationService
+        if (!isSuperAdmin()) return;
+        new Thread(() -> {
+            try {
+                edu.connection3a36.services.NotificationService ns =
+                        new edu.connection3a36.services.NotificationService();
+                int count = ns.countNonLues();
+                javafx.application.Platform.runLater(() -> updateNotificationBadge(count));
+            } catch (Exception ignored) {}
+        }).start();
+    }
+
+    /** Met à jour le badge de notification dans la sidebar et le header. */
+    public void updateNotificationBadge(int count) {
+        String label = count > 0 ? "🔔 (" + count + ")" : "🔔";
+        String style = count > 0
+                ? "-fx-text-fill: #e74c3c; -fx-font-weight: bold;"
+                : "";
+        if (btnNotifications != null) {
+            btnNotifications.setText(label);
+            btnNotifications.setStyle(style);
+        }
+        if (btnNotifSidebar != null) {
+            btnNotifSidebar.setText(label);
+            btnNotifSidebar.setStyle(style);
+        }
     }
 
     @FXML
     void handleNotifications() {
+        if (!isSuperAdmin()) return;
         try {
-            edu.connection3a36.services.PlanActionsService ps = new edu.connection3a36.services.PlanActionsService();
-            int count = ps.getRecentFeedbacks().size();
-            if (count > 0) {
-                edu.connection3a36.tools.AlertUtil.showSuccess("Vous avez " + count + " nouveaux feedbacks à traiter dans votre dashboard.");
-                if (isSuperAdmin()) {
-                    showDashboardAdmin();
-                }
-            } else {
-                edu.connection3a36.tools.AlertUtil.showSuccess("Aucune nouvelle notification.");
-            }
-        } catch (Exception e) {}
+            NotificationController nc = new NotificationController();
+            Stage stage = (Stage) contentArea.getScene().getWindow();
+            nc.openNotificationsPanel(stage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

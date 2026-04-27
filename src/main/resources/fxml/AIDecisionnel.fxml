@@ -74,6 +74,8 @@
                            HBox.hgrow="ALWAYS" styleClass="search-bar"
                            onAction="#handleSend"
                            style="-fx-padding: 11 15; -fx-border-width: 0; -fx-background-radius: 10;"/>
+                <Button fx:id="btnRecord" text="🎤" onAction="#handleRecord" 
+                        styleClass="btn-secondary" style="-fx-padding: 10 15; -fx-cursor: hand;"/>
                 <Button fx:id="btnSend" text="Envoyer" onAction="#handleSend"
                         styleClass="btn-primary" style="-fx-padding: 10 22;"/>
             </HBox>

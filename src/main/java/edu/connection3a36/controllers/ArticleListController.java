@@ -149,7 +149,11 @@ public class ArticleListController {
                 if (isEnseignant) {
                     box.getChildren().addAll(btnView, btnPdf);
                 } else {
-                    box.getChildren().addAll(btnView, btnPdf, btnEdit, btnToggle, btnDelete);
+                    Button btnPlan = new Button("📋 Créer Plan");
+                    btnPlan.getStyleClass().add("btn-success");
+                    btnPlan.setStyle("-fx-padding: 3 6; -fx-font-size: 10px;");
+                    btnPlan.setOnAction(e -> handleCreateLinkedPlan(getTableView().getItems().get(getIndex())));
+                    box.getChildren().addAll(btnView, btnPdf, btnEdit, btnToggle, btnDelete, btnPlan);
                 }
 
                 btnView.setOnAction(e   -> showArticleDetail(getTableView().getItems().get(getIndex())));
@@ -268,7 +272,12 @@ public class ArticleListController {
         btnPdf.setOnAction(e -> edu.connection3a36.tools.PdfExporter.exportSingleArticle(
                 cardsContainer.getScene().getWindow(), article));
 
-        footer.getChildren().addAll(dateLabel, spacer, btnPdf, btnVoir);
+        Button btnPlan = new Button("📋 Plan");
+        btnPlan.getStyleClass().add("btn-success");
+        btnPlan.setStyle("-fx-padding: 4 8; -fx-font-size: 11px;");
+        btnPlan.setOnAction(e -> handleCreateLinkedPlan(article));
+
+        footer.getChildren().addAll(dateLabel, spacer, btnPdf, btnPlan, btnVoir);
 
         // Badge statut brouillon
         if (!article.isPublished()) {
@@ -387,5 +396,43 @@ public class ArticleListController {
         } catch (IOException e) {
             AlertUtil.showError("Erreur : " + e.getMessage());
         }
+    }
+
+    /**
+     * Crée un Plan d'Action lié à cet article via l'IA (Point #5 réciproque).
+     */
+    void handleCreateLinkedPlan(ReferenceArticle article) {
+        if (!AlertUtil.showConfirmation("Créer un plan d'action pédagogique basé sur l'article :\n'" + article.getTitre() + "' ?")) return;
+        new Thread(() -> {
+            try {
+                edu.connection3a36.services.GroqService groq = new edu.connection3a36.services.GroqService();
+                String prompt = "Génère un plan d'action pédagogique basé sur l'article suivant.\n"
+                        + "Titre : " + article.getTitre() + "\n"
+                        + "Extrait : " + (article.getContenu() != null ? article.getContenu().substring(0, Math.min(300, article.getContenu().length())) : "") + "\n\n"
+                        + "Fournis une DÉCISION (1 phrase courte) et une DESCRIPTION (2-3 phrases) séparées par '|'. Exemple : Renforcer les TP|Organiser des sessions pratiques hebdomadaires...";
+                String resp = groq.sendSimpleMessage(prompt, "ADMIN");
+                String decision, description;
+                if (resp.contains("|")) {
+                    String[] parts = resp.split("\\|", 2);
+                    decision = parts[0].replaceAll("[*#]", "").trim();
+                    description = parts[1].trim();
+                } else {
+                    decision = "Plan lié à : " + article.getTitre();
+                    description = resp.substring(0, Math.min(400, resp.length()));
+                }
+                edu.connection3a36.entities.PlanActions plan = new edu.connection3a36.entities.PlanActions();
+                plan.setDecision(decision.length() > 200 ? decision.substring(0,200) : decision);
+                plan.setDescription(description);
+                plan.setStatut(edu.connection3a36.enums.Statut.EN_ATTENTE);
+                plan.setCategorie(edu.connection3a36.enums.CategorieSortie.PEDAGOGIQUE);
+                plan.setAuteurId(edu.connection3a36.tools.SessionManager.getCurrentUser() != null ? edu.connection3a36.tools.SessionManager.getCurrentUser().getId() : 1);
+                edu.connection3a36.services.PlanActionsService ps = new edu.connection3a36.services.PlanActionsService();
+                ps.addEntity(plan);
+                if (plan.getId() > 0) ps.addArticleToPlan(plan.getId(), article.getId());
+                javafx.application.Platform.runLater(() -> AlertUtil.showSuccess("Plan #" + plan.getId() + " créé et lié à l'article !"));
+            } catch (Exception ex) {
+                javafx.application.Platform.runLater(() -> AlertUtil.showError("Erreur : " + ex.getMessage()));
+            }
+        }).start();
     }
 }

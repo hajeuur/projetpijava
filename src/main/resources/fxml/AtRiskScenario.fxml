@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.AtRiskScenarioController"
+      spacing="0" style="-fx-background-color:#f0f4f8;">
+
+    <HBox style="-fx-background-color:linear-gradient(to right,#7f1d1d,#b91c1c);-fx-padding:14 25;" alignment="CENTER_LEFT" spacing="20">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="🚨 Scénario Étudiant à Risque → Plan Personnalisé"
+                   style="-fx-font-size:20px;-fx-font-weight:bold;-fx-text-fill:white;"/>
+            <Label text="Détection précoce → Analyse IA → Plan de remédiation → Suivi automatique"
+                   style="-fx-text-fill:rgba(255,255,255,0.75);-fx-font-size:12px;"/>
+        </VBox>
+        <VBox alignment="CENTER_RIGHT" spacing="5">
+            <Label fx:id="lblStep" text="Étape 1" style="-fx-text-fill:white;-fx-font-weight:bold;"/>
+            <ProgressBar fx:id="progressScenario" progress="0" prefWidth="200" prefHeight="8"/>
+        </VBox>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color:transparent;-fx-border-color:transparent;">
+        <VBox spacing="18" style="-fx-padding:20;">
+
+            <!-- ÉTAPE 1 : Sélection étudiant -->
+            <VBox style="-fx-background-color:white;-fx-padding:20;-fx-background-radius:12;-fx-effect:dropshadow(three-pass-box,rgba(0,0,0,0.05),10,0,0,3);" spacing="12">
+                <Label text="① Sélectionner l'étudiant à risque" style="-fx-font-weight:bold;-fx-font-size:15px;-fx-text-fill:#7f1d1d;"/>
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <ComboBox fx:id="comboStudent" promptText="Choisir un étudiant..." prefWidth="300"/>
+                    <Button fx:id="btnAnalyze" text="🔍 Analyser avec l'IA" onAction="#handleAnalyze"
+                            style="-fx-background-color:#dc2626;-fx-text-fill:white;-fx-padding:9 22;-fx-background-radius:20;-fx-cursor:hand;" disable="true"/>
+                </HBox>
+                <Label fx:id="lblStudentProfile" text="Sélectionnez un étudiant pour voir son profil."
+                       style="-fx-text-fill:#64748b;-fx-font-size:13px;" wrapText="true"/>
+            </VBox>
+
+            <!-- ÉTAPE 2 : Analyse IA -->
+            <VBox style="-fx-background-color:white;-fx-padding:20;-fx-background-radius:12;-fx-effect:dropshadow(three-pass-box,rgba(0,0,0,0.05),10,0,0,3);" spacing="10">
+                <Label text="② Analyse IA — Diagnostic &amp; Recommandations" style="-fx-font-weight:bold;-fx-font-size:15px;-fx-text-fill:#1e40af;"/>
+                <ScrollPane fitToWidth="true" prefHeight="200" style="-fx-background-color:#f8fafc;-fx-border-color:#e2e8f0;-fx-border-radius:8;">
+                    <VBox fx:id="boxAnalysis" spacing="8" style="-fx-padding:12;">
+                        <Label text="Le résultat de l'analyse IA apparaîtra ici." style="-fx-text-fill:#94a3b8;-fx-font-style:italic;"/>
+                    </VBox>
+                </ScrollPane>
+            </VBox>
+
+            <!-- ÉTAPE 3 : Création Plan -->
+            <VBox style="-fx-background-color:white;-fx-padding:20;-fx-background-radius:12;-fx-effect:dropshadow(three-pass-box,rgba(0,0,0,0.05),10,0,0,3);" spacing="10">
+                <Label text="③ Créer le Plan d'Action Personnalisé" style="-fx-font-weight:bold;-fx-font-size:15px;-fx-text-fill:#065f46;"/>
+                <Label text="Note complémentaire (optionnel) :" style="-fx-text-fill:#64748b;"/>
+                <TextArea fx:id="taCustomNote" promptText="Ajoutez vos observations personnelles sur cet étudiant..."
+                          prefRowCount="3" wrapText="true"/>
+                <HBox spacing="12">
+                    <Button fx:id="btnCreatePlan" text="📋 Générer &amp; Sauvegarder le Plan" onAction="#handleCreatePlan"
+                            style="-fx-background-color:#059669;-fx-text-fill:white;-fx-padding:10 24;-fx-background-radius:20;-fx-cursor:hand;" disable="true"/>
+                    <Button fx:id="btnSave" text="✅ Confirmer le Suivi" onAction="#handleSave"
+                            style="-fx-background-color:#0ea5e9;-fx-text-fill:white;-fx-padding:10 20;-fx-background-radius:20;-fx-cursor:hand;" disable="true"/>
+                </HBox>
+            </VBox>
+
+            <!-- ÉTAPE 4 : Résultat -->
+            <VBox fx:id="boxPlanResult" spacing="10"
+                  style="-fx-background-color:white;-fx-padding:20;-fx-background-radius:12;-fx-effect:dropshadow(three-pass-box,rgba(0,0,0,0.05),10,0,0,3);">
+                <Label text="④ Résultat &amp; Suivi" style="-fx-font-weight:bold;-fx-font-size:15px;-fx-text-fill:#475569;"/>
+                <Label text="Le plan créé apparaîtra ici." style="-fx-text-fill:#94a3b8;-fx-font-style:italic;"/>
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</VBox>

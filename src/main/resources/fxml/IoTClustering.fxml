@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.IoTClusteringController"
+      spacing="0" style="-fx-background-color: #f0f4f8;">
+
+    <!-- HEADER -->
+    <HBox style="-fx-background-color: linear-gradient(to right, #065f46, #047857); -fx-padding: 14 25;" alignment="CENTER_LEFT" spacing="20">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="📡 Hub IoT &amp; Présences Connectées" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Label text="Suivi en temps réel via capteurs PIR &amp; badges NFC, couplé à un clustering IA." style="-fx-text-fill: rgba(255,255,255,0.75); -fx-font-size: 13px;"/>
+        </VBox>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color:transparent;-fx-border-color:transparent;">
+        <VBox spacing="20" style="-fx-padding: 20;">
+
+            <HBox spacing="20">
+                <!-- Zone IoT & NFC (Gauche) -->
+                <VBox spacing="15" HBox.hgrow="ALWAYS" prefWidth="500">
+                    
+                    <!-- Capteur PIR -->
+                    <VBox style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 3);" spacing="15">
+                        <Label text="🚪 Capteur de Présence (PIR) - Salle B23" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #065f46;"/>
+                        <HBox alignment="CENTER_LEFT" spacing="15">
+                            <Circle fx:id="indicatorPIR" radius="12" fill="#64748b"/>
+                            <VBox spacing="2">
+                                <Label fx:id="lblStatusPIR" text="⚪ SALLE VIDE (Attente...)" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                                <Label fx:id="lblLastMotion" text="Dernière détection : -" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;"/>
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button text="Simuler Mouvement" onAction="#handlePIRManual" style="-fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-size: 11px;"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Lecteur NFC -->
+                    <VBox style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 3);" spacing="15">
+                        <Label text="🪪 Borne d'Émargement NFC" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #0ea5e9;"/>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <ComboBox fx:id="comboNFC" promptText="Approcher un badge (Simulation)..." prefWidth="280"/>
+                            <Button text="📱 Badger" onAction="#handleSimulateNFC" style="-fx-background-color: #0ea5e9; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        </HBox>
+
+                        <!-- Résultat Flash NFC -->
+                        <VBox fx:id="boxNfcResult" spacing="8" style="-fx-background-color: #f0f9ff; -fx-padding: 15; -fx-background-radius: 8; -fx-border-color: #bae6fd; -fx-border-radius: 8;" visible="false" managed="false">
+                            <Label fx:id="lblNfcStudentName" text="Nom Étudiant" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #0369a1;"/>
+                            <Label fx:id="lblNfcStudentDetails" text="Détails" style="-fx-text-fill: #0ea5e9;"/>
+                            <Label fx:id="lblNfcAlert" text="Alerte" style="-fx-background-color: #fef2f2; -fx-text-fill: #dc2626; -fx-font-weight: bold; -fx-padding: 5 10; -fx-background-radius: 5; -fx-border-color: #fca5a5; -fx-border-radius: 5;" visible="false" managed="false"/>
+                        </VBox>
+                    </VBox>
+
+                </VBox>
+
+                <!-- Zone Présents & Clustering (Droite) -->
+                <VBox spacing="15" prefWidth="400">
+                    <VBox style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 3);" spacing="10" VBox.vgrow="ALWAYS">
+                        <Label text="📋 Liste des Présents en temps réel" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
+                        <ListView fx:id="listPresents" prefHeight="150" style="-fx-border-color: #e2e8f0; -fx-background-radius: 5; -fx-border-radius: 5;"/>
+                        
+                        <Button fx:id="btnCluster" text="✨ Regrouper les présents via IA" onAction="#handleClusteringIA" disable="true"
+                                style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-padding: 12; -fx-background-radius: 8; -fx-font-weight: bold; -fx-cursor: hand;" maxWidth="Infinity"/>
+                        
+                        <!-- Résultat Clustering -->
+                        <VBox fx:id="clusterContainer" spacing="10" visible="false" managed="false">
+                            <Label text="Groupes de Travail Suggérés :" style="-fx-font-weight: bold; -fx-text-fill: #8b5cf6; -fx-padding: 10 0 0 0;"/>
+                            
+                            <VBox fx:id="boxCluster1" style="-fx-background-color: #f5f3ff; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: #ddd6fe; -fx-border-radius: 8;" visible="false" managed="false">
+                                <Label fx:id="lblGroup1Title" text="G1" style="-fx-font-weight: bold; -fx-text-fill: #6d28d9;"/>
+                                <Label fx:id="lblGroup1Desc" text="Desc" style="-fx-text-fill: #4c1d95; -fx-wrap-text: true;" wrapText="true"/>
+                            </VBox>
+                            
+                            <VBox fx:id="boxCluster2" style="-fx-background-color: #f5f3ff; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: #ddd6fe; -fx-border-radius: 8;" visible="false" managed="false">
+                                <Label fx:id="lblGroup2Title" text="G2" style="-fx-font-weight: bold; -fx-text-fill: #6d28d9;"/>
+                                <Label fx:id="lblGroup2Desc" text="Desc" style="-fx-text-fill: #4c1d95; -fx-wrap-text: true;" wrapText="true"/>
+                            </VBox>
+
+                            <VBox fx:id="boxCluster3" style="-fx-background-color: #f5f3ff; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: #ddd6fe; -fx-border-radius: 8;" visible="false" managed="false">
+                                <Label fx:id="lblGroup3Title" text="G3" style="-fx-font-weight: bold; -fx-text-fill: #6d28d9;"/>
+                                <Label fx:id="lblGroup3Desc" text="Desc" style="-fx-text-fill: #4c1d95; -fx-wrap-text: true;" wrapText="true"/>
+                            </VBox>
+                        </VBox>
+
+                    </VBox>
+                </VBox>
+            </HBox>
+
+        </VBox>
+    </ScrollPane>
+</VBox>

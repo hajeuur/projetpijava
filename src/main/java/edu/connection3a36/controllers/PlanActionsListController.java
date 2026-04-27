@@ -309,6 +309,13 @@ public class PlanActionsListController {
             btnFeedback.setStyle("-fx-padding: 5 12; -fx-font-size: 12px;");
             btnFeedback.setOnAction(e -> handleFeedback(plan));
             actions.getChildren().add(btnFeedback);
+        } else {
+            // ADMIN / Superadmin peuvent générer un article
+            Button btnGenArticle = new Button("📝 Générer Article");
+            btnGenArticle.getStyleClass().add("btn-info");
+            btnGenArticle.setStyle("-fx-padding: 5 12; -fx-font-size: 12px;");
+            btnGenArticle.setOnAction(e -> handleGenerateArticle(plan));
+            actions.getChildren().add(btnGenArticle);
         }
 
         card.getChildren().addAll(titleRow, decision, description, dateLabel);
@@ -426,6 +433,29 @@ public class PlanActionsListController {
                     if (isEnseignant) {
                         int userId = SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getId() : 0;
                         service.addFeedback(plan.getId(), taFeedback.getText().trim(), userId);
+                        
+                        // ─ Auto-notification pour le superadmin ──────────────────────
+                        new Thread(() -> {
+                            try {
+                                edu.connection3a36.services.NotificationService ns =
+                                        new edu.connection3a36.services.NotificationService();
+                                String profName = SessionManager.getCurrentUser() != null 
+                                        ? SessionManager.getCurrentUser().getPrenom() 
+                                        : "Un enseignant";
+                                ns.addSystemNotification(
+                                        "Nouveau Feedback Enseignant",
+                                        profName + " a commenté le plan : \"" + plan.getDecision() + "\"",
+                                        "INFO"
+                                );
+                                // Mettre à jour le badge dans MainController
+                                int count = ns.countNonLues();
+                                javafx.application.Platform.runLater(() -> {
+                                    if (MainController.getInstance() != null)
+                                        MainController.getInstance().updateNotificationBadge(count);
+                                });
+                            } catch (Exception ignored) {}
+                        }).start();
+                        // ─────────────────────────────────────────────────────────────
                     }
                     return true;
                 } catch (SQLException e) {
@@ -440,6 +470,53 @@ public class PlanActionsListController {
             AlertUtil.showSuccess("Mise à jour enregistrée avec succès !");
             loadData();
         }
+    }
+
+    /**
+     * Génère automatiquement un article lié à ce plan d'action (Requirement #5)
+     */
+    void handleGenerateArticle(PlanActions plan) {
+        if (!AlertUtil.showConfirmation("Voulez-vous générer un article pédagogique basé sur ce plan d'action ?\nCela prendra quelques secondes.")) {
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                edu.connection3a36.services.GroqService groq = new edu.connection3a36.services.GroqService();
+                String prompt = "Rédige un article pédagogique professionnel (format Markdown, sans JSON) basé sur le plan d'action suivant :\n"
+                              + "Titre : " + plan.getDecision() + "\n"
+                              + "Description : " + plan.getDescription() + "\n\n"
+                              + "L'article doit être structuré, informatif, et expliquer l'importance de ce type d'action pédagogique pour les étudiants.";
+                
+                String contenu = groq.sendSimpleMessage(prompt, "ADMIN");
+
+                // 1. Créer l'article
+                edu.connection3a36.entities.ReferenceArticle article = new edu.connection3a36.entities.ReferenceArticle();
+                article.setTitre("Guide : " + plan.getDecision());
+                article.setContenu(contenu);
+                article.setPublished(true);
+                // On assigne par défaut à la première catégorie existante ou on met 1
+                article.setCategorieId(1); 
+                article.setAuteurId(SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getId() : 1);
+
+                edu.connection3a36.services.ReferenceArticleService articleService = new edu.connection3a36.services.ReferenceArticleService();
+                articleService.addEntity(article);
+
+                // 2. Lier l'article au plan d'action
+                if (article.getId() > 0) {
+                    service.addArticleToPlan(plan.getId(), article.getId());
+                }
+
+                javafx.application.Platform.runLater(() -> {
+                    AlertUtil.showSuccess("L'article a été généré et lié au plan d'action avec succès !");
+                });
+
+            } catch (Exception ex) {
+                javafx.application.Platform.runLater(() -> {
+                    AlertUtil.showError("Erreur lors de la génération de l'article : " + ex.getMessage());
+                });
+            }
+        }).start();
     }
 
     @FXML
