@@ -27,7 +27,14 @@
                 <Button text="Home" style="-fx-background-color: transparent; -fx-text-fill: #34495e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
                 <Button text="Parcours" onAction="#loadParcours" style="-fx-background-color: transparent; -fx-text-fill: #102c59; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
                 <Button text="Projets" onAction="#loadProjets" style="-fx-background-color: transparent; -fx-text-fill: #102c59; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                <Button text="Analyse IA" onAction="#loadSkillGap" style="-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <!-- Dropdown Menu IA -->
+                <MenuButton text="Espace IA ✨" 
+                            style="-fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6); -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 2 10; -fx-cursor: hand;">
+                    <items>
+                        <MenuItem text="📊 Analyse Skill Gap" onAction="#loadSkillGap" style="-fx-font-weight: bold;"/>
+                        <MenuItem text="📈 Carrière Prédictive" onAction="#loadCareer" style="-fx-font-weight: bold;"/>
+                    </items>
+                </MenuButton>
                 <Button text="Contact" style="-fx-background-color: transparent; -fx-text-fill: #34495e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
                 <Button text="Pricing" onAction="#loadPricing" style="-fx-background-color: transparent; -fx-text-fill: #34495e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
                 <Button text="About" onAction="#loadAbout" style="-fx-background-color: transparent; -fx-text-fill: #34495e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>

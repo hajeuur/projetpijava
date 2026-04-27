@@ -176,6 +176,11 @@ public class FrontLayoutController implements Initializable {
         }
     }
 
+    @FXML
+    private void loadCareer() {
+        loadView("/CareerDashboard.fxml");
+    }
+
     private void loadView(String fxml) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
