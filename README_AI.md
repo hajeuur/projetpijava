@@ -39,7 +39,7 @@ Le module fonctionne sur un modèle **Hybride Java/Python** :
 
 ## 🚀 Comment l'étendre ?
 
-1.  **Ajouter un métier** : Modifiez simplement le fichier `python_app/job_requirements.json` en ajoutant une nouvelle clé et sa liste de compétences.
+1.  **Ajouter un métier** : Modifiez simplement le fichier `python/job_requirements.json` en ajoutant une nouvelle clé et sa liste de compétences.
 2.  **Améliorer l'analyse** : Vous pouvez modifier `skill_gap_analyzer.py` pour utiliser des bibliothèques comme `spacy` ou `nltk` afin de gérer les synonymes (ex: "JS" = "Javascript").
 3.  **Graphiques** : La méthode `drawRadarChart` dans le contrôleur Java peut être personnalisée pour changer les couleurs ou la taille du graphique.
 

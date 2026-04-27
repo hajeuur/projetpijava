@@ -54,7 +54,7 @@ public class AnalyseCVController implements Initializable {
         new Thread(() -> {
             try {
                 // Appel au script Python intermédiaire
-                ProcessBuilder pb = new ProcessBuilder("python", "analyze_cv.py", AFFINDA_API_KEY, file.getAbsolutePath());
+                ProcessBuilder pb = new ProcessBuilder("python", "python/analyze_cv.py", AFFINDA_API_KEY, file.getAbsolutePath());
                 pb.directory(new File(System.getProperty("user.dir")));
                 Process process = pb.start();
 

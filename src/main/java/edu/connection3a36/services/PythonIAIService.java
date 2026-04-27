@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class PythonIAIService {
 
     private static final String PYTHON_EXE = "python"; // Assumes python is in PATH
-    private static final String SCRIPT_PATH = "python_app/skill_gap_analyzer.py";
+    private static final String SCRIPT_PATH = "python/skill_gap_analyzer.py";
 
     public static JSONObject analyzeSkillGap(List<String> userSkills, String targetJob) {
         try {
