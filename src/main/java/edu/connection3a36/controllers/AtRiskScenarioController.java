@@ -2,6 +2,7 @@ package edu.connection3a36.controllers;
 
 import edu.connection3a36.enums.CategorieSortie;
 import edu.connection3a36.enums.Statut;
+import edu.connection3a36.services.EmailService;
 import edu.connection3a36.services.GroqService;
 import edu.connection3a36.services.MockDataService;
 import edu.connection3a36.services.NotificationService;
@@ -35,6 +36,7 @@ public class AtRiskScenarioController {
     private final GroqService groq = new GroqService();
     private final PlanActionsService planService = new PlanActionsService();
     private final NotificationService notifService = new NotificationService();
+    private final EmailService emailService = new EmailService();
 
     private String lastAiAnalysis = "";
     private String selectedStudentKey = "";
@@ -144,6 +146,25 @@ public class AtRiskScenarioController {
                     "Plan IA créé pour " + selectedStudentKey + " (ID: " + plan.getId() + ")",
                     "SUCCESS"
                 );
+
+                // ── Envoi email alerte at-risk ────────────────────────────────
+                new Thread(() -> {
+                    try {
+                        edu.connection3a36.entities.Utilisateur currentUser = SessionManager.getCurrentUser();
+                        if (currentUser != null && currentUser.getEmail() != null && !currentUser.getEmail().isBlank()) {
+                            emailService.sendAtRiskAlert(
+                                currentUser.getEmail(),
+                                currentUser.getPrenom() + " " + currentUser.getNom(),
+                                selectedStudentKey,
+                                lastAiAnalysis.length() > 500 ? lastAiAnalysis.substring(0, 500) + "..." : lastAiAnalysis
+                            );
+                            System.out.println("✅ Email alerte at-risk envoyé à " + currentUser.getEmail());
+                        }
+                    } catch (Exception e) {
+                        System.err.println("⚠️ Email at-risk non envoyé: " + e.getMessage());
+                    }
+                }).start();
+                // ─────────────────────────────────────────────────────────────
 
                 Platform.runLater(() -> {
                     boxPlanResult.getChildren().clear();

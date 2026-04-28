@@ -152,6 +152,12 @@
                         styleClass="sidebar-btn" maxWidth="Infinity"/>
                 <Button fx:id="btnCategories" text="Catégories d'Articles"
                         onAction="#showCategories" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnBackParcours" text="🎓 Gestion Parcours"
+                        onAction="#showBackParcours" styleClass="sidebar-btn" maxWidth="Infinity"
+                        visible="false" managed="false"/>
+                <Button fx:id="btnBackProjets" text="📂 Gestion Projets"
+                        onAction="#showBackProjets" styleClass="sidebar-btn" maxWidth="Infinity"
+                        visible="false" managed="false"/>
             </VBox>
 
             <!-- Spacer -->

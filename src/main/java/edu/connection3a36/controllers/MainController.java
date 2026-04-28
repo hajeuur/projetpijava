@@ -115,26 +115,23 @@ public class MainController {
             showCategories();
 
         } else if (isAdmin()) {
-            // ADMIN SIMPLE (admin@gmail.com) → Back-Office ciblé IoT + étudiants à risque
+            // ADMIN SIMPLE (admin@gmail.com) → Back-Office Parcours + Projets uniquement
             showBackMode();
             hide(boxAdmin);
             show(boxBackAdmin);
             hide(boxSwitcher);
-            
-            // On cache les autres outils dans la section CRUD pour cet admin
+
+            // Cacher tout dans boxBackAdmin sauf Parcours et Projets
             for (javafx.scene.Node n : boxBackAdmin.getChildren()) {
-                if (n instanceof Button) {
-                    Button b = (Button) n;
-                    if (b == btnIoT || b == btnAtRisk) show(b);
+                if (n instanceof Button b) {
+                    if (b == btnBackParcours || b == btnBackProjets) show(b);
                     else hide(b);
-                } else if (n instanceof Label) {
-                    show(n); // Garder le titre "BACK CRUD"
                 } else {
-                    hide(n); // Cacher les séparateurs etc
+                    hide(n); // Séparateurs, labels
                 }
             }
-            
-            showIoT();
+
+            showBackParcours();
 
         } else if (isEnseignant()) {
             // Enseignant → FRONT uniquement (dashboard pédagogique + IA + Plans + Articles)
@@ -144,6 +141,7 @@ public class MainController {
             hide(btnAIDecisionnel);
             hide(btnParcours);
             hide(btnProjets);
+            hide(btnGamesHub); // Cacher Hub Intervention
             hide(boxAdmin);
             hide(boxBackAdmin);
             hide(boxSwitcher);
@@ -210,14 +208,14 @@ public class MainController {
             show(btnAIDecisionnel);
             show(btnSwitchBack);
             show(btnNotifications);
-            show(btnGamesHub);
+            hide(btnGamesHub); // Cacher Hub Intervention pour ADMINM
             showDashboardAdmin();
         } else if (isEnseignant()) {
             show(btnDashboardEnseignant);
             show(btnPlanActions);
             show(btnArticles);
             show(btnAIPedagogique);
-            show(btnGamesHub);
+            hide(btnGamesHub); // Cacher Hub Intervention pour enseignant
             showDashboardEnseignant();
         }
     }

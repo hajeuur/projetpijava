@@ -3,6 +3,7 @@ package edu.connection3a36.controllers;
 import edu.connection3a36.entities.PlanActions;
 import edu.connection3a36.enums.CategorieSortie;
 import edu.connection3a36.enums.Statut;
+import edu.connection3a36.services.EmailService;
 import edu.connection3a36.services.PlanActionsService;
 import edu.connection3a36.services.UserPreferencesService;
 import edu.connection3a36.tools.AlertUtil;
@@ -61,6 +62,7 @@ public class PlanActionsListController {
 
     private final PlanActionsService           service   = new PlanActionsService();
     private final UserPreferencesService       prefsService = new UserPreferencesService();
+    private final EmailService                 emailService = new EmailService();
     private final ObservableList<PlanActions>  plansList = FXCollections.observableArrayList();
     private static final DateTimeFormatter     DATE_FMT  = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -448,7 +450,25 @@ public class PlanActionsListController {
                                         ? (SessionManager.getCurrentUser().getPrenom() + " " + SessionManager.getCurrentUser().getNom()).trim()
                                         : "Un enseignant";
                                 ns.addFeedbackNotificationForAdmin(plan.getId(), plan.getDecision(), profName);
-                                // Mettre à jour le badge dans MainController
+                                // ── Email au superadmin ──────────────────────────────────────
+                                try {
+                                    edu.connection3a36.services.UtilisateurService us =
+                                            new edu.connection3a36.services.UtilisateurService();
+                                    us.getData().stream()
+                                        .filter(u -> "ADMIN".equals(u.getRole()) || "SUPERADMIN".equals(u.getRole()))
+                                        .forEach(admin -> {
+                                            try {
+                                                emailService.sendNotification(
+                                                    admin.getEmail(),
+                                                    admin.getPrenom() + " " + admin.getNom(),
+                                                    "Feedback enseignant sur Plan #" + plan.getId(),
+                                                    profName + " a soumis un feedback sur le plan : \"" + plan.getDecision() + "\""
+                                                );
+                                            } catch (Exception ignored) {}
+                                        });
+                                } catch (Exception ignored) {}
+                                // ─────────────────────────────────────────────────────────────
+                        // Mettre à jour le badge dans MainController
                                 int count = ns.countNonLues();
                                 javafx.application.Platform.runLater(() -> {
                                     if (MainController.getInstance() != null)
@@ -524,6 +544,25 @@ public class PlanActionsListController {
                 javafx.application.Platform.runLater(() -> {
                     AlertUtil.showSuccess("L'article a été généré et lié au plan d'action avec succès !");
                 });
+
+                // ── Email notification plan d'action ─────────────────────────
+                try {
+                    edu.connection3a36.entities.Utilisateur currentUser = SessionManager.getCurrentUser();
+                    if (currentUser != null && currentUser.getEmail() != null && !currentUser.getEmail().isBlank()) {
+                        emailService.sendPlanCreatedNotification(
+                            currentUser.getEmail(),
+                            currentUser.getPrenom() + " " + currentUser.getNom(),
+                            plan.getDecision(),
+                            plan.getDescription() != null
+                                ? (plan.getDescription().length() > 300 ? plan.getDescription().substring(0, 300) + "..." : plan.getDescription())
+                                : ""
+                        );
+                        System.out.println("✅ Email plan d'action envoyé à " + currentUser.getEmail());
+                    }
+                } catch (Exception e) {
+                    System.err.println("⚠️ Email plan non envoyé: " + e.getMessage());
+                }
+                // ─────────────────────────────────────────────────────────────
 
             } catch (Exception ex) {
                 javafx.application.Platform.runLater(() -> {
