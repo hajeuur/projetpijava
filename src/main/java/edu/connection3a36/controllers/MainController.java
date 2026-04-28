@@ -53,6 +53,21 @@ public class MainController {
     @FXML private Button btnBackParcours;
     @FXML private Button btnBackProjets;
     @FXML private Button btnNotifSidebar; // Bouton clochette dans la sidebar
+    @FXML private Button btnBackFeedbacks;
+    @FXML private Button btnMesFeedbacks;
+    @FXML private Button btnObjectifs;
+    @FXML private Button btnDashboardObjectifs;
+
+    // ── MentorAI features (sidebar BACK) ──────────────────────────────────────
+    @FXML private VBox    boxMentorAI;
+    @FXML private Button  btnHumeur;
+    @FXML private Button  btnPlanning;
+    @FXML private Button  btnCarnet;
+
+    // ── MentorAI features (header FRONT) ──────────────────────────────────────
+    @FXML private Button  btnHeaderHumeur;
+    @FXML private Button  btnHeaderPlanning;
+    @FXML private Button  btnHeaderCarnet;
 
     // ── Sidebar (BACK) ────────────────────────────────────────────────────────
     @FXML private VBox backSidebar;
@@ -124,12 +139,15 @@ public class MainController {
             // Cacher tout dans boxBackAdmin sauf Parcours et Projets
             for (javafx.scene.Node n : boxBackAdmin.getChildren()) {
                 if (n instanceof Button b) {
-                    if (b == btnBackParcours || b == btnBackProjets) show(b);
+                    if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks) show(b);
                     else hide(b);
                 } else {
                     hide(n); // Séparateurs, labels
                 }
             }
+
+            // MentorAI visible en sidebar pour admin
+            if (boxMentorAI != null) show(boxMentorAI);
 
             showBackParcours();
 
@@ -149,6 +167,11 @@ public class MainController {
             show(btnAIPedagogique);
             show(btnPlanActions);
             show(btnArticles);
+            
+            // MentorAI dans le header FRONT
+            if (btnHeaderHumeur != null) show(btnHeaderHumeur);
+            if (btnHeaderPlanning != null) show(btnHeaderPlanning);
+            if (btnHeaderCarnet != null) show(btnHeaderCarnet);
 
             showDashboardEnseignant();
 
@@ -164,6 +187,9 @@ public class MainController {
             show(btnParcours);
             show(btnProjets);
             show(btnGamesHub);
+            if (btnMesFeedbacks != null) show(btnMesFeedbacks);
+            if (btnObjectifs != null) show(btnObjectifs);
+            if (btnHeaderCarnet != null) show(btnHeaderCarnet);
             
             showParcours();
 
@@ -421,6 +447,48 @@ public class MainController {
         if (!acl.canAccess(AccessControlService.Module.BACK_PROJETS)) return;
         loadView("/BackOfficeProjets.fxml");
         setActiveBtn(btnBackProjets);
+    }
+
+    @FXML
+    void showBackFeedbacks() {
+        loadView("/fxml/AdminFeedback.fxml");
+        setActiveBtn(btnBackFeedbacks);
+    }
+
+    @FXML
+    void showMesFeedbacks() {
+        loadView("/fxml/MesFeedbacks.fxml");
+        setActiveBtn(btnMesFeedbacks);
+    }
+
+    @FXML
+    void showObjectifs() {
+        loadView("/fxml/ObjectifList.fxml");
+        setActiveBtn(btnObjectifs);
+    }
+
+    @FXML
+    void showDashboardObjectifs() {
+        loadView("/fxml/DashboardObjectifsAdmin.fxml");
+        setActiveBtn(btnDashboardObjectifs);
+    }
+
+    @FXML
+    void showHumeur() {
+        loadView("/views/humeur.fxml");
+        setActiveBtn(btnHumeur);
+    }
+
+    @FXML
+    void showPlanning() {
+        loadView("/views/planning.fxml");
+        setActiveBtn(btnPlanning);
+    }
+
+    @FXML
+    void showCarnet() {
+        loadView("/views/carnet.fxml");
+        setActiveBtn(btnCarnet);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

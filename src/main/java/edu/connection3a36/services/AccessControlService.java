@@ -8,7 +8,9 @@ public class AccessControlService {
     public enum Module {
         DASHBOARD_ADMIN, DASHBOARD_ENSEIGNANT, PLAN_ACTIONS, ARTICLES,
         IA_PEDAGOGIQUE, IA_DECISIONNELLE, IOT, AT_RISK, BACK_PARCOURS, BACK_PROJETS,
-        UTILISATEURS, CATEGORIES, PARCOURS_FRONT, PROJETS_FRONT, GAMES_HUB
+        UTILISATEURS, CATEGORIES, PARCOURS_FRONT, PROJETS_FRONT, GAMES_HUB,
+        BACK_FEEDBACKS, MES_FEEDBACKS, OBJECTIFS, DASHBOARD_OBJECTIFS,
+        HUMEUR, PLANNING, CARNET
     }
 
     public boolean canAccess(Module module) {
@@ -22,11 +24,11 @@ public class AccessControlService {
         boolean etudiant = role.contains("ETUDIANT") || role.equals("STUDENT");
 
         return switch (module) {
-            case DASHBOARD_ADMIN, IA_DECISIONNELLE, UTILISATEURS, CATEGORIES -> superAdmin;
-            case IOT, AT_RISK, BACK_PARCOURS, BACK_PROJETS -> superAdmin || admin;
-            case DASHBOARD_ENSEIGNANT, IA_PEDAGOGIQUE -> enseignant;
+            case DASHBOARD_ADMIN, IA_DECISIONNELLE, UTILISATEURS, CATEGORIES, DASHBOARD_OBJECTIFS -> superAdmin;
+            case IOT, AT_RISK, BACK_PARCOURS, BACK_PROJETS, BACK_FEEDBACKS -> superAdmin || admin;
+            case DASHBOARD_ENSEIGNANT, IA_PEDAGOGIQUE, HUMEUR, PLANNING, CARNET -> enseignant;
             case PLAN_ACTIONS, ARTICLES, GAMES_HUB -> superAdmin || enseignant;
-            case PARCOURS_FRONT, PROJETS_FRONT -> etudiant;
+            case PARCOURS_FRONT, PROJETS_FRONT, MES_FEEDBACKS, OBJECTIFS -> etudiant;
         };
     }
 }

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mentorai.controllers.ModifierFeedbackController"
+      spacing="0"
+      style="-fx-background-color: #f5f7fa;"
+      prefWidth="700" prefHeight="550">
+
+    <!-- HEADER -->
+    <HBox style="-fx-background-color: #102c59; -fx-padding: 15 25 15 25;"
+          alignment="CENTER_LEFT" spacing="15">
+        <Label text="MentorAI"
+               style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+        <Label text="| Modifier mon feedback"
+               style="-fx-text-fill: #9dbbce; -fx-font-size: 14px;"/>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-border-color: transparent;">
+        <VBox spacing="20" style="-fx-padding: 25;">
+
+            <!-- FORMULAIRE -->
+            <VBox style="-fx-background-color: white; -fx-padding: 25;
+                         -fx-background-radius: 10;
+                         -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.08),8,0,0,3);"
+                  spacing="16">
+
+                <HBox style="-fx-border-color: #f0a500; -fx-border-width: 0 0 0 4;
+                             -fx-padding: 0 0 0 10;">
+                    <Label text="Modifier votre feedback"
+                           style="-fx-font-size: 17px; -fx-font-weight: bold;
+                                  -fx-text-fill: #102c59;"/>
+                </HBox>
+
+                <!-- Type -->
+                <VBox spacing="5">
+                    <Label text="Type de feedback *"
+                           style="-fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                    <ComboBox fx:id="comboType"
+                              maxWidth="Infinity"/>
+                    <Label fx:id="erreurType" text=""
+                           style="-fx-text-fill: #d52e28; -fx-font-size: 11px;"/>
+                </VBox>
+
+                <!-- Note -->
+                <VBox spacing="5">
+                    <Label text="Votre note *"
+                           style="-fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Button fx:id="star1" text="★" onAction="#noterUn"
+                                style="-fx-background-color: transparent; -fx-text-fill: #ccc;
+                                       -fx-font-size: 24px; -fx-cursor: hand; -fx-padding: 0;"/>
+                        <Button fx:id="star2" text="★" onAction="#noterDeux"
+                                style="-fx-background-color: transparent; -fx-text-fill: #ccc;
+                                       -fx-font-size: 24px; -fx-cursor: hand; -fx-padding: 0;"/>
+                        <Button fx:id="star3" text="★" onAction="#noterTrois"
+                                style="-fx-background-color: transparent; -fx-text-fill: #ccc;
+                                       -fx-font-size: 24px; -fx-cursor: hand; -fx-padding: 0;"/>
+                        <Button fx:id="star4" text="★" onAction="#noterQuatre"
+                                style="-fx-background-color: transparent; -fx-text-fill: #ccc;
+                                       -fx-font-size: 24px; -fx-cursor: hand; -fx-padding: 0;"/>
+                        <Button fx:id="star5" text="★" onAction="#noterCinq"
+                                style="-fx-background-color: transparent; -fx-text-fill: #ccc;
+                                       -fx-font-size: 24px; -fx-cursor: hand; -fx-padding: 0;"/>
+                        <Label fx:id="labelNote" text="(0/5)"
+                               style="-fx-text-fill: #888; -fx-font-size: 12px;"/>
+                    </HBox>
+                    <Label fx:id="erreurNote" text=""
+                           style="-fx-text-fill: #d52e28; -fx-font-size: 11px;"/>
+                </VBox>
+
+                <!-- Message -->
+                <VBox spacing="5">
+                    <Label text="Votre message *"
+                           style="-fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                    <TextArea fx:id="textMessage"
+                              prefHeight="110" wrapText="true"
+                              style="-fx-background-radius: 6;"/>
+                    <Label fx:id="erreurMessage" text=""
+                           style="-fx-text-fill: #d52e28; -fx-font-size: 11px;"/>
+                </VBox>
+
+                <!-- Résultat -->
+                <Label fx:id="labelResultat" text="" wrapText="true"
+                       style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
+
+                <!-- Boutons -->
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Button text="💾  Enregistrer"
+                            onAction="#enregistrer"
+                            style="-fx-background-color: #f0a500; -fx-text-fill: white;
+                                   -fx-font-weight: bold; -fx-background-radius: 20;
+                                   -fx-padding: 10 25 10 25; -fx-cursor: hand;"/>
+                    <Button text="↩  Retour"
+                            onAction="#retour"
+                            style="-fx-background-color: transparent; -fx-text-fill: #102c59;
+                                   -fx-border-color: #102c59; -fx-border-radius: 20;
+                                   -fx-background-radius: 20; -fx-padding: 10 25 10 25;
+                                   -fx-cursor: hand;"/>
+                </HBox>
+
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</VBox>

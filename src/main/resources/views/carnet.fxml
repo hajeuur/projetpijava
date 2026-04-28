@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.mentorai.controllers.CarnetController"
+            stylesheets="@/css/carnet.css">
+
+    <!-- LEFT -->
+    <left>
+        <VBox spacing="10" prefWidth="280" styleClass="left-panel">
+            <padding>
+                <Insets top="15" right="10" bottom="15" left="10"/>
+            </padding>
+
+            <TextField fx:id="searchField"
+                       promptText="Rechercher..."
+                       styleClass="search-field"/>
+
+            <!-- FILTER -->
+            <HBox spacing="10">
+                <Label text="Afficher :" />
+                <ComboBox fx:id="filterCombo"/>
+            </HBox>
+
+            <ListView fx:id="notesListView"
+                      VBox.vgrow="ALWAYS"
+                      styleClass="notes-list"/>
+
+            <Label fx:id="noteCountLabel"/>
+        </VBox>
+    </left>
+
+    <!-- CENTER -->
+    <center>
+        <VBox spacing="10" styleClass="right-panel">
+            <padding>
+                <Insets top="15" right="15" bottom="15" left="15"/>
+            </padding>
+
+            <!-- TITLE -->
+            <TextField fx:id="titreField"
+                       promptText="Titre"
+                       styleClass="title-field"/>
+
+            <!-- 🔴 ERROR TITRE -->
+            <Label fx:id="titreError"
+                   textFill="red"
+                   visible="false"
+                   managed="false"/>
+
+            <!-- COLOR + VISIBILITY -->
+            <HBox spacing="10">
+
+                <ColorPicker fx:id="colorPicker"/>
+
+                <ComboBox fx:id="visibiliteCombo"/>
+
+            </HBox>
+
+            <!-- 🔴 ERROR VISIBILITE -->
+            <Label fx:id="visibiliteError"
+                   textFill="red"
+                   visible="false"
+                   managed="false"/>
+
+            <!-- CONTENT -->
+            <TextArea fx:id="contenuEditor"
+                      wrapText="true"
+                      VBox.vgrow="ALWAYS"
+                      promptText="Écrire votre note ici..."
+                      styleClass="html-editor"/>
+
+            <!-- 🔴 ERROR CONTENU -->
+            <Label fx:id="contenuError"
+                   textFill="red"
+                   visible="false"
+                   managed="false"/>
+
+            <!-- GENERAL ERROR -->
+            <Label fx:id="errorLabel"
+                   visible="false"
+                   managed="false"
+                   styleClass="error-label"/>
+
+            <!-- BUTTONS -->
+            <HBox spacing="10">
+
+                <Button fx:id="btnAjouter"
+                        text="Ajouter"
+                        onAction="#handleAjouter"
+                        styleClass="btn-primary"/>
+
+                <Button fx:id="btnModifier"
+                        text="Modifier"
+                        onAction="#handleModifier"
+                        styleClass="btn-secondary"/>
+
+                <Button fx:id="btnSupprimer"
+                        text="Supprimer"
+                        onAction="#handleSupprimer"
+                        styleClass="btn-danger"/>
+
+                <Button text="Enregistrer"
+                        onAction="#handleEnregistrer"
+                        styleClass="btn-save"/>
+
+                <Button fx:id="btnAnnuler"
+                        text="Annuler"
+                        onAction="#handleAnnuler"
+                        styleClass="btn-outline"
+                        visible="false"
+                        managed="false"/>
+            </HBox>
+
+            <Label fx:id="editorStatusLabel"/>
+
+        </VBox>
+    </center>
+
+</BorderPane>

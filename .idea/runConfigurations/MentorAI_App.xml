@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="MentorAI App" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="edu.connection3a36.tests.MainFx" />
+    <module name="MentorAi" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

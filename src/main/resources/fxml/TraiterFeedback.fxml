@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mentorai.controllers.TraiterFeedbackController"
+      spacing="0"
+      style="-fx-background-color: #f5f7fa;"
+      prefWidth="620" prefHeight="600">
+
+    <!-- HEADER -->
+    <HBox style="-fx-background-color: #102c59; -fx-padding: 16 20 16 20;"
+          alignment="CENTER_LEFT" spacing="10">
+        <Label text="Traiter le Feedback"
+               style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <VBox spacing="2">
+            <Label fx:id="labelSousTitre" text="Feedback #..."
+                   style="-fx-text-fill: #9dbbce; -fx-font-size: 11px;"/>
+        </VBox>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-border-color: transparent;">
+        <VBox spacing="15" style="-fx-padding: 20;">
+
+            <!-- INFO FEEDBACK -->
+            <VBox style="-fx-background-color: white; -fx-background-radius: 8;
+                         -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.08),5,0,0,2);
+                         -fx-padding: 0;">
+                <HBox style="-fx-background-color: #eef2ff; -fx-padding: 10 15 10 15;
+                             -fx-background-radius: 8 8 0 0;" alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Informations du Feedback"
+                           style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 12px;"/>
+                </HBox>
+                <VBox style="-fx-padding: 12 15 12 15;" spacing="6">
+                    <Label fx:id="labelInfoFeedback" text="..."
+                           wrapText="true"
+                           style="-fx-text-fill: #444; -fx-font-size: 12px;"/>
+                </VBox>
+            </VBox>
+
+            <!-- BOUTON GEMINI IA -->
+            <VBox style="-fx-background-color: white; -fx-background-radius: 8;
+                         -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.08),5,0,0,2);
+                         -fx-padding: 0;">
+                <HBox style="-fx-background-color: #7c3aed; -fx-padding: 10 15 10 15;
+                             -fx-background-radius: 8 8 0 0;" alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Gemini IA — Suggestion Automatique"
+                           style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 12px;"/>
+                </HBox>
+                <VBox spacing="10" style="-fx-padding: 14;">
+                    <Label text="Laissez Gemini IA analyser ce feedback et generer une reponse professionnelle automatiquement."
+                           wrapText="true"
+                           style="-fx-text-fill: #555; -fx-font-size: 11px;"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Button fx:id="btnGemini"
+                                text="Suggerer avec Gemini IA"
+                                onAction="#suggererAvecGemini"
+                                style="-fx-background-color: #7c3aed; -fx-text-fill: white;
+                                       -fx-font-weight: bold; -fx-background-radius: 6;
+                                       -fx-padding: 9 18 9 18; -fx-cursor: hand; -fx-font-size: 12px;"/>
+                        <Label fx:id="labelGeminiStatus" text=""
+                               style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- FORMULAIRE -->
+            <VBox style="-fx-background-color: white; -fx-background-radius: 8;
+                         -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.08),5,0,0,2);
+                         -fx-padding: 0;">
+                <HBox style="-fx-background-color: #28a745; -fx-padding: 10 15 10 15;
+                             -fx-background-radius: 8 8 0 0;" alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Formulaire de Traitement"
+                           style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 12px;"/>
+                </HBox>
+
+                <VBox spacing="14" style="-fx-padding: 16;">
+
+                    <!-- Type -->
+                    <VBox spacing="5">
+                        <Label text="Type de traitement *"
+                               style="-fx-font-weight: bold; -fx-text-fill: #333; -fx-font-size: 12px;"/>
+                        <ComboBox fx:id="comboType"
+                                  promptText="-- Selectionner un type --"
+                                  maxWidth="Infinity"
+                                  style="-fx-background-radius: 6; -fx-border-color: #ddd;
+                                         -fx-border-radius: 6;"/>
+                    </VBox>
+
+                    <!-- Réponse -->
+                    <VBox spacing="5">
+                        <Label text="Reponse a l'utilisateur *"
+                               style="-fx-font-weight: bold; -fx-text-fill: #333; -fx-font-size: 12px;"/>
+                        <TextArea fx:id="textDescription"
+                                  promptText="Ecrivez votre reponse ou utilisez Gemini IA..."
+                                  prefHeight="120"
+                                  wrapText="true"
+                                  style="-fx-background-radius: 6; -fx-border-color: #ddd;
+                                         -fx-border-radius: 6;"/>
+                        <Label text="Minimum 10 caracteres, maximum 1000."
+                               style="-fx-text-fill: #aaa; -fx-font-size: 10px;"/>
+                    </VBox>
+
+                    <!-- Avertissement -->
+                    <HBox style="-fx-background-color: #fff8e1; -fx-padding: 10;
+                                 -fx-background-radius: 6; -fx-border-color: #f0a500;
+                                 -fx-border-width: 0 0 0 3;"
+                          spacing="8" alignment="CENTER_LEFT">
+                        <Label text="Une fois enregistre, le statut passera a Traite."
+                               wrapText="true"
+                               style="-fx-text-fill: #856404; -fx-font-size: 11px;"
+                               maxWidth="480"/>
+                    </HBox>
+
+                    <!-- Erreur -->
+                    <Label fx:id="labelErreur" text=""
+                           style="-fx-text-fill: #d52e28; -fx-font-size: 12px;"/>
+
+                </VBox>
+            </VBox>
+
+        </VBox>
+    </ScrollPane>
+
+    <!-- BOUTONS BAS -->
+    <HBox spacing="10" alignment="CENTER_RIGHT"
+          style="-fx-padding: 14 20 14 20; -fx-background-color: white;
+                 -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
+        <Button text="Annuler" onAction="#annuler"
+                style="-fx-background-color: transparent; -fx-text-fill: #555;
+                       -fx-border-color: #ccc; -fx-border-radius: 6;
+                       -fx-background-radius: 6; -fx-padding: 9 20 9 20;
+                       -fx-cursor: hand; -fx-font-size: 12px;"/>
+        <Button text="Enregistrer le traitement" onAction="#confirmer"
+                style="-fx-background-color: #28a745; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-background-radius: 6;
+                       -fx-padding: 9 20 9 20; -fx-cursor: hand; -fx-font-size: 12px;"/>
+    </HBox>
+
+</VBox>

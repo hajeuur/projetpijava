@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="edu.connection3a36.controllers.AdminObjectifsUserController"
+            prefWidth="1100" prefHeight="750"
+            style="-fx-background-color: #f4f7fb;">
+    <top>
+        <VBox style="-fx-background-color: #102c59;">
+            <padding><Insets top="25" left="40" right="40" bottom="25"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button text="Retour au dashboard" onAction="#handleRetour"
+                        style="-fx-background-color: rgba(255,255,255,0.15); -fx-text-fill: white; -fx-background-radius: 50; -fx-padding: 8 18 8 18; -fx-cursor: hand;"/>
+                <VBox HBox.hgrow="ALWAYS" spacing="3">
+                    <Label fx:id="lblUserTitre" text=""
+                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label fx:id="lblUserSub" text=""
+                           style="-fx-font-size: 12px; -fx-text-fill: #9dbbce;"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: #f4f7fb; -fx-background-color: #f4f7fb;">
+            <VBox spacing="20">
+                <padding><Insets top="25" left="30" right="30" bottom="25"/></padding>
+
+                <!-- STATS UTILISATEUR -->
+                <HBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 15 20 15 20; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.06), 8, 0, 0, 2);">
+                    <Label fx:id="lblStats" text=""
+                           style="-fx-text-fill: #102c59; -fx-font-weight: bold; -fx-font-size: 13px;"/>
+                </HBox>
+
+                <!-- INFO READONLY -->
+                <HBox style="-fx-background-color: #e8f4fd; -fx-background-radius: 10; -fx-padding: 12 20 12 20;">
+                    <Label text="Mode consultation — Vous pouvez voir les programmes et taches mais pas les modifier."
+                           style="-fx-text-fill: #1a6fa8; -fx-font-weight: bold; -fx-font-size: 12px;"/>
+                </HBox>
+
+                <!-- LISTE OBJECTIFS -->
+                <VBox fx:id="vboxObjectifs" spacing="15"/>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

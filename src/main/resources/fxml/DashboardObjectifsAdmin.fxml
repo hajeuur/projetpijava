@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="edu.connection3a36.controllers.DashboardObjectifsAdminController"
+            prefWidth="1200" prefHeight="750"
+            style="-fx-background-color: #f4f7fb;">
+    <top>
+        <VBox style="-fx-background-color: #102c59;">
+            <padding><Insets top="20" left="40" right="40" bottom="20"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <VBox HBox.hgrow="ALWAYS" spacing="4">
+                    <Label text="Dashboard Admin — Objectifs et Programmes"
+                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Vue globale de tous les objectifs et progressions des utilisateurs"
+                           style="-fx-font-size: 12px; -fx-text-fill: #9dbbce;"/>
+                </VBox>
+                <Button text="Rafraichir" onAction="#handleRefresh"
+                        style="-fx-background-color: rgba(255,255,255,0.15); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 8 20 8 20; -fx-cursor: hand;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: #f4f7fb; -fx-background-color: #f4f7fb;">
+            <VBox spacing="25">
+                <padding><Insets top="30" left="30" right="30" bottom="30"/></padding>
+
+                <!-- STATS CARDS -->
+                <HBox spacing="20">
+                    <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 3);">
+                        <Label text="TOTAL OBJECTIFS" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #888;"/>
+                        <Label fx:id="totalObjectifsLabel" text="0" style="-fx-font-size: 38px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                    </VBox>
+                    <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 3);">
+                        <Label text="OBJECTIFS ATTEINTS" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #888;"/>
+                        <Label fx:id="atteintsLabel" text="0" style="-fx-font-size: 38px; -fx-font-weight: bold; -fx-text-fill: #198754;"/>
+                    </VBox>
+                    <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 3);">
+                        <Label text="EN COURS" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #888;"/>
+                        <Label fx:id="enCoursLabel" text="0" style="-fx-font-size: 38px; -fx-font-weight: bold; -fx-text-fill: #ffc107;"/>
+                    </VBox>
+                    <VBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 3);">
+                        <Label text="TAUX DE REUSSITE" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #888;"/>
+                        <Label fx:id="tauxLabel" text="0%" style="-fx-font-size: 38px; -fx-font-weight: bold; -fx-text-fill: #d52e28;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- INFO READONLY -->
+                <HBox style="-fx-background-color: #fff3cd; -fx-background-radius: 10; -fx-padding: 15 20 15 20;">
+                    <Label text="Mode consultation — Vous pouvez voir les objectifs et taches de chaque utilisateur sans les modifier."
+                           style="-fx-text-fill: #856404; -fx-font-weight: bold; -fx-font-size: 13px;"/>
+                </HBox>
+
+                <!-- LISTE UTILISATEURS -->
+                <VBox spacing="12"
+                      style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.06), 10, 0, 0, 3);">
+
+                    <HBox alignment="CENTER_LEFT" spacing="15">
+                        <Label text="Utilisateurs et leurs objectifs"
+                               style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #102c59;"
+                               HBox.hgrow="ALWAYS"/>
+                        <TextField fx:id="tfRechercheUser" promptText="Rechercher un utilisateur..."
+                                   prefWidth="250"
+                                   style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #eee; -fx-padding: 8 12 8 12;"/>
+                        <Button text="Filtrer" onAction="#handleRechercheUser"
+                                style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 18 8 18; -fx-cursor: hand;"/>
+                    </HBox>
+
+                    <Separator/>
+
+                    <VBox fx:id="vboxUtilisateurs" spacing="10"/>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>
