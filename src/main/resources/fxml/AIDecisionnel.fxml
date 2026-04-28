@@ -1,94 +1,185 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
 
 <ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="edu.connection3a36.controllers.AIDecisionnelController"
             fitToWidth="true" style="-fx-background-color:transparent;-fx-border-color:transparent;">
-<content>
-<VBox spacing="16">
-
-    <!-- ===== PAGE HEADER ===== -->
-    <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="15">
-        <VBox spacing="3" HBox.hgrow="ALWAYS">
-            <Label text="IA Décisionnelle" styleClass="section-title"/>
-            <Label text="Analyse intelligente et support décisionnel pour la direction"
-                   styleClass="section-subtitle"/>
-        </VBox>
-        <Button text="Historique" onAction="#handleShowHistory" styleClass="btn-secondary"/>
-        <Button text="Analyser les données globales" onAction="#handleAnalyse"
-                styleClass="btn-primary" style="-fx-padding: 9 20;"/>
-        <Button text="Effacer" onAction="#handleClear" styleClass="btn-secondary"/>
-    </HBox>
-
-    <HBox spacing="14">
-
-        <!-- Zone analyse textuelle IA -->
-        <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="10" prefWidth="430">
-            <Label text="Analyse IA — Vue Globale"
-                   style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #102c59;"/>
-            <Separator/>
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane"
-                        style="-fx-background-color: transparent; -fx-min-height: 160;">
-                <VBox fx:id="boxAnalyse" spacing="10" style="-fx-padding: 4;">
-                    <Label text="Cliquez sur «Analyser les données globales» pour obtenir des recommandations stratégiques sur l'ensemble de l'établissement."
-                           wrapText="true"
-                           style="-fx-font-size: 13px; -fx-text-fill: #8e9aaa; -fx-font-style: italic;"/>
+    <content>
+        <VBox spacing="14">
+            <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="12">
+                <VBox spacing="3" HBox.hgrow="ALWAYS">
+                    <Label text="IA Décisionnelle" styleClass="section-title"/>
+                    <Label text="Chatbot + hub d’intervention pédagogique sur une seule page" styleClass="section-subtitle"/>
                 </VBox>
-            </ScrollPane>
-        </VBox>
+                <Button text="Historique" onAction="#handleShowHistory" styleClass="btn-secondary"/>
+                <Button text="Analyser les données globales" onAction="#handleAnalyse" styleClass="btn-primary"/>
+                <Button text="Effacer" onAction="#handleClear" styleClass="btn-secondary"/>
+            </HBox>
 
-        <!-- CHATBOT DÉCISIONNEL -->
-        <VBox HBox.hgrow="ALWAYS" spacing="12" prefWidth="620">
-            <VBox styleClass="card" spacing="10">
-                <Label text="Suggestions de discussion"
-                       style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #102c59;"/>
-                <HBox spacing="8">
-                    <Button text="Situation globale" onAction="#handleSuggestion1" styleClass="chip-primary"/>
-                    <Button text="Détecter pbs" onAction="#handleSuggestion2" styleClass="chip-danger"/>
-                    <Button text="Plan stratégique" onAction="#handleSuggestion3" styleClass="chip-steel"/>
-                </HBox>
-            </VBox>
+            <HBox spacing="6" style="-fx-background-color: white; -fx-padding: 8 14; -fx-background-radius: 12; -fx-border-color: #dde6ef; -fx-border-radius:12;">
+                <Button fx:id="tabChatbot" text="Chatbot" onAction="#showSubChatbot" style="-fx-background-color:#3b82f6; -fx-text-fill:white; -fx-background-radius:20; -fx-padding:6 16;"/>
+                <Button fx:id="tabInterventions" text="Interventions" onAction="#showSubInterventions" style="-fx-background-color:#e2e8f0; -fx-background-radius:20; -fx-padding:6 16;"/>
+                <Button fx:id="tabDiagnostic" text="Diagnostic" onAction="#showSubDiagnostic" style="-fx-background-color:#e2e8f0; -fx-background-radius:20; -fx-padding:6 16;"/>
+                <Button fx:id="tabAccessibilite" text="Accessibilité" onAction="#showSubAccessibilite" style="-fx-background-color:#e2e8f0; -fx-background-radius:20; -fx-padding:6 16;"/>
+                <Button fx:id="tabImpact" text="Suivi d’impact" onAction="#showSubImpact" style="-fx-background-color:#e2e8f0; -fx-background-radius:20; -fx-padding:6 16;"/>
+            </HBox>
 
-            <!-- Zone de chat -->
-            <VBox styleClass="card" spacing="10">
-                <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="Conversation stratégique" style="-fx-font-weight:bold; -fx-font-size:14px; -fx-text-fill:#102c59;"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="lblChatStatus" text="" style="-fx-text-fill: #7a8fa5; -fx-font-size: 12px;"/>
-                </HBox>
-                <ScrollPane fx:id="chatScroll" fitToWidth="true"
-                            styleClass="chat-container" style="-fx-min-height: 340px; -fx-pref-height: 420px;">
-                    <VBox fx:id="chatBox" spacing="12">
-                        <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+            <StackPane>
+                <VBox fx:id="paneChatbot" spacing="14">
+                    <HBox spacing="14">
+                        <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="10" prefWidth="430">
+                            <Label text="Analyse IA — Vue Globale" style="-fx-font-weight:bold; -fx-font-size:14px; -fx-text-fill:#102c59;"/>
+                            <Separator/>
+                            <ScrollPane fitToWidth="true" styleClass="scroll-pane" style="-fx-background-color: transparent; -fx-min-height: 160;">
+                                <VBox fx:id="boxAnalyse" spacing="10" style="-fx-padding: 4;">
+                                    <Label text="Cliquez sur «Analyser les données globales» pour obtenir des recommandations."
+                                           wrapText="true" style="-fx-font-size: 13px; -fx-text-fill: #8e9aaa; -fx-font-style: italic;"/>
+                                </VBox>
+                            </ScrollPane>
+                        </VBox>
+
+                        <VBox HBox.hgrow="ALWAYS" spacing="12" prefWidth="620">
+                            <VBox styleClass="card" spacing="10">
+                                <Label text="Suggestions de discussion" style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #102c59;"/>
+                                <HBox spacing="8">
+                                    <Button text="Situation globale" onAction="#handleSuggestion1" styleClass="chip-primary"/>
+                                    <Button text="Détecter pbs" onAction="#handleSuggestion2" styleClass="chip-danger"/>
+                                    <Button text="Plan stratégique" onAction="#handleSuggestion3" styleClass="chip-steel"/>
+                                </HBox>
+                            </VBox>
+
+                            <VBox styleClass="card" spacing="10">
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label text="Conversation stratégique" style="-fx-font-weight:bold; -fx-font-size:14px; -fx-text-fill:#102c59;"/>
+                                    <Region HBox.hgrow="ALWAYS"/>
+                                    <Label fx:id="lblChatStatus" text="" style="-fx-text-fill: #7a8fa5; -fx-font-size: 12px;"/>
+                                </HBox>
+                                <ScrollPane fx:id="chatScroll" fitToWidth="true" styleClass="chat-container" style="-fx-min-height: 340px; -fx-pref-height: 420px;">
+                                    <VBox fx:id="chatBox" spacing="12"><padding><Insets top="15" right="15" bottom="15" left="15"/></padding></VBox>
+                                </ScrollPane>
+                                <HBox spacing="8" alignment="CENTER_LEFT">
+                                    <Button text="Transformer en Plan d'Action" onAction="#handleCreatePlan" styleClass="chip-success"/>
+                                    <Button text="Rédiger Article IA" onAction="#handleGenerateArticle" styleClass="chip-steel"/>
+                                </HBox>
+                                <HBox styleClass="chat-input-area" spacing="10" alignment="CENTER_LEFT">
+                                    <TextField fx:id="inputField" promptText="Posez votre question décisionnelle à l'IA..." HBox.hgrow="ALWAYS" styleClass="search-bar" onAction="#handleSend"/>
+                                    <Button fx:id="btnRecord" text="🎤" onAction="#handleRecord" styleClass="btn-secondary"/>
+                                    <Button fx:id="btnSend" text="Envoyer" onAction="#handleSend" styleClass="btn-primary"/>
+                                </HBox>
+                            </VBox>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <VBox fx:id="paneInterventions" spacing="12" visible="false" managed="false" styleClass="card">
+                    <Label text="Interventions — générateur enseignant (15 min)" style="-fx-font-size:18px; -fx-font-weight:bold; -fx-text-fill:#102c59;"/>
+                    <HBox spacing="10">
+                        <ComboBox fx:id="cbNiveau" promptText="Niveau" prefWidth="180"/>
+                        <ComboBox fx:id="cbProfil" promptText="Profil" prefWidth="240"/>
+                        <Button text="Générer pack 15 min" onAction="#generateInterventionPack" styleClass="btn-primary"/>
+                    </HBox>
+                    <HBox spacing="10">
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label text="Micro-activités"/>
+                            <TextArea fx:id="taIntervention" prefRowCount="8" wrapText="true"/>
+                        </VBox>
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label text="Banque de remédiation"/>
+                            <TextArea fx:id="taRemediation" prefRowCount="8" wrapText="true"/>
+                        </VBox>
+                    </HBox>
+                    <Label text="Script prêt à l’emploi"/>
+                    <TextArea fx:id="taScriptSeance" prefRowCount="6" wrapText="true"/>
+                </VBox>
+
+                <VBox fx:id="paneDiagnostic" spacing="12" visible="false" managed="false" styleClass="card">
+                    <Label text="Diagnostic — quiz rapide 5 questions" style="-fx-font-size:18px; -fx-font-weight:bold; -fx-text-fill:#102c59;"/>
+                    <GridPane hgap="12" vgap="8">
+                        <Label text="1) Concentration faible" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <ComboBox fx:id="cbQ1" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <Label text="2) Absences impactantes" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <ComboBox fx:id="cbQ2" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <Label text="3) Consignes difficiles" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <ComboBox fx:id="cbQ3" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        <Label text="4) Travail irrégulier" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                        <ComboBox fx:id="cbQ4" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                        <Label text="5) Feedback non appliqué" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                        <ComboBox fx:id="cbQ5" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                    </GridPane>
+                    <HBox spacing="10">
+                        <Button text="Évaluer" onAction="#runDiagnostic" styleClass="btn-warning"/>
+                        <Label fx:id="lblDiagScore" text="Score diagnostic: -- / 15" style="-fx-font-weight:bold;"/>
+                    </HBox>
+                    <TextArea fx:id="taDiagRecommendation" prefRowCount="10" wrapText="true"/>
+                </VBox>
+
+                <VBox fx:id="paneAccessibilite" spacing="12" visible="false" managed="false" styleClass="card">
+                    <Label text="Accessibilité — lecture adaptée, audio, focus" style="-fx-font-size:18px; -fx-font-weight:bold; -fx-text-fill:#102c59;"/>
+                    <HBox spacing="10">
+                        <Button fx:id="btnDyslexia" text="📖 Mode Dyslexie" onAction="#toggleDyslexiaMode" styleClass="btn-secondary"/>
+                        <Button text="Crème" onAction="#setBgCream"/>
+                        <Button text="Vert pâle" onAction="#setBgGreen"/>
+                        <Button text="Bleu pâle" onAction="#setBgBlue"/>
+                        <Button text="Normal" onAction="#setBgNormal"/>
+                    </HBox>
+                    <HBox spacing="10">
+                        <VBox spacing="6">
+                            <Label text="Taille police"/>
+                            <Slider fx:id="fontSizeSlider" min="12" max="24" value="15" onMouseReleased="#adjustFontSize"/>
+                        </VBox>
+                        <VBox spacing="6">
+                            <Label text="Espacement"/>
+                            <Slider fx:id="letterSpacingSlider" min="0" max="8" value="2" onMouseReleased="#adjustLetterSpacing"/>
+                        </VBox>
+                        <VBox spacing="6">
+                            <Label text="Lecture audio"/>
+                            <HBox spacing="6">
+                                <ComboBox fx:id="cbAudioSymbol" prefWidth="130"/>
+                                <Button text="Lire" onAction="#playSelectedAudio" styleClass="btn-secondary"/>
+                            </HBox>
+                        </VBox>
+                    </HBox>
+                    <VBox fx:id="previewBox" spacing="6" style="-fx-background-color:#fdf6e3; -fx-padding:14; -fx-background-radius:10;">
+                        <Label fx:id="previewText1" text="Prévisualisation lecture adaptée"/>
+                        <Label fx:id="previewText2" text="Texte avec réglages d’accessibilité."/>
+                        <Label fx:id="previewText3" text="Lisibilité améliorée."/>
                     </VBox>
-                </ScrollPane>
+                    <Label fx:id="lblSoundFeedback" text="Prêt pour lecture audio."/>
+                    <Separator/>
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label fx:id="lblPomodoroMode" text="MODE TRAVAIL" style="-fx-font-weight:bold;"/>
+                        <StackPane>
+                            <Circle radius="40" fill="transparent" stroke="#dc2626" strokeWidth="4"/>
+                            <Label fx:id="lblPomodoroTime" text="25:00" style="-fx-font-size:20px; -fx-font-weight:bold;"/>
+                        </StackPane>
+                        <Button text="Start/Pause" onAction="#togglePomodoro"/>
+                        <Button text="Reset" onAction="#resetPomodoro"/>
+                        <Label fx:id="lblPomodoroSessions" text="Sessions finalisées: 0"/>
+                    </HBox>
+                    <Label fx:id="lblPomodoroMotivation" text="&quot;Progression > perfection.&quot;"/>
+                </VBox>
 
-                <!-- Actions chatbot -->
-                <HBox spacing="8" alignment="CENTER_LEFT">
-                    <Button text="Transformer en Plan d'Action" onAction="#handleCreatePlan"
-                            styleClass="chip-success" style="-fx-font-size: 12px;"/>
-                    <Button text="Rédiger Article IA" onAction="#handleGenerateArticle"
-                            styleClass="chip-steel" style="-fx-font-size: 12px;"/>
-                </HBox>
-
-                <!-- Barre d'envoi -->
-                <HBox styleClass="chat-input-area" spacing="10" alignment="CENTER_LEFT">
-                    <TextField fx:id="inputField"
-                               promptText="Posez votre question décisionnelle à l'IA..."
-                               HBox.hgrow="ALWAYS" styleClass="search-bar"
-                               onAction="#handleSend"
-                               style="-fx-padding: 11 15; -fx-border-width: 0; -fx-background-radius: 10;"/>
-                    <Button fx:id="btnRecord" text="🎤" onAction="#handleRecord" 
-                            styleClass="btn-secondary" style="-fx-padding: 10 15; -fx-cursor: hand;"/>
-                    <Button fx:id="btnSend" text="Envoyer" onAction="#handleSend"
-                            styleClass="btn-primary" style="-fx-padding: 10 22;"/>
-                </HBox>
-            </VBox>
+                <VBox fx:id="paneImpact" spacing="12" visible="false" managed="false" styleClass="card">
+                    <Label text="Suivi d’impact — alertes + actions semaine" style="-fx-font-size:18px; -fx-font-weight:bold; -fx-text-fill:#102c59;"/>
+                    <HBox spacing="10">
+                        <VBox styleClass="stat-card-red" spacing="3"><Label text="À risque"/><Label fx:id="lblAtRiskCount" text="0" style="-fx-font-size:20px; -fx-font-weight:bold;"/></VBox>
+                        <VBox styleClass="stat-card-orange" spacing="3"><Label text="Feedback manquant"/><Label fx:id="lblMissingFeedback" text="0" style="-fx-font-size:20px; -fx-font-weight:bold;"/></VBox>
+                        <VBox styleClass="stat-card-blue" spacing="3"><Label text="Plans en retard"/><Label fx:id="lblLatePlans" text="0" style="-fx-font-size:20px; -fx-font-weight:bold;"/></VBox>
+                        <VBox styleClass="stat-card-steel" spacing="3" HBox.hgrow="ALWAYS"><Label text="Résumé"/><Label fx:id="lblImpactSummary" text="--"/></VBox>
+                    </HBox>
+                    <HBox spacing="8">
+                        <Button text="Actualiser" onAction="#refreshImpact"/>
+                        <Button text="Top 3 actions semaine" onAction="#generateWeeklyActions"/>
+                    </HBox>
+                    <HBox spacing="10">
+                        <VBox spacing="6" HBox.hgrow="ALWAYS"><Label text="Assistant décision"/><TextArea fx:id="taWeeklyActions" prefRowCount="9" wrapText="true"/></VBox>
+                        <VBox spacing="6" HBox.hgrow="ALWAYS"><Label text="Détail impact"/><TextArea fx:id="taImpactDetail" prefRowCount="9" wrapText="true"/></VBox>
+                    </HBox>
+                </VBox>
+            </StackPane>
         </VBox>
-    </HBox>
-</VBox>
-</content>
+    </content>
 </ScrollPane>
