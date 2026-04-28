@@ -4,6 +4,7 @@ import edu.connection3a36.services.*;
 import edu.connection3a36.tools.AlertUtil;
 import edu.connection3a36.tools.ExportUtil;
 import edu.connection3a36.tools.SessionManager;
+import edu.connection3a36.tools.ToastNotification;
 import edu.connection3a36.entities.Objectif;
 import edu.connection3a36.entities.Programme;
 import edu.connection3a36.entities.Statutobj;
@@ -77,7 +78,7 @@ public class ObjectifListController {
             mettreAJourStats();
             filtrer();
         } catch (Exception e) {
-            AlertUtil.showError("Erreur chargement objectifs : " + e.getMessage());
+            ToastNotification.showError("Chargement impossible", e.getMessage());
         }
     }
 
@@ -333,7 +334,7 @@ public class ObjectifListController {
             ctrl.setObjectif(objectif);
             ctrl.setOnSaved(this::charger);
             MainController.getInstance().loadInContentArea(view);
-        } catch (Exception e) { AlertUtil.showError("Erreur ouverture formulaire : " + e.getMessage()); }
+        } catch (Exception e) { ToastNotification.showError("Ouverture formulaire", e.getMessage()); }
     }
 
     private void ouvrirProgramme(Objectif objectif) {
@@ -343,7 +344,7 @@ public class ObjectifListController {
             ProgrammeDetailController ctrl = loader.getController();
             ctrl.setObjectif(objectif);
             MainController.getInstance().loadInContentArea(view);
-        } catch (Exception e) { AlertUtil.showError("Erreur ouverture programme : " + e.getMessage()); }
+        } catch (Exception e) { ToastNotification.showError("Ouverture programme", e.getMessage()); }
     }
 
     private void supprimer(Objectif o) {
@@ -352,8 +353,12 @@ public class ObjectifListController {
                 ButtonType.YES, ButtonType.NO);
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.YES) {
-                try { objectifService.deleteEntity(o); charger(); }
-                catch (Exception e) { AlertUtil.showError("Erreur suppression : " + e.getMessage()); }
+                try {
+                    objectifService.deleteEntity(o);
+                    charger();
+                    ToastNotification.showSuccess("Objectif supprimé", "\"" + o.getTitre() + "\" a été supprimé.");
+                }
+                catch (Exception e) { ToastNotification.showError("Erreur suppression", e.getMessage()); }
             }
         });
     }
@@ -363,7 +368,7 @@ public class ObjectifListController {
     // ─────────────────────────────────────────────────────────────────────────
 
     @FXML void handleExportExcel() {
-        if (tousObjectifs == null || tousObjectifs.isEmpty()) { AlertUtil.showError("Aucun objectif a exporter."); return; }
+        if (tousObjectifs == null || tousObjectifs.isEmpty()) { ToastNotification.showWarning("Export Excel", "Aucun objectif à exporter."); return; }
         FileChooser fc = new FileChooser();
         fc.setTitle("Exporter en Excel");
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel (.xlsx)", "*.xlsx"));
@@ -378,13 +383,13 @@ public class ObjectifListController {
                         break;
                     }
                 }
-                AlertUtil.showSuccess("Export Excel reussi : " + file.getName());
-            } catch (Exception e) { AlertUtil.showError("Erreur export Excel : " + e.getMessage()); }
+                ToastNotification.showSuccess("Export Excel réussi", file.getName() + " sauvegardé.");
+            } catch (Exception e) { ToastNotification.showError("Erreur export Excel", e.getMessage()); }
         }
     }
 
     @FXML void handleExportWord() {
-        if (tousObjectifs == null || tousObjectifs.isEmpty()) { AlertUtil.showError("Aucun objectif a exporter."); return; }
+        if (tousObjectifs == null || tousObjectifs.isEmpty()) { ToastNotification.showWarning("Export Word", "Aucun objectif à exporter."); return; }
         FileChooser fc = new FileChooser();
         fc.setTitle("Exporter en Word");
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Word (.docx)", "*.docx"));
@@ -399,8 +404,8 @@ public class ObjectifListController {
                         break;
                     }
                 }
-                AlertUtil.showSuccess("Export Word reussi : " + file.getName());
-            } catch (Exception e) { AlertUtil.showError("Erreur export Word : " + e.getMessage()); }
+                ToastNotification.showSuccess("Export Word réussi", file.getName() + " sauvegardé.");
+            } catch (Exception e) { ToastNotification.showError("Erreur export Word", e.getMessage()); }
         }
     }
 
@@ -409,8 +414,12 @@ public class ObjectifListController {
                 "Supprimer TOUS vos objectifs ? Action irreversible.", ButtonType.YES, ButtonType.NO);
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.YES) {
-                try { for (Objectif o : tousObjectifs) objectifService.deleteEntity(o); charger(); AlertUtil.showSuccess("Donnees reinitialises."); }
-                catch (Exception e) { AlertUtil.showError("Erreur : " + e.getMessage()); }
+                try {
+                    for (Objectif o : tousObjectifs) objectifService.deleteEntity(o);
+                    charger();
+                    ToastNotification.showInfo("Réinitialisation", "Toutes les données ont été supprimées.");
+                }
+                catch (Exception e) { ToastNotification.showError("Erreur réinitialisation", e.getMessage()); }
             }
         });
     }

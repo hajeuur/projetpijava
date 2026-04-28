@@ -3,6 +3,7 @@ package edu.connection3a36.controllers;
 import edu.connection3a36.services.*;
 import edu.connection3a36.tools.AlertUtil;
 import edu.connection3a36.tools.ExportUtil;
+import edu.connection3a36.tools.ToastNotification;
 import edu.connection3a36.entities.*;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -120,13 +121,13 @@ public class ProgrammeDetailController {
                 programmeService.addForObjectif(programme, o.getId());
             }
             if (programme == null) {
-                AlertUtil.showError("Aucun programme trouve pour cet objectif.");
+                ToastNotification.showError("Programme introuvable", "Aucun programme trouvé pour cet objectif.");
                 return;
             }
             scorePrecedent = programme.getScorePourcentage();
             charger();
         } catch (Exception e) {
-            AlertUtil.showError("Erreur chargement programme : " + e.getMessage());
+            ToastNotification.showError("Chargement programme", e.getMessage());
         }
     }
 
@@ -351,10 +352,31 @@ public class ProgrammeDetailController {
             tacheService.updateEtat(t.getId(), nouvelEtat);
             t.setEtat(Etat.fromValue(nouvelEtat));
             scorePrecedent = programme.getScorePourcentage();
-            scoreService.recalculerEtSauvegarder(programme.getId());
+            int nouveauScore = scoreService.recalculerEtSauvegarder(programme.getId());
             rafraichirScore();
             afficherTaches();
-        } catch (Exception e) { AlertUtil.showError("Erreur mise a jour etat : " + e.getMessage()); }
+
+            // Toast selon le nouvel état
+            if ("realisee".equals(nouvelEtat)) {
+                programme = programmeService.getById(programme.getId());
+                Medaille m = programme.getMeilleureMedaille();
+                if (m != null && nouveauScore >= 80) {
+                    ToastNotification.showMedal(ScoreService.emojiMedaille(m) + " — Score : " + nouveauScore + "%");
+                } else if (nouveauScore == 100) {
+                    ToastNotification.showMedal("Objectif atteint à 100% ! Félicitations !");
+                } else {
+                    ToastNotification.showSuccess("Tâche réalisée ✅", "Score mis à jour : " + nouveauScore + "%");
+                }
+            } else if ("Abandonner".equals(nouvelEtat)) {
+                ToastNotification.showWarning("Tâche abandonnée", "\"" + t.getTitre() + "\" marquée comme abandonnée.");
+            }
+
+            // Regénérer automatiquement le message de motivation si le score a changé
+            if (nouveauScore != scorePrecedent && !readOnly) {
+                genererEtAfficherMotivation(true); // toast à chaque nouveau message
+            }
+
+        } catch (Exception e) { ToastNotification.showError("Mise à jour état", e.getMessage()); }
     }
 
     private void supprimerTache(Tache t) {
@@ -362,10 +384,17 @@ public class ProgrammeDetailController {
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.YES) {
                 try {
+                    int scoreAvant = programme.getScorePourcentage();
                     tacheService.deleteEntity(t); taches.remove(t);
-                    scoreService.recalculerEtSauvegarder(programme.getId());
+                    int scoreApres = scoreService.recalculerEtSauvegarder(programme.getId());
                     rafraichirScore(); afficherTaches();
-                } catch (Exception e) { AlertUtil.showError("Erreur suppression : " + e.getMessage()); }
+                    ToastNotification.showInfo("Tâche supprimée", "\"" + t.getTitre() + "\" a été supprimée.");
+                    // Regénérer la motivation si le score a changé
+                    if (scoreApres != scoreAvant) {
+                        scorePrecedent = scoreAvant;
+                        genererEtAfficherMotivation(true);
+                    }
+                } catch (Exception e) { ToastNotification.showError("Erreur suppression", e.getMessage()); }
             }
         });
     }
@@ -384,8 +413,12 @@ public class ProgrammeDetailController {
                             tacheService.addEntity(t); taches.add(t);
                         }
                         scoreService.recalculerEtSauvegarder(programme.getId());
-                        Platform.runLater(() -> { try { rafraichirScore(); } catch (Exception ignored) {} afficherTaches(); AlertUtil.showSuccess(generated.size() + " taches generees !"); });
-                    } catch (Exception e) { Platform.runLater(() -> AlertUtil.showError("Erreur IA : " + e.getMessage())); }
+                        Platform.runLater(() -> {
+                            try { rafraichirScore(); } catch (Exception ignored) {}
+                            afficherTaches();
+                            ToastNotification.showSuccess("IA Ollama", generated.size() + " tâches générées et ajoutées !");
+                        });
+                    } catch (Exception e) { Platform.runLater(() -> ToastNotification.showError("Erreur IA", e.getMessage())); }
                 });
                 thread.setDaemon(true); thread.start();
             }
@@ -420,31 +453,29 @@ public class ProgrammeDetailController {
     @FXML void handleSauvegarderTache() {
         String titre = tfTacheTitre.getText().trim();
         if (titre.isEmpty()) {
-            AlertUtil.showError("Le titre de la tache est obligatoire.");
+            ToastNotification.showWarning("Champ requis", "Le titre de la tâche est obligatoire.");
             return;
         }
         String description = taTacheDescription.getText().trim();
 
         try {
             if (tacheEnEdition == null) {
-                // Ajout — état par défaut : encours
                 Tache t = new Tache(taches.size() + 1, titre, description, Etat.encours, programme.getId());
                 tacheService.addEntity(t);
                 taches.add(t);
-                AlertUtil.showSuccess("Tache ajoutee avec succes !");
+                ToastNotification.showSuccess("Tâche ajoutée", "\"" + titre + "\" ajoutée au programme.");
             } else {
-                // Modification
                 tacheEnEdition.setTitre(titre);
                 tacheEnEdition.setDescription(description);
                 tacheService.updateEntity(tacheEnEdition.getId(), tacheEnEdition);
-                AlertUtil.showSuccess("Tache modifiee avec succes !");
+                ToastNotification.showSuccess("Tâche modifiée", "\"" + titre + "\" mise à jour.");
             }
             scoreService.recalculerEtSauvegarder(programme.getId());
             fermerFormTache();
             rafraichirScore();
             afficherTaches();
         } catch (Exception e) {
-            AlertUtil.showError("Erreur sauvegarde tache : " + e.getMessage());
+            ToastNotification.showError("Erreur sauvegarde tâche", e.getMessage());
         }
     }
 
@@ -468,17 +499,23 @@ public class ProgrammeDetailController {
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.YES) {
                 try {
+                    int scoreAvant = programme.getScorePourcentage();
                     for (Tache t : taches) { tacheService.updateEtat(t.getId(), Etat.encours.getValue()); t.setEtat(Etat.encours); }
-                    scoreService.recalculerEtSauvegarder(programme.getId());
-                    rafraichirScore(); afficherTaches(); AlertUtil.showSuccess("Taches reinitialises.");
-                } catch (Exception e) { AlertUtil.showError("Erreur : " + e.getMessage()); }
+                    int scoreApres = scoreService.recalculerEtSauvegarder(programme.getId());
+                    rafraichirScore(); afficherTaches();
+                    ToastNotification.showInfo("Réinitialisation", "Toutes les tâches sont remises en cours.");
+                    if (scoreApres != scoreAvant) {
+                        scorePrecedent = scoreAvant;
+                        genererEtAfficherMotivation(true);
+                    }
+                } catch (Exception e) { ToastNotification.showError("Erreur réinitialisation", e.getMessage()); }
             }
         });
     }
 
     @FXML void handleSupprimerToutesTaches() {
         if (readOnly) return;
-        if (taches == null || taches.isEmpty()) { AlertUtil.showError("Aucune tache a supprimer."); return; }
+        if (taches == null || taches.isEmpty()) { ToastNotification.showWarning("Aucune tâche", "Il n'y a aucune tâche à supprimer."); return; }
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
                 "Supprimer TOUTES les taches (" + taches.size() + ") ? Cette action est irreversible.",
                 ButtonType.YES, ButtonType.NO);
@@ -486,34 +523,94 @@ public class ProgrammeDetailController {
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.YES) {
                 try {
+                    int scoreAvant = programme.getScorePourcentage();
                     tacheService.deleteByProgramme(programme.getId());
                     taches.clear();
-                    scoreService.recalculerEtSauvegarder(programme.getId());
+                    int scoreApres = scoreService.recalculerEtSauvegarder(programme.getId());
                     rafraichirScore();
                     afficherTaches();
-                    AlertUtil.showSuccess("Toutes les taches ont ete supprimees.");
-                } catch (Exception e) { AlertUtil.showError("Erreur suppression : " + e.getMessage()); }
+                    ToastNotification.showInfo("Tâches supprimées", "Toutes les tâches ont été supprimées.");
+                    if (scoreApres != scoreAvant) {
+                        scorePrecedent = scoreAvant;
+                        genererEtAfficherMotivation(true);
+                    }
+                } catch (Exception e) { ToastNotification.showError("Erreur suppression", e.getMessage()); }
             }
         });
     }
 
     @FXML void handleRefreshMotivation() {
-        progressMotivation.setVisible(true); progressMotivation.setManaged(true);
-        btnRefreshMotivation.setDisable(true);
-        lblMotivation.setText("Generation en cours...");
+        // Appel manuel → affiche le toast de confirmation
+        genererEtAfficherMotivation(true);
+    }
+
+    /**
+     * Génère un message de motivation via Ollama et l'affiche dans lblMotivation.
+     * Sauvegarde le message en BDD via MotivationService.
+     *
+     * @param avecToast true = affiche un toast INFO après génération (appel manuel),
+     *                  false = silencieux (appel automatique après changement de score)
+     */
+    private void genererEtAfficherMotivation(boolean avecToast) {
+        if (readOnly) return;
+
+        // Afficher le spinner et désactiver le bouton
+        if (progressMotivation != null) { progressMotivation.setVisible(true); progressMotivation.setManaged(true); }
+        if (btnRefreshMotivation != null) btnRefreshMotivation.setDisable(true);
+
+        // Indiquer visuellement que la génération est en cours
+        if (avecToast) {
+            lblMotivation.setText("Génération en cours...");
+        } else {
+            // Mise à jour silencieuse : on garde l'ancien message pendant la génération
+            lblMotivation.setOpacity(0.5);
+        }
+
+        // Capturer les valeurs nécessaires avant le thread
+        final String titreObjectif   = objectif.getTitre();
+        final int    scoreCourant    = programme.getScorePourcentage();
+        final int    scorePrec       = scorePrecedent;
+        final LocalDate deadline     = objectif.getDatefin();
+        final int    programmeId     = programme.getId();
+
         Thread thread = new Thread(() -> {
             try {
-                String message = ollamaService.genererMessageMotivant(objectif.getTitre(),
-                        programme.getScorePourcentage(), scorePrecedent, objectif.getDatefin());
+                // Appel à Ollama pour générer le message
+                String message = ollamaService.genererMessageMotivant(
+                        titreObjectif, scoreCourant, scorePrec, deadline);
+
+                // Sauvegarder en BDD
                 Motivation m = new Motivation();
-                m.setMessagemotivant(message); m.setDategeneration(LocalDate.now()); m.setProgrammeId(programme.getId());
+                m.setMessagemotivant(message);
+                m.setDategeneration(LocalDate.now());
+                m.setProgrammeId(programmeId);
                 motivationService.addEntity(m);
-                Platform.runLater(() -> { lblMotivation.setText(message); progressMotivation.setVisible(false); progressMotivation.setManaged(false); btnRefreshMotivation.setDisable(false); });
+
+                // Mettre à jour l'UI sur le thread JavaFX
+                Platform.runLater(() -> {
+                    lblMotivation.setText(message);
+                    lblMotivation.setOpacity(1.0);
+                    if (progressMotivation != null) { progressMotivation.setVisible(false); progressMotivation.setManaged(false); }
+                    if (btnRefreshMotivation != null) btnRefreshMotivation.setDisable(false);
+                    if (avecToast) {
+                        ToastNotification.showInfo("💬 Message motivant", "Nouveau message généré par l'IA !");
+                    }
+                });
+
             } catch (Exception e) {
-                Platform.runLater(() -> { lblMotivation.setText("Ollama indisponible. Verifiez que le service est demarre."); progressMotivation.setVisible(false); progressMotivation.setManaged(false); btnRefreshMotivation.setDisable(false); });
+                Platform.runLater(() -> {
+                    lblMotivation.setOpacity(1.0);
+                    if (avecToast) {
+                        lblMotivation.setText("Ollama indisponible. Vérifiez que le service est démarré.");
+                        ToastNotification.showWarning("Ollama indisponible", "Vérifiez que le service est démarré.");
+                    }
+                    if (progressMotivation != null) { progressMotivation.setVisible(false); progressMotivation.setManaged(false); }
+                    if (btnRefreshMotivation != null) btnRefreshMotivation.setDisable(false);
+                });
             }
         });
-        thread.setDaemon(true); thread.start();
+        thread.setDaemon(true);
+        thread.start();
     }
 
     @FXML void handleExportExcel() {
@@ -523,8 +620,8 @@ public class ProgrammeDetailController {
         fc.setInitialFileName(objectif.getTitre().replaceAll("[^a-zA-Z0-9]", "_") + ".xlsx");
         File file = fc.showSaveDialog(vboxTaches.getScene().getWindow());
         if (file != null) {
-            try { ExportUtil.exporterExcel(file.getAbsolutePath(), objectif, programme, taches); AlertUtil.showSuccess("Export Excel reussi."); }
-            catch (Exception e) { AlertUtil.showError("Erreur export Excel : " + e.getMessage()); }
+            try { ExportUtil.exporterExcel(file.getAbsolutePath(), objectif, programme, taches); ToastNotification.showSuccess("Export Excel réussi", file.getName() + " sauvegardé."); }
+            catch (Exception e) { ToastNotification.showError("Erreur export Excel", e.getMessage()); }
         }
     }
 
@@ -535,8 +632,8 @@ public class ProgrammeDetailController {
         fc.setInitialFileName(objectif.getTitre().replaceAll("[^a-zA-Z0-9]", "_") + ".docx");
         File file = fc.showSaveDialog(vboxTaches.getScene().getWindow());
         if (file != null) {
-            try { ExportUtil.exporterWord(file.getAbsolutePath(), objectif, programme, taches); AlertUtil.showSuccess("Export Word reussi."); }
-            catch (Exception e) { AlertUtil.showError("Erreur export Word : " + e.getMessage()); }
+            try { ExportUtil.exporterWord(file.getAbsolutePath(), objectif, programme, taches); ToastNotification.showSuccess("Export Word réussi", file.getName() + " sauvegardé."); }
+            catch (Exception e) { ToastNotification.showError("Erreur export Word", e.getMessage()); }
         }
     }
 
@@ -567,6 +664,7 @@ public class ProgrammeDetailController {
             if (lblResumeTexte != null) lblResumeTexte.setText("Ollama indisponible.");
             if (progressResume != null) { progressResume.setVisible(false); progressResume.setManaged(false); }
             if (btnGenererRapport != null) btnGenererRapport.setDisable(false);
+            ToastNotification.showWarning("Ollama indisponible", "Impossible de générer le rapport IA.");
         }));
         new Thread(task).start();
     }
@@ -604,6 +702,7 @@ public class ProgrammeDetailController {
                 lblAlerte.setText("⚠️ " + nb + " tache(s) abandonnee(s) mettent en danger votre objectif. " + r.conseil);
                 lblAlerte.setVisible(true);
                 lblAlerte.setManaged(true);
+                ToastNotification.showDeadline(nb + " tâche(s) abandonnée(s) menacent votre objectif !");
             }
         }));
         new Thread(task).start();

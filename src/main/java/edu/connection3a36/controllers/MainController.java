@@ -1,7 +1,10 @@
 package edu.connection3a36.controllers;
 
 import edu.connection3a36.entities.Utilisateur;
+import edu.connection3a36.services.ObjectifService;
+import edu.connection3a36.services.RisqueAbandonService;
 import edu.connection3a36.tools.SessionManager;
+import edu.connection3a36.tools.ToastNotification;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -15,6 +18,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Contrôleur principal — gère la navigation, les RÔLES et le mode FRONT/BACK.
@@ -193,6 +197,9 @@ public class MainController {
             hide(btnParcours); hide(btnProjets);
             contentArea.getChildren().clear();
         }
+
+        // Vérification bandeau abandon (pour tous les rôles avec objectifs)
+        verifierBandeauAbandon();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -299,6 +306,48 @@ public class MainController {
     @FXML
     void showPreferences() {
         loadView("/fxml/Preferences.fxml");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // TOAST NOTIFICATION — TÂCHES ABANDONNÉES (RisqueAbandonService)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Vérifie s'il existe des tâches abandonnées pour l'utilisateur connecté.
+     * Si oui, affiche un toast DEADLINE dans le coin inférieur droit.
+     * Exécuté en arrière-plan pour ne pas bloquer le démarrage.
+     */
+    private void verifierBandeauAbandon() {
+        Utilisateur user = SessionManager.getCurrentUser();
+        if (user == null) return;
+
+        new Thread(() -> {
+            try {
+                ObjectifService objectifService = new ObjectifService();
+                List<edu.connection3a36.entities.Objectif> objectifs =
+                        objectifService.getByUtilisateur(user.getId());
+
+                RisqueAbandonService risqueService = new RisqueAbandonService();
+                RisqueAbandonService.AlerteAbandon alerte =
+                        risqueService.detecterAlerteGlobale(objectifs);
+
+                if (alerte.hasRisque()) {
+                    // Construire un message court pour le toast
+                    String titre = "⚠️ Tâches abandonnées";
+                    String msg;
+                    if (alerte.titresObjectifsConcernes.isEmpty()) {
+                        msg = alerte.nbTachesAbandonnes + " tâche(s) abandonnée(s) risquent de compromettre vos objectifs !";
+                    } else {
+                        String objStr = String.join(", ", alerte.titresObjectifsConcernes);
+                        msg = alerte.nbTachesAbandonnes + " tâche(s) abandonnée(s) — " + objStr;
+                    }
+                    // Afficher le toast (Platform.runLater géré en interne par ToastNotification)
+                    ToastNotification.show(ToastNotification.Type.DEADLINE, titre, msg, 8000);
+                }
+            } catch (Exception e) {
+                System.err.println("verifierBandeauAbandon — erreur : " + e.getMessage());
+            }
+        }).start();
     }
 
     private void updateNotifications() {
