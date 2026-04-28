@@ -1,8 +1,8 @@
 package edu.connection3a36.services;
 
-import edu.mentorai.entities.Etat;
-import edu.mentorai.entities.Objectif;
-import edu.mentorai.entities.Tache;
+import edu.connection3a36.entities.Etat;
+import edu.connection3a36.entities.Objectif;
+import edu.connection3a36.entities.Tache;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

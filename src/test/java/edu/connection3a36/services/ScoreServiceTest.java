@@ -1,9 +1,9 @@
 package edu.connection3a36.services;
 
-import edu.mentorai.entities.Etat;
-import edu.mentorai.entities.Medaille;
-import edu.mentorai.entities.Statutobj;
-import edu.mentorai.entities.Tache;
+import edu.connection3a36.entities.Etat;
+import edu.connection3a36.entities.Medaille;
+import edu.connection3a36.entities.Statutobj;
+import edu.connection3a36.entities.Tache;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -4,9 +4,11 @@ import edu.connection3a36.services.*;
 import edu.connection3a36.tools.AlertUtil;
 import edu.connection3a36.tools.ExportUtil;
 import edu.connection3a36.tools.SessionManager;
-import edu.mentorai.entities.Objectif;
-import edu.mentorai.entities.Programme;
-import edu.mentorai.entities.Statutobj;
+import edu.connection3a36.entities.Objectif;
+import edu.connection3a36.entities.Programme;
+import edu.connection3a36.entities.Statutobj;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -44,9 +46,17 @@ public class ObjectifListController {
     @FXML private Label lblCalJourSemaine;
     @FXML private VBox vboxCalGrille;
 
+    // ── Plan du jour ──────────────────────────────────────────────────────────
+    @FXML private VBox cardPlanDuJour;
+    @FXML private VBox vboxPlanTimeline;
+    @FXML private Label lblPlanConseil;
+    @FXML private Button btnPlanDuJour;
+    @FXML private ProgressIndicator progressPlan;
+
     private final ObjectifService objectifService = new ObjectifService();
     private final ProgrammeService programmeService = new ProgrammeService();
     private final NotificationService notifService = new NotificationService();
+    private final PlanificateurService planificateurService = new PlanificateurService();
 
     private List<Objectif> tousObjectifs;
 
@@ -403,6 +413,88 @@ public class ObjectifListController {
                 catch (Exception e) { AlertUtil.showError("Erreur : " + e.getMessage()); }
             }
         });
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // PLAN DU JOUR
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @FXML void handlePlanDuJour() {
+        if (cardPlanDuJour == null) return;
+        if (progressPlan != null) { progressPlan.setVisible(true); progressPlan.setManaged(true); }
+        if (btnPlanDuJour != null) btnPlanDuJour.setDisable(true);
+
+        final List<Objectif> snapshot = tousObjectifs != null ? List.copyOf(tousObjectifs) : List.of();
+
+        Task<PlanificateurService.PlanResultat> task = new Task<>() {
+            @Override
+            protected PlanificateurService.PlanResultat call() {
+                return planificateurService.genererPlan(snapshot);
+            }
+        };
+        task.setOnSucceeded(e -> Platform.runLater(() -> {
+            afficherPlan(task.getValue());
+            if (progressPlan != null) { progressPlan.setVisible(false); progressPlan.setManaged(false); }
+            if (btnPlanDuJour != null) btnPlanDuJour.setDisable(false);
+        }));
+        task.setOnFailed(e -> Platform.runLater(() -> {
+            if (progressPlan != null) { progressPlan.setVisible(false); progressPlan.setManaged(false); }
+            if (btnPlanDuJour != null) btnPlanDuJour.setDisable(false);
+        }));
+        new Thread(task).start();
+    }
+
+    private void afficherPlan(PlanificateurService.PlanResultat r) {
+        if (cardPlanDuJour == null) return;
+        if (vboxPlanTimeline != null) vboxPlanTimeline.getChildren().clear();
+
+        if (r.plan.isEmpty()) {
+            if (lblPlanConseil != null) lblPlanConseil.setText(r.conseil);
+            cardPlanDuJour.setVisible(true);
+            cardPlanDuJour.setManaged(true);
+            return;
+        }
+
+        for (PlanificateurService.CreneauPlan creneau : r.plan) {
+            HBox ligne = new HBox(0);
+            ligne.setAlignment(Pos.CENTER_LEFT);
+
+            // Heure
+            Label lblHeure = new Label(creneau.heure);
+            lblHeure.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"
+                    + " -fx-min-width: 80; -fx-padding: 10 12 10 0;");
+
+            // Ligne verticale timeline
+            VBox timeline = new VBox();
+            timeline.setAlignment(Pos.CENTER);
+            timeline.setMinWidth(20);
+            Label dot = new Label("●");
+            dot.setStyle("-fx-text-fill: #102c59; -fx-font-size: 8px;");
+            timeline.getChildren().add(dot);
+
+            // Contenu
+            VBox contenu = new VBox(2);
+            contenu.setPadding(new Insets(8, 12, 8, 12));
+            contenu.setStyle("-fx-background-color: #f8faff; -fx-background-radius: 8;"
+                    + " -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-border-width: 1;");
+            HBox.setHgrow(contenu, Priority.ALWAYS);
+
+            Label lblTache = new Label(creneau.tache);
+            lblTache.setStyle("-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 12px;");
+            lblTache.setWrapText(true);
+
+            Label lblObj = new Label("📌 " + creneau.objectif);
+            lblObj.setStyle("-fx-text-fill: #888; -fx-font-size: 11px;");
+
+            contenu.getChildren().addAll(lblTache, lblObj);
+            ligne.getChildren().addAll(lblHeure, timeline, contenu);
+
+            if (vboxPlanTimeline != null) vboxPlanTimeline.getChildren().add(ligne);
+        }
+
+        if (lblPlanConseil != null) lblPlanConseil.setText("💡 " + r.conseil);
+        cardPlanDuJour.setVisible(true);
+        cardPlanDuJour.setManaged(true);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@ package edu.connection3a36.controllers;
 import edu.connection3a36.services.*;
 import edu.connection3a36.tools.AlertUtil;
 import edu.connection3a36.tools.SessionManager;
-import edu.mentorai.entities.*;
+import edu.connection3a36.entities.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -134,7 +134,7 @@ public class ObjectifFormController {
                 if (tachesGenerees != null && !tachesGenerees.isEmpty() && o.getProgramme() != null) {
                     for (int i = 0; i < tachesGenerees.size(); i++) {
                         tacheService.addEntity(new Tache(i + 1, tachesGenerees.get(i)[0],
-                                tachesGenerees.get(i)[1], Etat.Abandonner, o.getProgramme().getId()));
+                                tachesGenerees.get(i)[1], Etat.encours, o.getProgramme().getId()));
                     }
                 }
                 AlertUtil.showSuccess("Objectif cree avec succes !");

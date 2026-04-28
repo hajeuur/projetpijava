@@ -1,7 +1,7 @@
 package edu.connection3a36.services;
 
-import edu.mentorai.entities.Objectif;
-import edu.mentorai.entities.Statutobj;
+import edu.connection3a36.entities.Objectif;
+import edu.connection3a36.entities.Statutobj;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

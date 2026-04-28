@@ -1,4 +1,4 @@
-package edu.mentorai.entities;
+package edu.connection3a36.entities;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

@@ -19,6 +19,11 @@ public class OllamaService {
     private static final String OLLAMA_URL = "http://localhost:11434/api/generate";
     private static final String MODEL = "llama3.1:8b";
 
+    /** Point d entree public pour les services externes. */
+    public String appeler(String prompt) throws Exception {
+        return callOllama(prompt);
+    }
+
     public List<String[]> genererTaches(String objectifTitre, String objectifDescription) throws Exception {
         String prompt = """
                 Tu es un coach personnel expert en productivite. Un utilisateur a defini l objectif suivant :

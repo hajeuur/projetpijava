@@ -1,4 +1,4 @@
-package edu.mentorai.entities;
+package edu.connection3a36.entities;
 
 public enum Medaille {
     Bronze("Bronze"),

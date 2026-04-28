@@ -2,9 +2,9 @@ package edu.connection3a36.services;
 
 import edu.connection3a36.interfaces.IService;
 import edu.connection3a36.tools.MyConnection;
-import edu.mentorai.entities.Objectif;
-import edu.mentorai.entities.Programme;
-import edu.mentorai.entities.Statutobj;
+import edu.connection3a36.entities.Objectif;
+import edu.connection3a36.entities.Programme;
+import edu.connection3a36.entities.Statutobj;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -119,7 +119,7 @@ public class ObjectifService implements IService<Objectif> {
     }
 
     /** Trouve l'objectif lié à un programme via objectif.programme_id */
-    public edu.mentorai.entities.Objectif getByProgrammeId(int programmeId) throws SQLException {
+    public edu.connection3a36.entities.Objectif getByProgrammeId(int programmeId) throws SQLException {
         PreparedStatement pst = cnx.prepareStatement("SELECT * FROM objectif WHERE programme_id = ?");
         pst.setInt(1, programmeId);
         ResultSet rs = pst.executeQuery();
@@ -131,7 +131,7 @@ public class ObjectifService implements IService<Objectif> {
      * Valide un objectif avant insertion/modification.
      * @return liste des erreurs (vide = valide)
      */
-    public List<String> validate(edu.mentorai.entities.Objectif o) {
+    public List<String> validate(edu.connection3a36.entities.Objectif o) {
         List<String> erreurs = new ArrayList<>();
         if (o.getTitre() == null || o.getTitre().isBlank())
             erreurs.add("Le titre est obligatoire");

@@ -1,9 +1,9 @@
 package edu.connection3a36.services;
 
-import edu.mentorai.entities.Etat;
-import edu.mentorai.entities.Medaille;
-import edu.mentorai.entities.Statutobj;
-import edu.mentorai.entities.Tache;
+import edu.connection3a36.entities.Etat;
+import edu.connection3a36.entities.Medaille;
+import edu.connection3a36.entities.Statutobj;
+import edu.connection3a36.entities.Tache;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ public class ScoreService {
     private void mettreAJourStatutObjectif(int programmeId, List<Tache> taches, int score) {
         try {
             // Trouver l'objectif lié à ce programme
-            edu.mentorai.entities.Objectif objectif = objectifService.getByProgrammeId(programmeId);
+            edu.connection3a36.entities.Objectif objectif = objectifService.getByProgrammeId(programmeId);
             if (objectif == null) return;
 
             Statutobj nouveauStatut = calculerStatutObjectif(taches, score);
