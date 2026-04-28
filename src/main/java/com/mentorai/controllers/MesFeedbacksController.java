@@ -56,6 +56,9 @@ public class MesFeedbacksController implements Initializable {
 
         // ✅ CORRECTION : message quand table vide
         tableFeedbacks.setPlaceholder(new Label("Aucun feedback trouvé."));
+        
+        // ✅ CHARGER LES DONNÉES
+        chargerDonnees();
     }
 
     public void setUtilisateurId(int id) {
