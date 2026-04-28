@@ -49,14 +49,15 @@
             <TableView fx:id="tableFeedbacks" VBox.vgrow="ALWAYS"
                        style="-fx-background-color: transparent;">
                 <columns>
-                    <TableColumn fx:id="colId"      text="#"             prefWidth="55"/>
-                    <TableColumn fx:id="colType"    text="Type"          prefWidth="120"/>
-                    <TableColumn fx:id="colDate"    text="Date"          prefWidth="110"/>
-                    <TableColumn fx:id="colNote"    text="Note"          prefWidth="100"/>
-                    <TableColumn fx:id="colMessage" text="Message"       prefWidth="220"/>
-                    <TableColumn fx:id="colEtat"    text="État"          prefWidth="110"/>
-                    <TableColumn fx:id="colReponse" text="Réponse admin" prefWidth="170"/>
-                    <TableColumn fx:id="colActions" text="Actions"       prefWidth="180"/>
+                    <TableColumn fx:id="colId"       text="#"             prefWidth="50"/>
+                    <TableColumn fx:id="colPriorite" text="Priorité"      prefWidth="100"/>
+                    <TableColumn fx:id="colType"     text="Type"          prefWidth="110"/>
+                    <TableColumn fx:id="colDate"     text="Date"          prefWidth="100"/>
+                    <TableColumn fx:id="colNote"     text="Note"          prefWidth="80"/>
+                    <TableColumn fx:id="colMessage"  text="Message"       prefWidth="200"/>
+                    <TableColumn fx:id="colEtat"     text="État"          prefWidth="110"/>
+                    <TableColumn fx:id="colReponse"  text="Réponse admin" prefWidth="160"/>
+                    <TableColumn fx:id="colActions"  text="Actions"       prefWidth="180"/>
                 </columns>
             </TableView>
         </VBox>
