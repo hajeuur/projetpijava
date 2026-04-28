@@ -4,9 +4,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="edu.connection3a36.controllers.AIDecisionnelController"
-      spacing="16">
+<ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="edu.connection3a36.controllers.AIDecisionnelController"
+            fitToWidth="true" style="-fx-background-color:transparent;-fx-border-color:transparent;">
+<content>
+<VBox spacing="16">
 
     <!-- ===== PAGE HEADER ===== -->
     <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="15">
@@ -21,10 +23,10 @@
         <Button text="Effacer" onAction="#handleClear" styleClass="btn-secondary"/>
     </HBox>
 
-    <HBox spacing="14" VBox.vgrow="ALWAYS">
+    <HBox spacing="14">
 
         <!-- Zone analyse textuelle IA -->
-        <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="10" prefWidth="350">
+        <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="10" prefWidth="430">
             <Label text="Analyse IA — Vue Globale"
                    style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #102c59;"/>
             <Separator/>
@@ -39,7 +41,7 @@
         </VBox>
 
         <!-- CHATBOT DÉCISIONNEL -->
-        <VBox HBox.hgrow="ALWAYS" spacing="12">
+        <VBox HBox.hgrow="ALWAYS" spacing="12" prefWidth="620">
             <VBox styleClass="card" spacing="10">
                 <Label text="Suggestions de discussion"
                        style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #102c59;"/>
@@ -51,32 +53,42 @@
             </VBox>
 
             <!-- Zone de chat -->
-            <ScrollPane fx:id="chatScroll" VBox.vgrow="ALWAYS" fitToWidth="true"
-                        styleClass="chat-container" style="-fx-min-height: 250px;">
-                <VBox fx:id="chatBox" spacing="12">
-                    <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
-                </VBox>
-            </ScrollPane>
+            <VBox styleClass="card" spacing="10">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Conversation stratégique" style="-fx-font-weight:bold; -fx-font-size:14px; -fx-text-fill:#102c59;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblChatStatus" text="" style="-fx-text-fill: #7a8fa5; -fx-font-size: 12px;"/>
+                </HBox>
+                <ScrollPane fx:id="chatScroll" fitToWidth="true"
+                            styleClass="chat-container" style="-fx-min-height: 340px; -fx-pref-height: 420px;">
+                    <VBox fx:id="chatBox" spacing="12">
+                        <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+                    </VBox>
+                </ScrollPane>
 
-            <!-- Actions chatbot -->
-            <HBox spacing="8" alignment="CENTER_LEFT">
-                <Button text="Transformer en Plan d'Action" onAction="#handleCreatePlan"
-                        styleClass="chip-success" style="-fx-font-size: 12px;"/>
-                <Button text="Rédiger Article IA" onAction="#handleGenerateArticle"
-                        styleClass="chip-steel" style="-fx-font-size: 12px;"/>
-                <Label fx:id="lblChatStatus" text="" style="-fx-text-fill: #7a8fa5; -fx-font-size: 12px;"/>
-            </HBox>
+                <!-- Actions chatbot -->
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <Button text="Transformer en Plan d'Action" onAction="#handleCreatePlan"
+                            styleClass="chip-success" style="-fx-font-size: 12px;"/>
+                    <Button text="Rédiger Article IA" onAction="#handleGenerateArticle"
+                            styleClass="chip-steel" style="-fx-font-size: 12px;"/>
+                </HBox>
 
-            <!-- Barre d'envoi -->
-            <HBox styleClass="chat-input-area" spacing="10" alignment="CENTER_LEFT">
-                <TextField fx:id="inputField"
-                           promptText="Posez votre question décisionnelle à l'IA..."
-                           HBox.hgrow="ALWAYS" styleClass="search-bar"
-                           onAction="#handleSend"
-                           style="-fx-padding: 11 15; -fx-border-width: 0; -fx-background-radius: 10;"/>
-                <Button fx:id="btnSend" text="Envoyer" onAction="#handleSend"
-                        styleClass="btn-primary" style="-fx-padding: 10 22;"/>
-            </HBox>
+                <!-- Barre d'envoi -->
+                <HBox styleClass="chat-input-area" spacing="10" alignment="CENTER_LEFT">
+                    <TextField fx:id="inputField"
+                               promptText="Posez votre question décisionnelle à l'IA..."
+                               HBox.hgrow="ALWAYS" styleClass="search-bar"
+                               onAction="#handleSend"
+                               style="-fx-padding: 11 15; -fx-border-width: 0; -fx-background-radius: 10;"/>
+                    <Button fx:id="btnRecord" text="🎤" onAction="#handleRecord" 
+                            styleClass="btn-secondary" style="-fx-padding: 10 15; -fx-cursor: hand;"/>
+                    <Button fx:id="btnSend" text="Envoyer" onAction="#handleSend"
+                            styleClass="btn-primary" style="-fx-padding: 10 22;"/>
+                </HBox>
+            </VBox>
         </VBox>
     </HBox>
 </VBox>
+</content>
+</ScrollPane>

@@ -4,7 +4,10 @@ import edu.connection3a36.entities.PlanActions;
 import edu.connection3a36.enums.CategorieSortie;
 import edu.connection3a36.enums.Statut;
 import edu.connection3a36.services.PlanActionsService;
+import edu.connection3a36.services.UserPreferencesService;
 import edu.connection3a36.tools.AlertUtil;
+import edu.connection3a36.tools.AIJsonParser;
+import edu.connection3a36.tools.AIJsonSchemas;
 import edu.connection3a36.tools.SessionManager;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -57,6 +60,7 @@ public class PlanActionsListController {
     @FXML private Button             btnNewPlan;
 
     private final PlanActionsService           service   = new PlanActionsService();
+    private final UserPreferencesService       prefsService = new UserPreferencesService();
     private final ObservableList<PlanActions>  plansList = FXCollections.observableArrayList();
     private static final DateTimeFormatter     DATE_FMT  = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -212,9 +216,10 @@ public class PlanActionsListController {
         String userRole = SessionManager.getCurrentUser() != null
                 ? SessionManager.getCurrentUser().getRole() : "";
         boolean isEnseignant = "ENSEIGNANT".equals(userRole);
+        boolean darkMode = prefsService.load().darkMode;
 
         for (PlanActions plan : plansList) {
-            cardsContainer.getChildren().add(buildPlanCard(plan, isEnseignant));
+            cardsContainer.getChildren().add(buildPlanCard(plan, isEnseignant, darkMode));
         }
 
         if (plansList.isEmpty()) {
@@ -224,7 +229,7 @@ public class PlanActionsListController {
         }
     }
 
-    private VBox buildPlanCard(PlanActions plan, boolean isEnseignant) {
+    private VBox buildPlanCard(PlanActions plan, boolean isEnseignant, boolean darkMode) {
         VBox card = new VBox(10);
         card.getStyleClass().add("plan-card");
         card.setPrefWidth(320);
@@ -237,7 +242,7 @@ public class PlanActionsListController {
             case REJETE     -> "#d52e28";
         };
         card.setStyle("-fx-border-left-color: " + borderColor + "; -fx-border-left-width: 4;"
-                + "-fx-padding: 16; -fx-background-color: white; -fx-background-radius: 12;"
+                + "-fx-padding: 16; -fx-background-color: " + (darkMode ? "#161b22" : "white") + "; -fx-background-radius: 12;"
                 + "-fx-border-color: " + borderColor + "; -fx-border-width: 0 0 0 4; -fx-border-radius: 12;"
                 + "-fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 2);");
 
@@ -257,7 +262,7 @@ public class PlanActionsListController {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         Label catBadge = new Label(plan.getCategorie() != null ? plan.getCategorie().getLabel() : "");
-        catBadge.setStyle("-fx-background-color: rgba(16,44,89,0.08); -fx-text-fill: #102c59;"
+        catBadge.setStyle("-fx-background-color: " + (darkMode ? "#30363d" : "rgba(16,44,89,0.08)") + "; -fx-text-fill: " + (darkMode ? "#e6edf3" : "#102c59") + ";"
                 + "-fx-padding: 2 8; -fx-background-radius: 12; -fx-font-size: 10px;");
 
         titleRow.getChildren().addAll(badge, spacer, catBadge);
@@ -266,18 +271,18 @@ public class PlanActionsListController {
         Label decision = new Label(plan.getDecision() != null ? plan.getDecision() : "");
         decision.setWrapText(true);
         decision.setMaxWidth(290);
-        decision.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #102c59;");
+        decision.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: " + (darkMode ? "#e6edf3" : "#102c59") + ";");
 
         // ── Description courte ──
         String desc = plan.getDescription() != null ? plan.getDescription() : "";
         Label description = new Label(desc.length() > 120 ? desc.substring(0, 120) + "..." : desc);
         description.setWrapText(true);
         description.setMaxWidth(290);
-        description.setStyle("-fx-font-size: 12px; -fx-text-fill: #5a7a90;");
+        description.setStyle("-fx-font-size: 12px; -fx-text-fill: " + (darkMode ? "#c9d1d9" : "#5a7a90") + ";");
 
         // ── Date ──
         Label dateLabel = new Label("📅 " + (plan.getDate() != null ? plan.getDate().format(DATE_FMT) : "—"));
-        dateLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #9dbbce;");
+        dateLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: " + (darkMode ? "#8b949e" : "#9dbbce") + ";");
 
         // ── Feedback existant ──
         VBox feedbackBox = new VBox(4);
@@ -288,7 +293,7 @@ public class PlanActionsListController {
             fbText.getStyleClass().add("feedback-text");
             fbText.setWrapText(true);
             fbText.setMaxWidth(280);
-            feedbackBox.setStyle("-fx-background-color: #eef4f9; -fx-padding: 8; -fx-background-radius: 8;");
+            feedbackBox.setStyle("-fx-background-color: " + (darkMode ? "#1f2937" : "#eef4f9") + "; -fx-padding: 8; -fx-background-radius: 8;");
             feedbackBox.getChildren().addAll(fbTitle, fbText);
         }
 
@@ -309,6 +314,13 @@ public class PlanActionsListController {
             btnFeedback.setStyle("-fx-padding: 5 12; -fx-font-size: 12px;");
             btnFeedback.setOnAction(e -> handleFeedback(plan));
             actions.getChildren().add(btnFeedback);
+        } else {
+            // ADMIN / Superadmin peuvent générer un article
+            Button btnGenArticle = new Button("📝 Générer Article");
+            btnGenArticle.getStyleClass().add("btn-info");
+            btnGenArticle.setStyle("-fx-padding: 5 12; -fx-font-size: 12px;");
+            btnGenArticle.setOnAction(e -> handleGenerateArticle(plan));
+            actions.getChildren().add(btnGenArticle);
         }
 
         card.getChildren().addAll(titleRow, decision, description, dateLabel);
@@ -426,6 +438,25 @@ public class PlanActionsListController {
                     if (isEnseignant) {
                         int userId = SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getId() : 0;
                         service.addFeedback(plan.getId(), taFeedback.getText().trim(), userId);
+                        
+                        // ─ Auto-notification pour le superadmin ──────────────────────
+                        new Thread(() -> {
+                            try {
+                                edu.connection3a36.services.NotificationService ns =
+                                        new edu.connection3a36.services.NotificationService();
+                                String profName = SessionManager.getCurrentUser() != null 
+                                        ? (SessionManager.getCurrentUser().getPrenom() + " " + SessionManager.getCurrentUser().getNom()).trim()
+                                        : "Un enseignant";
+                                ns.addFeedbackNotificationForAdmin(plan.getId(), plan.getDecision(), profName);
+                                // Mettre à jour le badge dans MainController
+                                int count = ns.countNonLues();
+                                javafx.application.Platform.runLater(() -> {
+                                    if (MainController.getInstance() != null)
+                                        MainController.getInstance().updateNotificationBadge(count);
+                                });
+                            } catch (Exception ignored) {}
+                        }).start();
+                        // ─────────────────────────────────────────────────────────────
                     }
                     return true;
                 } catch (SQLException e) {
@@ -440,6 +471,66 @@ public class PlanActionsListController {
             AlertUtil.showSuccess("Mise à jour enregistrée avec succès !");
             loadData();
         }
+    }
+
+    /**
+     * Génère automatiquement un article lié à ce plan d'action (Requirement #5)
+     */
+    void handleGenerateArticle(PlanActions plan) {
+        if (!AlertUtil.showConfirmation("Voulez-vous générer un article pédagogique basé sur ce plan d'action ?\nCela prendra quelques secondes.")) {
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                edu.connection3a36.services.GroqService groq = new edu.connection3a36.services.GroqService();
+                String prompt = "Rédige un article pédagogique professionnel basé sur le plan d'action suivant.\n"
+                              + "Titre : " + plan.getDecision() + "\n"
+                              + "Description : " + plan.getDescription();
+                
+                String raw = groq.sendSimpleJsonMessage(
+                        prompt,
+                        "ADMIN",
+                        AIJsonSchemas.ARTICLE
+                );
+                org.json.JSONObject json = AIJsonParser.extractFirstJsonObject(raw);
+                String contenu = AIJsonParser.extractMarkdownContent(raw);
+                String aiTitle = json != null ? json.optString("title", "") : "";
+
+                // 1. Créer l'article
+                edu.connection3a36.entities.ReferenceArticle article = new edu.connection3a36.entities.ReferenceArticle();
+                String finalTitle = !aiTitle.isBlank() ? aiTitle : ("Guide : " + plan.getDecision());
+                article.setTitre(finalTitle.length() > 255 ? finalTitle.substring(0, 255) : finalTitle);
+                article.setContenu(contenu);
+                article.setPublished(true);
+                article.setPlanActionsId(plan.getId());
+                int fallbackCatId = 1;
+                try {
+                    edu.connection3a36.services.CategorieArticleService catServ = new edu.connection3a36.services.CategorieArticleService();
+                    var cats = catServ.getData();
+                    if (!cats.isEmpty()) fallbackCatId = cats.get(0).getId();
+                } catch (Exception ignored) {}
+                article.setCategorieId(fallbackCatId);
+                article.setAuteurId(SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getId() : 1);
+
+                edu.connection3a36.services.ReferenceArticleService articleService = new edu.connection3a36.services.ReferenceArticleService();
+                articleService.addEntity(article);
+
+                // 2. Lier l'article au plan d'action
+                if (article.getId() > 0) {
+                    service.addArticleToPlan(plan.getId(), article.getId());
+                }
+
+                javafx.application.Platform.runLater(() -> {
+                    AlertUtil.showSuccess("L'article a été généré et lié au plan d'action avec succès !");
+                });
+
+            } catch (Exception ex) {
+                javafx.application.Platform.runLater(() -> {
+                    AlertUtil.showError("Erreur lors de la génération de l'article : " + ex.getMessage());
+                });
+            }
+        }).start();
     }
 
     @FXML

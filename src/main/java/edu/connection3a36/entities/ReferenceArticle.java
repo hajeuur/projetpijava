@@ -13,6 +13,7 @@ public class ReferenceArticle {
     private int categorieId;           // FK → categorie_article.id
     private String categorieNom;       // Champ transient pour affichage
     private int auteurId;              // FK → utilisateur.id
+    private Integer planActionsId;     // FK optionnelle → plan_actions.id
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean published;
@@ -65,6 +66,9 @@ public class ReferenceArticle {
 
     public int getAuteurId() { return auteurId; }
     public void setAuteurId(int auteurId) { this.auteurId = auteurId; }
+
+    public Integer getPlanActionsId() { return planActionsId; }
+    public void setPlanActionsId(Integer planActionsId) { this.planActionsId = planActionsId; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

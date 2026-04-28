@@ -303,6 +303,21 @@ public class PlanActionsService implements IService<PlanActions> {
         return stats;
     }
 
+    public int countWithFeedback() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM plan_actions WHERE feedback_enseignant IS NOT NULL AND feedback_enseignant != ''";
+        Statement st = cnx.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        return rs.next() ? rs.getInt(1) : 0;
+    }
+
+    public int countByStatutValue(String statut) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM plan_actions WHERE statut = ?";
+        PreparedStatement pst = cnx.prepareStatement(sql);
+        pst.setString(1, statut);
+        ResultSet rs = pst.executeQuery();
+        return rs.next() ? rs.getInt(1) : 0;
+    }
+
     private void updateSortieAIStatut(int sortieId, String statut) throws SQLException {
         String sql = "UPDATE sortie_ai SET statut = ?, updated_at = ? WHERE id = ?";
         PreparedStatement pst = cnx.prepareStatement(sql);

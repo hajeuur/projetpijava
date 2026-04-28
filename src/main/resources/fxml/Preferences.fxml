@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.PreferencesController"
+      spacing="14">
+    <HBox styleClass="page-header" alignment="CENTER_LEFT">
+        <VBox spacing="3">
+            <Label text="Préférences d'Accessibilité" styleClass="section-title"/>
+            <Label text="Mode sombre, dyslexie, taille du texte et persistance par utilisateur" styleClass="section-subtitle"/>
+        </VBox>
+    </HBox>
+
+    <VBox styleClass="card" spacing="12">
+        <CheckBox fx:id="chkDarkMode" text="Activer le mode sombre global" onAction="#handlePreviewChange"/>
+        <CheckBox fx:id="chkDyslexic" text="Activer le mode dyslexie global" onAction="#handlePreviewChange"/>
+
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <Label text="Taille globale du texte"/>
+            <Slider fx:id="sliderUiScale" min="0.9" max="1.5" value="1.0" blockIncrement="0.05"
+                    prefWidth="250" onMouseReleased="#handlePreviewChange"/>
+            <Label fx:id="lblScaleValue" text="100%"/>
+        </HBox>
+
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <Label text="Espacement des lettres"/>
+            <Slider fx:id="sliderLetterSpacing" min="0.0" max="3.0" value="0.0" blockIncrement="0.1"
+                    prefWidth="250" onMouseReleased="#handlePreviewChange"/>
+            <Label fx:id="lblSpacingValue" text="0.0"/>
+        </HBox>
+
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <Label text="Fond de lecture"/>
+            <ComboBox fx:id="comboReadingBg" prefWidth="180" onAction="#handlePreviewChange"/>
+        </HBox>
+
+        <VBox fx:id="previewBox" spacing="6">
+            <Label text="Aperçu" style="-fx-font-weight:bold;"/>
+            <Label fx:id="previewText" wrapText="true"
+                   text="Ce réglage sera appliqué à toutes les pages et conservé pour ce même utilisateur après déconnexion/reconnexion."/>
+        </VBox>
+
+        <HBox alignment="CENTER_RIGHT">
+            <Button text="💾 Enregistrer et appliquer" onAction="#handleSavePreferences" styleClass="btn-primary"/>
+        </HBox>
+    </VBox>
+</VBox>

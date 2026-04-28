@@ -8,6 +8,9 @@ import edu.connection3a36.services.GroqService;
 import edu.connection3a36.services.PlanActionsService;
 import edu.connection3a36.services.ReferenceArticleService;
 import edu.connection3a36.tools.AlertUtil;
+import edu.connection3a36.tools.AIJsonParser;
+import edu.connection3a36.tools.AIJsonSchemas;
+import edu.connection3a36.tools.MarkdownRenderer;
 import edu.connection3a36.tools.SessionManager;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -37,12 +40,14 @@ public class AIDecisionnelController {
     @FXML private VBox chatBox;
     @FXML private TextField inputField;
     @FXML private Button btnSend;
+    @FXML private Button btnRecord;
     @FXML private Label lblChatStatus;
 
     // ── Services ──────────────────────────────────────────────────────────────
     private final PlanActionsService      planService      = new PlanActionsService();
     private final ReferenceArticleService articleService   = new ReferenceArticleService();
     private final GroqService             groqService      = new GroqService();
+    private final edu.connection3a36.services.VoiceRecorderService voiceService = new edu.connection3a36.services.VoiceRecorderService();
 
     // ── État chatbot ──────────────────────────────────────────────────────────
     private final List<Map<String, String>> conversationHistory = new ArrayList<>();
@@ -248,11 +253,15 @@ public class AIDecisionnelController {
                             + "L'article doit comprendre : Introduction, 3 parties stratégiques et une Conclusion. "
                             + "Ton de communication institutionnelle interne.";
 
-                    String articleContent = groqService.sendSimpleMessage(prompt, "ADMIN");
+                    String articleContent = groqService.sendSimpleJsonMessage(
+                            prompt,
+                            "ADMIN",
+                            AIJsonSchemas.ARTICLE
+                    );
 
                     ReferenceArticle article = new ReferenceArticle();
                     article.setTitre(titre.length() > 255 ? titre.substring(0, 255) : titre);
-                    article.setContenu(articleContent);
+                    article.setContenu(AIJsonParser.extractMarkdownContent(articleContent));
                     
                     int fallbackCatId = 1;
                     try {
@@ -305,14 +314,24 @@ public class AIDecisionnelController {
                 String prompt = String.format(
                         "Tu es l'IA décisionnelle de l'école ESPRIT. Voici un extrait de la base : "
                       + "Total plans : %d (Statuts : %s) — Total articles internes : %d.\n"
-                      + "Fais une analyse éclair (3 paragraphes max) sur la situation managériale et les points forts.",
+                      + "Fais une analyse éclair structurée sur la situation managériale et les points forts.",
                         totalPlans, statuts, totalArticles);
 
-                String response = groqService.sendSimpleMessage(prompt, "ADMIN");
+                String response = groqService.sendSimpleJsonMessage(
+                        prompt,
+                        "ADMIN",
+                        AIJsonSchemas.ANALYSIS
+                );
+                org.json.JSONObject json = AIJsonParser.extractFirstJsonObject(response);
+                final String normalized = (json != null)
+                        ? "## Analyse de la situation manageriale\n" + json.optString("resume_executif", "")
+                        + "\n\n## Points forts\n" + json.optString("points_forts", "")
+                        + "\n\n## Axes d'amelioration\n" + json.optString("axes_amelioration", "")
+                        : response;
 
                 Platform.runLater(() -> {
                     boxAnalyse.getChildren().clear();
-                    renderResponse(response, boxAnalyse);
+                    renderResponse(normalized, boxAnalyse);
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
@@ -403,6 +422,46 @@ public class AIDecisionnelController {
         histStage.show();
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // GESTION VOCALE (Whisper)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @FXML
+    void handleRecord() {
+        if (voiceService.isRecording()) {
+            btnRecord.setText("🎤");
+            btnRecord.setStyle("-fx-padding: 10 15; -fx-cursor: hand;");
+            inputField.setPromptText("Transcription en cours...");
+            
+            new Thread(() -> {
+                try {
+                    String text = voiceService.stopRecordingAndTranscribe();
+                    Platform.runLater(() -> {
+                        if (text != null && !text.isEmpty()) {
+                            String current = inputField.getText();
+                            inputField.setText(current.isEmpty() ? text : current + " " + text);
+                        }
+                        inputField.setPromptText("Posez votre question décisionnelle à l'IA...");
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> {
+                        AlertUtil.showError("Erreur dictée vocale : " + e.getMessage());
+                        inputField.setPromptText("Posez votre question décisionnelle à l'IA...");
+                    });
+                }
+            }).start();
+        } else {
+            try {
+                voiceService.startRecording();
+                btnRecord.setText("⏹️");
+                btnRecord.setStyle("-fx-padding: 10 15; -fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;");
+                inputField.setPromptText("Écoute en cours (parlez maintenant)...");
+            } catch (Exception e) {
+                AlertUtil.showError("Erreur micro : " + e.getMessage());
+            }
+        }
+    }
+
     @FXML
     void handleClear() {
         chatBox.getChildren().clear();
@@ -443,36 +502,7 @@ public class AIDecisionnelController {
     }
 
     private void renderResponse(String response, Pane target) {
-        String[] parts = response.split("```");
-        for (int i = 0; i < parts.length; i++) {
-            if (i % 2 == 0) {
-                if (!parts[i].trim().isEmpty()) {
-                    Label lbl = new Label(parts[i].trim());
-                    lbl.setWrapText(true);
-                    lbl.setMaxWidth(480);
-                    lbl.setStyle("-fx-font-size: 14px; -fx-text-fill: #102c59; -fx-line-spacing: 2;");
-                    target.getChildren().add(lbl);
-                }
-            } else {
-                String code = parts[i].trim();
-                org.json.JSONObject jsonObj = null;
-                if (code.toLowerCase().startsWith("json")) {
-                    code = code.substring(4).trim();
-                    try { jsonObj = new org.json.JSONObject(code); } catch (Exception ignored) {}
-                }
-
-                if (jsonObj != null) {
-                    renderJsonDashboard(jsonObj, target);
-                } else {
-                    Label codeLabel = new Label(code);
-                    codeLabel.setWrapText(true);
-                    codeLabel.setMaxWidth(480);
-                    codeLabel.setStyle("-fx-background-color: #eef4f9; -fx-text-fill: #102c59; "
-                            + "-fx-padding: 10; -fx-background-radius: 8; -fx-font-size: 11px;");
-                    target.getChildren().add(codeLabel);
-                }
-            }
-        }
+        MarkdownRenderer.render(AIJsonParser.extractMarkdownContent(response), target);
     }
 
     private void renderJsonDashboard(org.json.JSONObject obj, Pane target) {

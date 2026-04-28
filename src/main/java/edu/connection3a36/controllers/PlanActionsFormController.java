@@ -93,6 +93,25 @@ public class PlanActionsFormController {
                 // Création
                 service.addEntity(plan);
                 AlertUtil.showSuccess("Le plan d'action a été créé avec succès !");
+                // ─ Auto-notification pour le superadmin ──────────────────────
+                new Thread(() -> {
+                    try {
+                        edu.connection3a36.services.NotificationService ns =
+                                new edu.connection3a36.services.NotificationService();
+                        ns.addSystemNotification(
+                                "Nouveau Plan d'Action créé",
+                                "Plan : \"" + plan.getDecision() + "\" — Catégorie : "
+                                        + (plan.getCategorie() != null ? plan.getCategorie() : "N/A"),
+                                "SUCCESS"
+                        );
+                        // Mettre à jour le badge dans MainController
+                        int count = ns.countNonLues();
+                        javafx.application.Platform.runLater(() -> {
+                            if (MainController.getInstance() != null)
+                                MainController.getInstance().updateNotificationBadge(count);
+                        });
+                    } catch (Exception ignored) {}
+                }).start();
             }
             closeWindow();
         } catch (SQLException e) {

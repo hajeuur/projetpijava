@@ -60,6 +60,20 @@
             <version>7.2.5</version>
             <type>pom</type>
         </dependency>
+
+        <!-- Webcam capture pour la reconnaissance gestuelle (Point #7) -->
+        <dependency>
+            <groupId>com.github.sarxos</groupId>
+            <artifactId>webcam-capture</artifactId>
+            <version>0.3.12</version>
+        </dependency>
+
+        <!-- JavaFX Media pour animations et canvas -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-media</artifactId>
+            <version>21.0.2</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

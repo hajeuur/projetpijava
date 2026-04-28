@@ -8,6 +8,9 @@ import edu.connection3a36.services.GroqService;
 import edu.connection3a36.services.PlanActionsService;
 import edu.connection3a36.services.ReferenceArticleService;
 import edu.connection3a36.tools.AlertUtil;
+import edu.connection3a36.tools.AIJsonParser;
+import edu.connection3a36.tools.AIJsonSchemas;
+import edu.connection3a36.tools.MarkdownRenderer;
 import edu.connection3a36.tools.SessionManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -38,8 +41,10 @@ public class AIPedagogiqueController {
     @FXML private ScrollPane chatScroll;
     @FXML private TextField  inputField;
     @FXML private Button     btnSend;
+    @FXML private Button     btnRecord;
     @FXML private Label      lblStatus;
 
+    private final edu.connection3a36.services.VoiceRecorderService voiceService = new edu.connection3a36.services.VoiceRecorderService();
     private final GroqService            groqService   = new GroqService();
     private final PlanActionsService     planService   = new PlanActionsService();
     private final ReferenceArticleService articleService = new ReferenceArticleService();
@@ -269,11 +274,11 @@ public class AIPedagogiqueController {
                             + "Structure : Introduction | Corps (3-4 sections) | Conclusion & Recommandations. "
                             + "Style professionnel et accessible pour les enseignants de l'école ESPRIT.";
 
-                    String content2 = groqService.sendSimpleMessage(prompt, "ENSEIGNANT");
+                    String content2 = groqService.sendSimpleJsonMessage(prompt, "ENSEIGNANT", AIJsonSchemas.ARTICLE);
 
                     ReferenceArticle article = new ReferenceArticle();
                     article.setTitre(titre.length() > 255 ? titre.substring(0, 255) : titre);
-                    article.setContenu(content2);
+                    article.setContenu(AIJsonParser.extractMarkdownContent(content2));
                     
                     int fallbackCatId = 1;
                     try {
@@ -282,6 +287,7 @@ public class AIPedagogiqueController {
                         if (!cats.isEmpty()) { fallbackCatId = cats.get(0).getId(); }
                     } catch (Exception ignored) {}
 
+                    article.setCategorieId(fallbackCatId);
                     article.setAuteurId(SessionManager.getCurrentUser().getId());
                     article.setPublished(false);
                     articleService.addEntity(article);
@@ -377,7 +383,48 @@ public class AIPedagogiqueController {
         Scene scene = new Scene(root, 600, 520);
         scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
         histStage.setScene(scene);
+        histStage.setScene(scene);
         histStage.show();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // GESTION VOCALE (Whisper)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @FXML
+    void handleRecord() {
+        if (voiceService.isRecording()) {
+            btnRecord.setText("🎤");
+            btnRecord.setStyle("-fx-padding: 10 15; -fx-cursor: hand;");
+            inputField.setPromptText("Transcription en cours...");
+            
+            new Thread(() -> {
+                try {
+                    String text = voiceService.stopRecordingAndTranscribe();
+                    Platform.runLater(() -> {
+                        if (text != null && !text.isEmpty()) {
+                            String current = inputField.getText();
+                            inputField.setText(current.isEmpty() ? text : current + " " + text);
+                        }
+                        inputField.setPromptText("✏️ Posez une question pédagogique...");
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> {
+                        AlertUtil.showError("Erreur dictée vocale : " + e.getMessage());
+                        inputField.setPromptText("✏️ Posez une question pédagogique...");
+                    });
+                }
+            }).start();
+        } else {
+            try {
+                voiceService.startRecording();
+                btnRecord.setText("⏹️");
+                btnRecord.setStyle("-fx-padding: 10 15; -fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;");
+                inputField.setPromptText("Écoute en cours (parlez maintenant)...");
+            } catch (Exception e) {
+                AlertUtil.showError("Erreur micro : " + e.getMessage());
+            }
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -414,35 +461,7 @@ public class AIPedagogiqueController {
         container.getStyleClass().add("chat-message-ai");
         container.setMaxWidth(500);
 
-        String[] parts = message.split("```");
-        for (int i = 0; i < parts.length; i++) {
-            if (i % 2 == 0) {
-                if (!parts[i].trim().isEmpty()) {
-                    Label lbl = new Label(parts[i].trim());
-                    lbl.setWrapText(true);
-                    lbl.setMaxWidth(480);
-                    lbl.setStyle("-fx-font-size: 13px;");
-                    container.getChildren().add(lbl);
-                }
-            } else {
-                String code = parts[i].trim();
-                org.json.JSONObject jsonObj = null;
-                if (code.toLowerCase().startsWith("json")) {
-                    code = code.substring(4).trim();
-                    try { jsonObj = new org.json.JSONObject(code); } catch (Exception ignored) {}
-                }
-                if (jsonObj != null) {
-                    renderJsonCard(jsonObj, container);
-                } else {
-                    Label codeLabel = new Label(code);
-                    codeLabel.setWrapText(true);
-                    codeLabel.setMaxWidth(480);
-                    codeLabel.setStyle("-fx-background-color: #eef4f9; -fx-text-fill: #102c59; "
-                            + "-fx-padding: 10; -fx-background-radius: 8; -fx-font-size: 11px;");
-                    container.getChildren().add(codeLabel);
-                }
-            }
-        }
+        MarkdownRenderer.render(message, container);
 
         HBox hbox = new HBox(container);
         hbox.setAlignment(Pos.CENTER_LEFT);
