@@ -5,8 +5,6 @@ import edu.connection3a36.entities.ReferenceArticle;
 import edu.connection3a36.services.CategorieArticleService;
 import edu.connection3a36.services.ReferenceArticleService;
 import edu.connection3a36.tools.AlertUtil;
-import edu.connection3a36.tools.AIJsonParser;
-import edu.connection3a36.tools.AIJsonSchemas;
 import edu.connection3a36.tools.SessionManager;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -248,7 +246,7 @@ public class ArticleListController {
         VBox body = new VBox(10);
         body.getStyleClass().add("article-card-body");
 
-        String txt = article.getContenu() != null ? edu.connection3a36.tools.AIJsonParser.extractMarkdownContent(article.getContenu()) : "";
+        String txt = article.getContenu() != null ? article.getContenu() : "";
         Label contenu = new Label(txt.length() > 100 ? txt.substring(0, 100) + "..." : txt);
         contenu.setWrapText(true);
         contenu.setMaxWidth(250);
@@ -285,21 +283,9 @@ public class ArticleListController {
         if (!article.isPublished()) {
             Label badgeDraft = new Label("Brouillon");
             badgeDraft.setStyle("-fx-background-color: #eef2f7; -fx-text-fill: #5a7a90; -fx-padding: 2 6; -fx-background-radius: 4; -fx-font-size: 10px;");
-            if (article.getPlanActionsId() != null && article.getPlanActionsId() > 0) {
-                Label badgeLink = new Label("🔗 Plan #" + article.getPlanActionsId());
-                badgeLink.setStyle("-fx-background-color: #e0f2fe; -fx-text-fill: #0c4a6e; -fx-padding: 2 6; -fx-background-radius: 4; -fx-font-size: 10px;");
-                body.getChildren().addAll(badgeDraft, badgeLink, contenu, footer);
-            } else {
-                body.getChildren().addAll(badgeDraft, contenu, footer);
-            }
+            body.getChildren().addAll(badgeDraft, contenu, footer);
         } else {
-            if (article.getPlanActionsId() != null && article.getPlanActionsId() > 0) {
-                Label badgeLink = new Label("🔗 Plan #" + article.getPlanActionsId());
-                badgeLink.setStyle("-fx-background-color: #e0f2fe; -fx-text-fill: #0c4a6e; -fx-padding: 2 6; -fx-background-radius: 4; -fx-font-size: 10px;");
-                body.getChildren().addAll(badgeLink, contenu, footer);
-            } else {
-                body.getChildren().addAll(contenu, footer);
-            }
+            body.getChildren().addAll(contenu, footer);
         }
 
         card.getChildren().addAll(header, body);
@@ -372,14 +358,11 @@ public class ArticleListController {
         String details = String.format(
                 "📝 Article #%d\n\nTitre: %s\n\nContenu:\n%s\n\nCatégorie: %s\nStatut: %s\nCréé le: %s",
                 article.getId(), article.getTitre(),
-                article.getContenu() != null ? edu.connection3a36.tools.AIJsonParser.extractMarkdownContent(article.getContenu()) : "",
+                article.getContenu() != null ? article.getContenu() : "",
                 article.getCategorieNom() != null ? article.getCategorieNom() : "N/A",
                 article.isPublished() ? "Publié" : "Brouillon",
                 article.getCreatedAt() != null ? article.getCreatedAt().format(DATE_FMT) : "N/A"
         );
-        if (article.getPlanActionsId() != null && article.getPlanActionsId() > 0) {
-            details += "\nPlan lié: #" + article.getPlanActionsId();
-        }
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Détails de l'Article");
         alert.setHeaderText(article.getTitre());
@@ -425,25 +408,11 @@ public class ArticleListController {
                 edu.connection3a36.services.GroqService groq = new edu.connection3a36.services.GroqService();
                 String prompt = "Génère un plan d'action pédagogique basé sur l'article suivant.\n"
                         + "Titre : " + article.getTitre() + "\n"
-                        + "Extrait : " + (article.getContenu() != null ? edu.connection3a36.tools.AIJsonParser.extractMarkdownContent(article.getContenu()).substring(0, Math.min(300, edu.connection3a36.tools.AIJsonParser.extractMarkdownContent(article.getContenu()).length())) : "");
-                String resp = groq.sendSimpleJsonMessage(
-                        prompt,
-                        "ADMIN",
-                        AIJsonSchemas.PLAN
-                );
+                        + "Extrait : " + (article.getContenu() != null ? article.getContenu().substring(0, Math.min(300, article.getContenu().length())) : "") + "\n\n"
+                        + "Fournis une DÉCISION (1 phrase courte) et une DESCRIPTION (2-3 phrases) séparées par '|'. Exemple : Renforcer les TP|Organiser des sessions pratiques hebdomadaires...";
+                String resp = groq.sendSimpleMessage(prompt, "ADMIN");
                 String decision, description;
-                edu.connection3a36.enums.CategorieSortie iaCategorie = edu.connection3a36.enums.CategorieSortie.PEDAGOGIQUE;
-                org.json.JSONObject json = AIJsonParser.extractFirstJsonObject(resp);
-                if (json != null && json.has("decision") && json.has("description")) {
-                    decision = json.optString("decision", "").replaceAll("[*#]", "").trim();
-                    description = json.optString("description", "").trim();
-                    String cat = json.optString("categorie", "PEDAGOGIQUE").trim().toUpperCase();
-                    try {
-                        iaCategorie = edu.connection3a36.enums.CategorieSortie.valueOf(cat);
-                    } catch (Exception ignored) {
-                        iaCategorie = edu.connection3a36.enums.CategorieSortie.PEDAGOGIQUE;
-                    }
-                } else if (resp.contains("|")) {
+                if (resp.contains("|")) {
                     String[] parts = resp.split("\\|", 2);
                     decision = parts[0].replaceAll("[*#]", "").trim();
                     description = parts[1].trim();
@@ -455,16 +424,11 @@ public class ArticleListController {
                 plan.setDecision(decision.length() > 200 ? decision.substring(0,200) : decision);
                 plan.setDescription(description);
                 plan.setStatut(edu.connection3a36.enums.Statut.EN_ATTENTE);
-                plan.setCategorie(iaCategorie);
+                plan.setCategorie(edu.connection3a36.enums.CategorieSortie.PEDAGOGIQUE);
                 plan.setAuteurId(edu.connection3a36.tools.SessionManager.getCurrentUser() != null ? edu.connection3a36.tools.SessionManager.getCurrentUser().getId() : 1);
                 edu.connection3a36.services.PlanActionsService ps = new edu.connection3a36.services.PlanActionsService();
                 ps.addEntity(plan);
-                if (plan.getId() > 0) {
-                    ps.addArticleToPlan(plan.getId(), article.getId());
-                    article.setPlanActionsId(plan.getId());
-                    edu.connection3a36.services.ReferenceArticleService ras = new edu.connection3a36.services.ReferenceArticleService();
-                    ras.updateEntity(article.getId(), article);
-                }
+                if (plan.getId() > 0) ps.addArticleToPlan(plan.getId(), article.getId());
                 javafx.application.Platform.runLater(() -> AlertUtil.showSuccess("Plan #" + plan.getId() + " créé et lié à l'article !"));
             } catch (Exception ex) {
                 javafx.application.Platform.runLater(() -> AlertUtil.showError("Erreur : " + ex.getMessage()));

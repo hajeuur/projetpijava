@@ -2,7 +2,6 @@ package edu.connection3a36.controllers;
 
 import edu.connection3a36.entities.Notification;
 import edu.connection3a36.services.NotificationService;
-import edu.connection3a36.services.UserPreferencesService;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -38,18 +37,12 @@ public class NotificationController {
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initOwner(owner);
 
-        boolean darkMode = owner != null && owner.getScene() != null
-                && owner.getScene().getRoot().getStyleClass().contains("dark-mode");
-
-        VBox root = buildPanel(stage, darkMode);
+        VBox root = buildPanel(stage);
 
         Scene scene = new Scene(root, 560, 650);
         // Charger le CSS si disponible
         try {
             scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
-        } catch (Exception ignored) {}
-        try {
-            new UserPreferencesService().applyToRoot(root, new UserPreferencesService().load());
         } catch (Exception ignored) {}
 
         stage.setScene(scene);
@@ -61,9 +54,9 @@ public class NotificationController {
     // CONSTRUCTION DU PANNEAU
     // ─────────────────────────────────────────────────────────────────────────
 
-    private VBox buildPanel(Stage stage, boolean darkMode) {
+    private VBox buildPanel(Stage stage) {
         VBox root = new VBox(0);
-        root.setStyle("-fx-background-color: " + (darkMode ? "#161b22" : "#f8fafc") + ";");
+        root.setStyle("-fx-background-color: #f8fafc;");
 
         // ── Header ────────────────────────────────────────────────────────────
         HBox header = new HBox(10);
@@ -86,8 +79,8 @@ public class NotificationController {
 
         // ── Barre d'actions ───────────────────────────────────────────────────
         HBox actionsBar = new HBox(8);
-        actionsBar.setStyle("-fx-padding: 10 16; -fx-background-color: " + (darkMode ? "#161b22" : "white") + "; "
-                + "-fx-border-color: " + (darkMode ? "#30363d" : "#e2e8f0") + "; -fx-border-width: 0 0 1 0;");
+        actionsBar.setStyle("-fx-padding: 10 16; -fx-background-color: white; "
+                + "-fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;");
         actionsBar.setAlignment(Pos.CENTER_LEFT);
 
         Button btnToutLire = new Button("✅ Tout marquer comme lu");
@@ -113,16 +106,16 @@ public class NotificationController {
         scrollPane.setContent(listBox);
 
         // Chargement initial
-        reloadList(listBox, stage, badge, scrollPane, darkMode);
+        reloadList(listBox, stage, badge, scrollPane);
 
         // Actions sur la barre
         btnToutLire.setOnAction(e -> {
             notifService.marquerToutesLues();
-            reloadList(listBox, stage, badge, scrollPane, darkMode);
+            reloadList(listBox, stage, badge, scrollPane);
         });
         btnNettoyerDones.setOnAction(e -> {
             notifService.supprimerDones();
-            reloadList(listBox, stage, badge, scrollPane, darkMode);
+            reloadList(listBox, stage, badge, scrollPane);
         });
 
         actionsBar.getChildren().addAll(btnToutLire, btnNettoyerDones);
@@ -135,7 +128,7 @@ public class NotificationController {
     // CHARGEMENT DE LA LISTE
     // ─────────────────────────────────────────────────────────────────────────
 
-    private void reloadList(VBox listBox, Stage stage, Label badge, ScrollPane scroll, boolean darkMode) {
+    private void reloadList(VBox listBox, Stage stage, Label badge, ScrollPane scroll) {
         listBox.getChildren().clear();
 
         List<Notification> notifications = notifService.getAll();
@@ -147,12 +140,12 @@ public class NotificationController {
             Label emptyIcon = new Label("🔔");
             emptyIcon.setStyle("-fx-font-size: 40px;");
             Label emptyText = new Label("Aucune notification pour le moment");
-            emptyText.setStyle("-fx-text-fill: " + (darkMode ? "#8b949e" : "#94a3b8") + "; -fx-font-size: 14px;");
+            emptyText.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 14px;");
             empty.getChildren().addAll(emptyIcon, emptyText);
             listBox.getChildren().add(empty);
         } else {
             for (Notification n : notifications) {
-                listBox.getChildren().add(buildNotifCard(n, listBox, stage, badge, scroll, darkMode));
+                listBox.getChildren().add(buildNotifCard(n, listBox, stage, badge, scroll));
             }
         }
 
@@ -171,10 +164,10 @@ public class NotificationController {
     // CARTE DE NOTIFICATION
     // ─────────────────────────────────────────────────────────────────────────
 
-    private VBox buildNotifCard(Notification n, VBox listBox, Stage stage, Label badge, ScrollPane scroll, boolean darkMode) {
+    private VBox buildNotifCard(Notification n, VBox listBox, Stage stage, Label badge, ScrollPane scroll) {
         VBox card = new VBox(6);
-        String bgColor = n.isDone() ? (darkMode ? "#1f2937" : "#f1f5f9") : (n.isLu() ? (darkMode ? "#161b22" : "white") : n.getTypeBgColor());
-        String borderColor = n.isDone() ? (darkMode ? "#30363d" : "#e2e8f0") : (n.isLu() ? (darkMode ? "#30363d" : "#e2e8f0") : getBorderColor(n.getType()));
+        String bgColor = n.isDone() ? "#f1f5f9" : (n.isLu() ? "white" : n.getTypeBgColor());
+        String borderColor = n.isDone() ? "#e2e8f0" : (n.isLu() ? "#e2e8f0" : getBorderColor(n.getType()));
         String opacity = n.isDone() ? "0.65" : "1.0";
 
         card.setStyle("-fx-background-color: " + bgColor + "; "
@@ -242,7 +235,7 @@ public class NotificationController {
             styleSmallBtn(btnLire, "#3b82f6");
             btnLire.setOnAction(e -> {
                 notifService.marquerCommeLue(n.getId());
-                reloadList(listBox, stage, badge, scroll, darkMode);
+                reloadList(listBox, stage, badge, scroll);
             });
             actionsRow.getChildren().add(btnLire);
         }
@@ -252,7 +245,7 @@ public class NotificationController {
             styleSmallBtn(btnDone, "#10b981");
             btnDone.setOnAction(e -> {
                 notifService.marquerCommeDone(n.getId());
-                reloadList(listBox, stage, badge, scroll, darkMode);
+                reloadList(listBox, stage, badge, scroll);
             });
             actionsRow.getChildren().add(btnDone);
         }
@@ -261,7 +254,7 @@ public class NotificationController {
         styleSmallBtn(btnSuppr, "#ef4444");
         btnSuppr.setOnAction(e -> {
             notifService.supprimer(n.getId());
-            reloadList(listBox, stage, badge, scroll, darkMode);
+            reloadList(listBox, stage, badge, scroll);
         });
         actionsRow.getChildren().add(btnSuppr);
 

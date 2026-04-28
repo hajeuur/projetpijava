@@ -5,12 +5,9 @@ import edu.connection3a36.entities.ReferenceArticle;
 import edu.connection3a36.enums.CategorieSortie;
 import edu.connection3a36.enums.Statut;
 import edu.connection3a36.services.GroqService;
-import edu.connection3a36.services.MockDataService;
 import edu.connection3a36.services.PlanActionsService;
 import edu.connection3a36.services.ReferenceArticleService;
 import edu.connection3a36.tools.AlertUtil;
-import edu.connection3a36.tools.AIJsonParser;
-import edu.connection3a36.tools.AIJsonSchemas;
 import edu.connection3a36.tools.MarkdownRenderer;
 import edu.connection3a36.tools.SessionManager;
 import javafx.application.Platform;
@@ -24,8 +21,6 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import javax.sound.sampled.*;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -45,32 +40,6 @@ public class AIDecisionnelController {
     @FXML private Button btnSend;
     @FXML private Button btnRecord;
     @FXML private Label lblChatStatus;
-    
-    // ── Sous-pages IA Décisionnelle + Hub intervention ───────────────────────
-    @FXML private Button tabChatbot, tabInterventions, tabDiagnostic, tabAccessibilite, tabImpact;
-    @FXML private VBox paneChatbot, paneInterventions, paneDiagnostic, paneAccessibilite, paneImpact;
-    
-    // Interventions
-    @FXML private ComboBox<String> cbNiveau, cbProfil;
-    @FXML private TextArea taIntervention, taRemediation, taScriptSeance;
-    
-    // Diagnostic
-    @FXML private ComboBox<String> cbQ1, cbQ2, cbQ3, cbQ4, cbQ5;
-    @FXML private Label lblDiagScore;
-    @FXML private TextArea taDiagRecommendation;
-    
-    // Accessibilité
-    @FXML private Button btnDyslexia;
-    @FXML private Slider fontSizeSlider, letterSpacingSlider;
-    @FXML private VBox previewBox;
-    @FXML private Label previewText1, previewText2, previewText3;
-    @FXML private ComboBox<String> cbAudioSymbol;
-    @FXML private Label lblSoundFeedback;
-    @FXML private Label lblPomodoroTime, lblPomodoroMode, lblPomodoroSessions, lblPomodoroMotivation;
-    
-    // Impact
-    @FXML private Label lblAtRiskCount, lblMissingFeedback, lblLatePlans, lblImpactSummary;
-    @FXML private TextArea taWeeklyActions, taImpactDetail;
 
     // ── Services ──────────────────────────────────────────────────────────────
     private final PlanActionsService      planService      = new PlanActionsService();
@@ -83,20 +52,8 @@ public class AIDecisionnelController {
     private String lastAIResponse = "";
 
     // Historique persistant
-    private static final Map<Integer, List<String[]>> chatHistoryByUser = new HashMap<>();
+    private static final List<String[]> chatHistory = new ArrayList<>();
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("dd/MM HH:mm");
-    private Timer pomodoroTimer;
-    private int pomodoroSeconds = 25 * 60;
-    private boolean pomodoroWork = true, pomodoroRunning = false;
-    private int pomodoroSessionsDone = 0;
-    private String currentBg = "#fdf6e3";
-    private boolean dyslexiaActive = false;
-    private static final String[] HUB_QUOTES = {
-            "\"Progression > perfection.\"",
-            "\"Une séance claire vaut mieux qu'une séance longue.\"",
-            "\"Le suivi régulier bat les actions ponctuelles.\"",
-            "\"Chaque feedback utile augmente l'impact pédagogique.\""
-    };
 
     @FXML
     public void initialize() {
@@ -104,7 +61,6 @@ public class AIDecisionnelController {
                 + "Je suis à votre disposition pour analyser les données de l'établissement, détecter les risques, "
                 + "proposer des plans d'actions stratégiques ou rédiger des articles institutionnels.\n\n"
                 + "Que souhaitez-vous examiner aujourd'hui ?");
-        initHubInterventionSubPages();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -136,7 +92,7 @@ public class AIDecisionnelController {
                 aiMsg.put("content", response);
                 conversationHistory.add(aiMsg);
 
-                getCurrentUserHistory().add(new String[]{
+                chatHistory.add(new String[]{
                         LocalDateTime.now().format(TIME_FMT),
                         finalMessage,
                         response
@@ -295,15 +251,11 @@ public class AIDecisionnelController {
                             + "L'article doit comprendre : Introduction, 3 parties stratégiques et une Conclusion. "
                             + "Ton de communication institutionnelle interne.";
 
-                    String articleContent = groqService.sendSimpleJsonMessage(
-                            prompt,
-                            "ADMIN",
-                            AIJsonSchemas.ARTICLE
-                    );
+                    String articleContent = groqService.sendSimpleMessage(prompt, "ADMIN");
 
                     ReferenceArticle article = new ReferenceArticle();
                     article.setTitre(titre.length() > 255 ? titre.substring(0, 255) : titre);
-                    article.setContenu(AIJsonParser.extractMarkdownContent(articleContent));
+                    article.setContenu(articleContent);
                     
                     int fallbackCatId = 1;
                     try {
@@ -356,24 +308,14 @@ public class AIDecisionnelController {
                 String prompt = String.format(
                         "Tu es l'IA décisionnelle de l'école ESPRIT. Voici un extrait de la base : "
                       + "Total plans : %d (Statuts : %s) — Total articles internes : %d.\n"
-                      + "Fais une analyse éclair structurée sur la situation managériale et les points forts.",
+                      + "Fais une analyse éclair (3 paragraphes max) sur la situation managériale et les points forts.",
                         totalPlans, statuts, totalArticles);
 
-                String response = groqService.sendSimpleJsonMessage(
-                        prompt,
-                        "ADMIN",
-                        AIJsonSchemas.ANALYSIS
-                );
-                org.json.JSONObject json = AIJsonParser.extractFirstJsonObject(response);
-                final String normalized = (json != null)
-                        ? "## Analyse de la situation manageriale\n" + json.optString("resume_executif", "")
-                        + "\n\n## Points forts\n" + json.optString("points_forts", "")
-                        + "\n\n## Axes d'amelioration\n" + json.optString("axes_amelioration", "")
-                        : response;
+                String response = groqService.sendSimpleMessage(prompt, "ADMIN");
 
                 Platform.runLater(() -> {
                     boxAnalyse.getChildren().clear();
-                    renderResponse(normalized, boxAnalyse);
+                    renderResponse(response, boxAnalyse);
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
@@ -404,8 +346,7 @@ public class AIDecisionnelController {
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #102c59;");
         root.getChildren().add(title);
 
-        List<String[]> userHistory = new ArrayList<>(getCurrentUserHistory());
-        if (userHistory.isEmpty()) {
+        if (chatHistory.isEmpty()) {
             root.getChildren().add(new Label("Aucune conversation en mémoire.") {{
                 setStyle("-fx-text-fill: #7a8fa5; -fx-font-style: italic;");
             }});
@@ -417,7 +358,7 @@ public class AIDecisionnelController {
             VBox histList = new VBox(10);
             histList.setPadding(new Insets(5));
 
-            List<String[]> reversed = new ArrayList<>(userHistory);
+            List<String[]> reversed = new ArrayList<>(chatHistory);
             Collections.reverse(reversed);
 
             for (String[] entry : reversed) {
@@ -545,7 +486,7 @@ public class AIDecisionnelController {
     }
 
     private void renderResponse(String response, Pane target) {
-        MarkdownRenderer.render(AIJsonParser.extractMarkdownContent(response), target);
+        MarkdownRenderer.render(response, target);
     }
 
     private void renderJsonDashboard(org.json.JSONObject obj, Pane target) {
@@ -595,281 +536,8 @@ public class AIDecisionnelController {
         
         target.getChildren().add(dash);
     }
-    
-    // ─────────────────────────────────────────────────────────────────────────
-    // SOUS-PAGES HUB INTERVENTION (dans IA Décisionnelle)
-    // ─────────────────────────────────────────────────────────────────────────
-    
-    private void initHubInterventionSubPages() {
-        if (cbNiveau == null) return; // sécurité si FXML partiel
-        cbNiveau.getItems().setAll("L1", "L2", "L3", "M1", "M2", "3A36");
-        cbNiveau.setValue("3A36");
-        cbProfil.getItems().setAll("À risque", "Dyslexie", "Attention", "Absentéisme", "Irrégulier", "Excellent", "Moyen");
-        cbProfil.setValue("À risque");
-        
-        List<String> scale = Arrays.asList("Jamais", "Rarement", "Parfois", "Souvent");
-        cbQ1.getItems().setAll(scale); cbQ2.getItems().setAll(scale); cbQ3.getItems().setAll(scale);
-        cbQ4.getItems().setAll(scale); cbQ5.getItems().setAll(scale);
-        cbQ1.setValue("Parfois"); cbQ2.setValue("Parfois"); cbQ3.setValue("Parfois");
-        cbQ4.setValue("Parfois"); cbQ5.setValue("Parfois");
-        
-        cbAudioSymbol.getItems().setAll("A", "E", "I", "O", "U", "MA", "PA", "TA", "KA", "LA");
-        cbAudioSymbol.setValue("A");
-        
-        showSubPage(paneChatbot, tabChatbot);
-        applyPreview();
-        updateHubTimerLabels();
-        refreshImpact();
-    }
-    
-    @FXML void showSubChatbot() { showSubPage(paneChatbot, tabChatbot); }
-    @FXML void showSubInterventions() { showSubPage(paneInterventions, tabInterventions); }
-    @FXML void showSubDiagnostic() { showSubPage(paneDiagnostic, tabDiagnostic); }
-    @FXML void showSubAccessibilite() { showSubPage(paneAccessibilite, tabAccessibilite); }
-    @FXML void showSubImpact() { showSubPage(paneImpact, tabImpact); refreshImpact(); }
-    
-    private void showSubPage(VBox pane, Button tab) {
-        for (VBox p : new VBox[]{paneChatbot, paneInterventions, paneDiagnostic, paneAccessibilite, paneImpact}) {
-            if (p != null) {
-                p.setVisible(p == pane);
-                p.setManaged(p == pane);
-            }
-        }
-        String on = "-fx-background-color:#3b82f6; -fx-text-fill:white; -fx-background-radius:20; -fx-padding:6 16;";
-        String off = "-fx-background-color:#e2e8f0; -fx-text-fill:#102c59; -fx-background-radius:20; -fx-padding:6 16;";
-        for (Button b : new Button[]{tabChatbot, tabInterventions, tabDiagnostic, tabAccessibilite, tabImpact}) {
-            if (b != null) b.setStyle(b == tab ? on : off);
-        }
-    }
-    
-    @FXML
-    void generateInterventionPack() {
-        taIntervention.setText(generateMicroActivities(cbNiveau.getValue(), cbProfil.getValue()));
-        taRemediation.setText(generateRemediationBank(cbProfil.getValue()));
-        taScriptSeance.setText(generateSessionScript(cbNiveau.getValue(), cbProfil.getValue()));
-    }
-    
-    private String generateMicroActivities(String niveau, String profil) {
-        return "Objectif 15 min - " + profil + " (" + niveau + ")\n"
-                + "1) 3 min: activation rapide.\n"
-                + "2) 7 min: mini-atelier en binôme.\n"
-                + "3) 3 min: restitution orale guidée.\n"
-                + "4) 2 min: feedback flash.\n\n"
-                + "KPI: participation, réponses correctes, engagement.";
-    }
-    
-    private String generateRemediationBank(String profil) {
-        String base = "Banque de remédiation - profil " + profil + "\n";
-        if ("Dyslexie".equalsIgnoreCase(profil)) {
-            return base + "- Consignes segmentées.\n- Police lisible et interligne renforcé.\n- Evaluation orale flash.";
-        }
-        if ("Attention".equalsIgnoreCase(profil)) {
-            return base + "- Tâche unique de 5 minutes.\n- Rotation active.\n- Checkpoint verbal régulier.";
-        }
-        if ("Absentéisme".equalsIgnoreCase(profil) || "À risque".equalsIgnoreCase(profil)) {
-            return base + "- Micro-objectifs hebdomadaires.\n- Point parent/tuteur.\n- Rattrapage guidé.";
-        }
-        return base + "- Renforcement méthodologique.\n- Pair tutoring.\n- Auto-évaluation de fin de séance.";
-    }
-    
-    private String generateSessionScript(String niveau, String profil) {
-        return "Script prêt à l'emploi\n"
-                + "Objectif: stabiliser les acquis du groupe " + niveau + " (focus " + profil + ").\n"
-                + "00:00-03:00 cadrage, 03:00-10:00 activité centrale,\n"
-                + "10:00-13:00 correction guidée, 13:00-15:00 évaluation flash.";
-    }
-    
-    @FXML
-    void runDiagnostic() {
-        int score = scaleValue(cbQ1.getValue()) + scaleValue(cbQ2.getValue()) + scaleValue(cbQ3.getValue())
-                + scaleValue(cbQ4.getValue()) + scaleValue(cbQ5.getValue());
-        lblDiagScore.setText("Score diagnostic: " + score + " / 15");
-        if (score >= 11) {
-            taDiagRecommendation.setText("Risque FAIBLE.\nAction: approfondissement + autonomie guidée.");
-        } else if (score >= 7) {
-            taDiagRecommendation.setText("Risque MODÉRÉ.\nAction: remédiation ciblée x2/semaine.");
-        } else {
-            taDiagRecommendation.setText("Risque ÉLEVÉ.\nAction: intervention immédiate et suivi hebdomadaire.");
-        }
-    }
-    
-    private int scaleValue(String value) {
-        if ("Jamais".equals(value)) return 0;
-        if ("Rarement".equals(value)) return 1;
-        if ("Parfois".equals(value)) return 2;
-        return 3;
-    }
-    
-    @FXML void setBgCream() { currentBg = "#fdf6e3"; applyPreview(); }
-    @FXML void setBgGreen() { currentBg = "#e8f5e9"; applyPreview(); }
-    @FXML void setBgBlue() { currentBg = "#e3f2fd"; applyPreview(); }
-    @FXML void setBgNormal() { currentBg = "white"; applyPreview(); }
-    @FXML void adjustFontSize() { applyPreview(); }
-    @FXML void adjustLetterSpacing() { applyPreview(); }
-    
-    private void applyPreview() {
-        if (previewBox == null) return;
-        double fs = fontSizeSlider.getValue();
-        double ls = letterSpacingSlider.getValue();
-        String style = String.format("-fx-font-size:%.0fpx; -fx-letter-spacing:%.1f;", fs, ls);
-        previewBox.setStyle("-fx-background-color:" + currentBg + "; -fx-padding:14; -fx-background-radius:10;");
-        previewText1.setStyle(style);
-        previewText2.setStyle(style);
-        previewText3.setStyle(style);
-    }
-    
-    @FXML
-    void toggleDyslexiaMode() {
-        dyslexiaActive = !dyslexiaActive;
-        if (dyslexiaActive) {
-            btnDyslexia.setText("📖 Désactiver");
-            btnDyslexia.getScene().getRoot().setStyle("-fx-font-family:'Arial'; -fx-font-size:" + fontSizeSlider.getValue() + "px; -fx-background-color:" + currentBg + ";");
-        } else {
-            btnDyslexia.setText("📖 Mode Dyslexie");
-            btnDyslexia.getScene().getRoot().setStyle("");
-        }
-    }
-    
-    @FXML
-    void playSelectedAudio() {
-        String symbol = cbAudioSymbol.getValue();
-        lblSoundFeedback.setText("Lecture du son: " + symbol);
-        new Thread(() -> {
-            if (!speakSymbolWindows(symbol)) playBeepFor(symbol);
-            Platform.runLater(() -> lblSoundFeedback.setText("Lecture terminée: " + symbol));
-        }).start();
-    }
-    
-    private boolean speakSymbolWindows(String symbol) {
-        String text = symbol.replace("'", " ");
-        String ps = "Add-Type -AssemblyName System.Speech; "
-                + "$s = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
-                + "$s.Rate = -1; $s.Speak('" + text + "');";
-        try {
-            Process p = new ProcessBuilder("powershell", "-Command", ps).start();
-            return p.waitFor() == 0;
-        } catch (IOException | InterruptedException e) {
-            return false;
-        }
-    }
-    
-    private void playBeepFor(String symbol) {
-        try {
-            int freq = 440 + Math.abs(symbol.hashCode() % 400);
-            AudioFormat fmt = new AudioFormat(44100, 8, 1, true, false);
-            DataLine.Info info = new DataLine.Info(SourceDataLine.class, fmt);
-            SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
-            line.open(fmt);
-            line.start();
-            byte[] buf = new byte[(int) (fmt.getSampleRate() * 350 / 1000)];
-            for (int i = 0; i < buf.length; i++) {
-                buf[i] = (byte) (75 * Math.sin(2 * Math.PI * freq * i / fmt.getSampleRate()));
-            }
-            line.write(buf, 0, buf.length);
-            line.drain();
-            line.close();
-        } catch (Exception ignored) {}
-    }
-    
-    @FXML
-    void togglePomodoro() {
-        if (pomodoroRunning) {
-            pomodoroTimer.cancel();
-            pomodoroRunning = false;
-            return;
-        }
-        pomodoroRunning = true;
-        pomodoroTimer = new Timer();
-        pomodoroTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    if (pomodoroSeconds > 0) {
-                        pomodoroSeconds--;
-                        updateHubTimerLabels();
-                        return;
-                    }
-                    pomodoroTimer.cancel();
-                    pomodoroRunning = false;
-                    if (pomodoroWork) {
-                        pomodoroWork = false;
-                        pomodoroSessionsDone++;
-                        pomodoroSeconds = 5 * 60;
-                        lblPomodoroMode.setText("MODE PAUSE");
-                    } else {
-                        pomodoroWork = true;
-                        pomodoroSeconds = 25 * 60;
-                        lblPomodoroMode.setText("MODE TRAVAIL");
-                        lblPomodoroMotivation.setText(HUB_QUOTES[pomodoroSessionsDone % HUB_QUOTES.length]);
-                    }
-                    updateHubTimerLabels();
-                });
-            }
-        }, 1000, 1000);
-    }
-    
-    @FXML
-    void resetPomodoro() {
-        if (pomodoroTimer != null) pomodoroTimer.cancel();
-        pomodoroRunning = false;
-        pomodoroWork = true;
-        pomodoroSeconds = 25 * 60;
-        lblPomodoroMode.setText("MODE TRAVAIL");
-        updateHubTimerLabels();
-    }
-    
-    private void updateHubTimerLabels() {
-        int m = pomodoroSeconds / 60;
-        int s = pomodoroSeconds % 60;
-        lblPomodoroTime.setText(String.format("%02d:%02d", m, s));
-        lblPomodoroSessions.setText("Sessions finalisées: " + pomodoroSessionsDone);
-    }
-    
-    @FXML
-    void refreshImpact() {
-        try {
-            List<String[]> students = MockDataService.getStudentProfiles();
-            int atRisk = 0;
-            double avg = 0;
-            int abs = 0;
-            for (String[] s : students) {
-                double m = Double.parseDouble(s[3]);
-                int a = Integer.parseInt(s[4]);
-                avg += m; abs += a;
-                if (s[2].toLowerCase().contains("risque") || a >= 3 || m < 11.0) atRisk++;
-            }
-            avg /= students.size();
-            
-            int totalPlans = planService.countAll();
-            int feedbackPlans = planService.countWithFeedback();
-            int latePlans = planService.countByStatutValue("EN_ATTENTE");
-            int missingFeedback = Math.max(0, totalPlans - feedbackPlans);
-            
-            lblAtRiskCount.setText(String.valueOf(atRisk));
-            lblMissingFeedback.setText(String.valueOf(missingFeedback));
-            lblLatePlans.setText(String.valueOf(latePlans));
-            lblImpactSummary.setText(String.format("Moyenne %.1f | Absences %d | Feedback %d%%", avg, abs, totalPlans > 0 ? (feedbackPlans * 100 / totalPlans) : 0));
-            taImpactDetail.setText("Élèves à risque: " + atRisk + "\nPlans sans feedback: " + missingFeedback + "\nPlans en retard: " + latePlans);
-        } catch (Exception e) {
-            taImpactDetail.setText("Erreur indicateurs: " + e.getMessage());
-        }
-    }
-    
-    @FXML
-    void generateWeeklyActions() {
-        String role = SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getRole() : "";
-        taWeeklyActions.setText("Top 3 actions de la semaine (" + role + ")\n"
-                + "1) Prioriser les profils à risque.\n"
-                + "2) Clôturer les plans en attente avec feedback.\n"
-                + "3) Lancer un diagnostic et adapter la séance suivante.");
-    }
 
     private void scrollToBottom() {
         Platform.runLater(() -> chatScroll.setVvalue(1.0));
-    }
-
-    private List<String[]> getCurrentUserHistory() {
-        int uid = SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getId() : -1;
-        return chatHistoryByUser.computeIfAbsent(uid, k -> new ArrayList<>());
     }
 }

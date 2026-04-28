@@ -18,21 +18,6 @@
 
     <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color:transparent;-fx-border-color:transparent;">
         <VBox spacing="20" style="-fx-padding: 20;">
-            <HBox spacing="10">
-                <VBox style="-fx-background-color:white; -fx-padding:12; -fx-background-radius:10; -fx-border-color:#e2e8f0; -fx-border-radius:10;" HBox.hgrow="ALWAYS">
-                    <Label text="👥 Présents" style="-fx-text-fill:#64748b; -fx-font-size:11px;"/>
-                    <Label fx:id="lblKpiPresentCount" text="0 / 10" style="-fx-font-size:20px; -fx-font-weight:bold;"/>
-                </VBox>
-                <VBox style="-fx-background-color:white; -fx-padding:12; -fx-background-radius:10; -fx-border-color:#e2e8f0; -fx-border-radius:10;" HBox.hgrow="ALWAYS">
-                    <Label text="⚠️ À risque présents" style="-fx-text-fill:#64748b; -fx-font-size:11px;"/>
-                    <Label fx:id="lblKpiRiskCount" text="0" style="-fx-font-size:20px; -fx-font-weight:bold; -fx-text-fill:#dc2626;"/>
-                </VBox>
-                <VBox style="-fx-background-color:white; -fx-padding:12; -fx-background-radius:10; -fx-border-color:#e2e8f0; -fx-border-radius:10;" HBox.hgrow="ALWAYS">
-                    <Label text="📈 Taux de couverture" style="-fx-text-fill:#64748b; -fx-font-size:11px;"/>
-                    <ProgressBar fx:id="progressCoverage" progress="0.0" prefWidth="190"/>
-                    <Label fx:id="lblCoveragePct" text="0%" style="-fx-font-size:12px; -fx-font-weight:bold;"/>
-                </VBox>
-            </HBox>
 
             <HBox spacing="20">
                 <!-- Zone IoT & NFC (Gauche) -->
@@ -97,12 +82,6 @@
                                 <Label fx:id="lblGroup3Title" text="G3" style="-fx-font-weight: bold; -fx-text-fill: #6d28d9;"/>
                                 <Label fx:id="lblGroup3Desc" text="Desc" style="-fx-text-fill: #4c1d95; -fx-wrap-text: true;" wrapText="true"/>
                             </VBox>
-                        </VBox>
-                        <VBox style="-fx-background-color:#ecfeff; -fx-padding:10; -fx-background-radius:8; -fx-border-color:#bae6fd; -fx-border-radius:8;">
-                            <Label text="🎯 Recommandation opérationnelle" style="-fx-font-weight:bold; -fx-text-fill:#0c4a6e;"/>
-                            <Label fx:id="lblOperationalHint" wrapText="true"
-                                   text="Scannez au moins 3 étudiants pour obtenir une recommandation pédagogique contextualisée."
-                                   style="-fx-text-fill:#0f172a; -fx-font-size:12px;"/>
                         </VBox>
 
                     </VBox>

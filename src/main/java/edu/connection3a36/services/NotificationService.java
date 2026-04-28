@@ -66,16 +66,6 @@ public class NotificationService {
         addNotification(n);
     }
 
-    public void addFeedbackNotificationForAdmin(int planId, String planDecision, String teacherName) {
-        String safeTeacher = (teacherName == null || teacherName.isBlank()) ? "Un enseignant" : teacherName;
-        String safeDecision = (planDecision == null || planDecision.isBlank()) ? "Plan sans titre" : planDecision;
-        addSystemNotification(
-                "Nouveau feedback enseignant",
-                safeTeacher + " a soumis un feedback sur le plan #" + planId + " : \"" + safeDecision + "\"",
-                "INFO"
-        );
-    }
-
     /** Récupère toutes les notifications (les plus récentes en premier). */
     public List<Notification> getAll() {
         List<Notification> list = new ArrayList<>();

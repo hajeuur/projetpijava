@@ -8,8 +8,6 @@ import edu.connection3a36.services.GroqService;
 import edu.connection3a36.services.PlanActionsService;
 import edu.connection3a36.services.ReferenceArticleService;
 import edu.connection3a36.tools.AlertUtil;
-import edu.connection3a36.tools.AIJsonParser;
-import edu.connection3a36.tools.AIJsonSchemas;
 import edu.connection3a36.tools.MarkdownRenderer;
 import edu.connection3a36.tools.SessionManager;
 import javafx.application.Platform;
@@ -274,11 +272,11 @@ public class AIPedagogiqueController {
                             + "Structure : Introduction | Corps (3-4 sections) | Conclusion & Recommandations. "
                             + "Style professionnel et accessible pour les enseignants de l'école ESPRIT.";
 
-                    String content2 = groqService.sendSimpleJsonMessage(prompt, "ENSEIGNANT", AIJsonSchemas.ARTICLE);
+                    String content2 = groqService.sendSimpleMessage(prompt, "ENSEIGNANT");
 
                     ReferenceArticle article = new ReferenceArticle();
                     article.setTitre(titre.length() > 255 ? titre.substring(0, 255) : titre);
-                    article.setContenu(AIJsonParser.extractMarkdownContent(content2));
+                    article.setContenu(content2);
                     
                     int fallbackCatId = 1;
                     try {
@@ -287,7 +285,6 @@ public class AIPedagogiqueController {
                         if (!cats.isEmpty()) { fallbackCatId = cats.get(0).getId(); }
                     } catch (Exception ignored) {}
 
-                    article.setCategorieId(fallbackCatId);
                     article.setAuteurId(SessionManager.getCurrentUser().getId());
                     article.setPublished(false);
                     articleService.addEntity(article);

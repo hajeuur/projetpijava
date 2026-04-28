@@ -1,10 +1,7 @@
 package edu.connection3a36.controllers;
 
 import edu.connection3a36.services.GroqService;
-import edu.connection3a36.services.MockDataService;
 import edu.connection3a36.tools.AlertUtil;
-import edu.connection3a36.tools.AIJsonParser;
-import edu.connection3a36.tools.AIJsonSchemas;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -43,14 +40,18 @@ public class IoTClusteringController {
     @FXML private Label lblGroup2Title, lblGroup2Desc;
     @FXML private Label lblGroup3Title, lblGroup3Desc;
     @FXML private VBox clusterContainer;
-    @FXML private Label lblKpiPresentCount, lblKpiRiskCount, lblCoveragePct, lblOperationalHint;
-    @FXML private ProgressBar progressCoverage;
 
-    private List<String[]> students;
+    // Mock Data pour NFC
+    private static final String[][] STUDENTS = {
+        {"101", "Amine Ben Ali", "Moyenne: 18.5 | Absences: 0"},
+        {"102", "Sarah Trabelsi", "Moyenne: 09.2 | Absences: 5"},
+        {"103", "Youssef Gharbi", "Moyenne: 11.5 | Absences: 1"},
+        {"104", "Mariem Jlassi", "Moyenne: 13.0 | Absences: 2 | Dyslexie"},
+        {"107", "Rayen Khemiri", "Moyenne: 08.5 | Absences: 8"}
+    };
 
     @FXML public void initialize() {
-        students = MockDataService.getStudentProfiles();
-        for (String[] s : students) comboNFC.getItems().add(s[1] + " (Badge " + s[0] + ")");
+        for (String[] s : STUDENTS) comboNFC.getItems().add(s[1] + " (Badge " + s[0] + ")");
         boxNfcResult.setVisible(false);
         clusterContainer.setVisible(false);
 
@@ -61,7 +62,6 @@ public class IoTClusteringController {
                 if (Math.random() > 0.5) triggerMotion();
             }
         }, 3000, 8000);
-        refreshKpisAndHint();
     }
 
     private void triggerMotion() {
@@ -94,17 +94,17 @@ public class IoTClusteringController {
         
         String id = sel.substring(sel.indexOf("Badge ") + 6, sel.indexOf(")"));
         String[] student = null;
-        for(String[] s : students) { if (s[0].equals(id)) { student = s; break; } }
+        for(String[] s : STUDENTS) { if (s[0].equals(id)) { student = s; break; } }
         
         if (student == null) return;
 
         // Animer l'apparition
         boxNfcResult.setVisible(true);
         lblNfcStudentName.setText(student[1]);
-        lblNfcStudentDetails.setText("ID NFC: " + student[0] + " | Moyenne: " + student[3] + " | Absences: " + student[4] + " | " + student[2]);
+        lblNfcStudentDetails.setText("ID NFC: " + student[0] + " | " + student[2]);
 
         // Alerte si absence ou problème
-        int abs = Integer.parseInt(student[4]);
+        int abs = Integer.parseInt(student[2].split("Absences: ")[1].split(" ")[0].replace("|","").trim());
         if (abs >= 3) {
             lblNfcAlert.setText("⚠️ ALERTE : Étudiant à risque (" + abs + " absences) ! Interpellez-le à la fin du cours.");
             lblNfcAlert.setVisible(true);
@@ -119,7 +119,6 @@ public class IoTClusteringController {
             presentsList.add(student[1]);
             listPresents.getItems().add("✅ " + student[1] + " (" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")) + ")");
             btnCluster.setDisable(presentsList.size() < 2);
-            refreshKpisAndHint();
         }
     }
 
@@ -129,64 +128,35 @@ public class IoTClusteringController {
         btnCluster.setDisable(true);
         btnCluster.setText("🔄 Analyse IA en cours...");
         clusterContainer.setVisible(true);
-        clusterContainer.setManaged(true);
         boxCluster1.setVisible(false); boxCluster2.setVisible(false); boxCluster3.setVisible(false);
 
         new Thread(() -> {
             try {
                 edu.connection3a36.services.GroqService groq = new edu.connection3a36.services.GroqService();
                 String prompt = "Tu es MentorAI. Voici la liste des étudiants présents: " + String.join(", ", presentsList) + ".\n"
-                              + MockDataService.getEtudiants3A36Context() + "\n"
-                              + "Crée 2 ou 3 groupes de travail équilibrés selon profils pédagogiques.\n"
-                              + "Pour chaque groupe, donne un objectif concret et une action pédagogique de 15 minutes.";
-                String response = groq.sendSimpleJsonMessage(prompt, "ENSEIGNANT", AIJsonSchemas.CLUSTERS);
+                              + "Crée 2 ou 3 groupes de travail avec eux.\n"
+                              + "Tu DOIS formater ta réponse EXACTEMENT ligne par ligne comme ceci (remplace les noms par les étudiants présents) :\n"
+                              + "GROUPE 1: Les Analystes | Amine, Sarah - Focus sur la réflexion.\n"
+                              + "GROUPE 2: Les Créatifs | Youssef, Mariem - Focus sur le design.\n"
+                              + "N'ajoute AUCUN texte avant ou après, pas de markdown, pas de tirets.";
+                String response = groq.sendSimpleMessage(prompt, "ENSEIGNANT");
                 
                 Platform.runLater(() -> {
                     parseAndDisplayClusters(response);
                     btnCluster.setText("✨ Regrouper les présents via IA");
                     btnCluster.setDisable(false);
-                    refreshKpisAndHint();
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     AlertUtil.showError("Erreur IA: " + e.getMessage());
                     btnCluster.setText("✨ Regrouper les présents via IA");
                     btnCluster.setDisable(false);
-                    refreshKpisAndHint();
                 });
             }
         }).start();
     }
 
     private void parseAndDisplayClusters(String text) {
-        org.json.JSONObject json = AIJsonParser.extractFirstJsonObject(text);
-        if (json != null && json.has("groupes")) {
-            try {
-                org.json.JSONArray groups = json.getJSONArray("groupes");
-                boxCluster1.setVisible(false); boxCluster1.setManaged(false);
-                boxCluster2.setVisible(false); boxCluster2.setManaged(false);
-                boxCluster3.setVisible(false); boxCluster3.setManaged(false);
-                for (int i = 0; i < Math.min(groups.length(), 3); i++) {
-                    org.json.JSONObject g = groups.getJSONObject(i);
-                    String title = g.optString("nom", "Groupe " + (i + 1));
-                    String desc = "Etudiants: " + g.optString("etudiants", "")
-                            + "\nObjectif: " + g.optString("objectif", "")
-                            + "\nAction: " + g.optString("action", "");
-                    if (i == 0) {
-                        lblGroup1Title.setText("Groupe 1 : " + title); lblGroup1Desc.setText(desc);
-                        boxCluster1.setVisible(true); boxCluster1.setManaged(true);
-                    } else if (i == 1) {
-                        lblGroup2Title.setText("Groupe 2 : " + title); lblGroup2Desc.setText(desc);
-                        boxCluster2.setVisible(true); boxCluster2.setManaged(true);
-                    } else {
-                        lblGroup3Title.setText("Groupe 3 : " + title); lblGroup3Desc.setText(desc);
-                        boxCluster3.setVisible(true); boxCluster3.setManaged(true);
-                    }
-                }
-                refreshKpisAndHint();
-                return;
-            } catch (Exception ignored) {}
-        }
         String[] lines = text.split("\n");
         int gIdx = 1;
         
@@ -198,15 +168,9 @@ public class IoTClusteringController {
             if (l.toUpperCase().contains("GROUPE")) {
                 try {
                     String[] parts = l.split(":", 2);
-                    String[] subParts = parts[1].split("\\|", 3);
+                    String[] subParts = parts[1].split("\\|", 2);
                     String title = subParts[0].trim();
-                    String desc = "";
-                    if (subParts.length > 1) {
-                        desc = "Étudiants: " + subParts[1].trim();
-                    }
-                    if (subParts.length > 2) {
-                        desc += "\n" + subParts[2].trim();
-                    }
+                    String desc = subParts.length > 1 ? subParts[1].trim() : "";
                     
                     if (title.isEmpty() && desc.isEmpty()) continue;
                     
@@ -229,37 +193,6 @@ public class IoTClusteringController {
             lblGroup1Title.setText("Groupes Suggérés");
             lblGroup1Desc.setText(text.length() > 200 ? text.substring(0, 200) + "..." : text);
             boxCluster1.setVisible(true); boxCluster1.setManaged(true);
-        }
-        refreshKpisAndHint();
-    }
-
-    private void refreshKpisAndHint() {
-        int total = students != null ? students.size() : 10;
-        int present = presentsList.size();
-        int risk = 0;
-        for (String[] s : students) {
-            if (presentsList.contains(s[1])) {
-                int abs = Integer.parseInt(s[4]);
-                double avg = Double.parseDouble(s[3]);
-                if (s[2].toLowerCase().contains("risque") || abs >= 3 || avg < 11.0) {
-                    risk++;
-                }
-            }
-        }
-        double coverage = total > 0 ? (double) present / total : 0.0;
-        if (lblKpiPresentCount != null) lblKpiPresentCount.setText(present + " / " + total);
-        if (lblKpiRiskCount != null) lblKpiRiskCount.setText(String.valueOf(risk));
-        if (progressCoverage != null) progressCoverage.setProgress(coverage);
-        if (lblCoveragePct != null) lblCoveragePct.setText(String.format("%.0f%%", coverage * 100));
-
-        if (lblOperationalHint != null) {
-            if (present < 3) {
-                lblOperationalHint.setText("Ajoutez encore " + (3 - present) + " badge(s) pour un clustering plus fiable.");
-            } else if (risk >= 2) {
-                lblOperationalHint.setText("Priorité: créez un groupe de remédiation ciblé et un point individuel de 10 min pour chaque étudiant à risque.");
-            } else {
-                lblOperationalHint.setText("Répartition équilibrée: lancez une activité collaborative de 15 min puis mesurez progrès/participation en fin de séance.");
-            }
         }
     }
 }

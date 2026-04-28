@@ -1,46 +1,10 @@
 package edu.connection3a36.services;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Fournit des données simulées (mockées) pour enrichir le contexte de l'IA
  * concernant les étudiants et scénarios pédagogiques.
  */
 public class MockDataService {
-
-    private static final String[][] STUDENTS = {
-            {"101", "Amine Ben Ali", "Excellent", "18.5", "0", "Très engagé, participe activement. Aide souvent ses camarades."},
-            {"102", "Sarah Trabelsi", "À risque (Décrochage)", "9.2", "5", "Baisse brutale de notes depuis 1 mois. Semble isolée."},
-            {"103", "Youssef Gharbi", "Difficultés d'attention", "11.5", "1", "Perturbateur en classe mais montre de bonnes capacités pratiques."},
-            {"104", "Mariem Jlassi", "Dyslexique", "13.0", "2", "Temps supplémentaire nécessaire aux examens. Très créative."},
-            {"105", "Ahmed Khelil", "Moyen", "12.5", "0", "Discret, régulier. A besoin d'encouragement pour participer."},
-            {"106", "Nour Hentati", "Excellente (Technique)", "16.0", "1", "Brillante en programmation, difficultés mineures en communication/soft skills."},
-            {"107", "Rayen Khemiri", "À risque (Absentéisme)", "8.5", "8", "Ne vient souvent pas aux TD du matin. Doit être convoqué."},
-            {"108", "Eya Rekik", "Performante", "15.2", "0", "Déléguée de classe, très responsable."},
-            {"109", "Mehdi Bouaziz", "Irrégulier", "10.8", "3", "De très bonnes notes suivies de très mauvaises. Manque de méthode de travail."},
-            {"110", "Farah Mansour", "En progression", "14.1", "0", "Était en difficulté en début d'année, forte amélioration suite au dernier plan d'action."}
-    };
-
-    public static List<String[]> getStudentProfiles() {
-        List<String[]> list = new ArrayList<>();
-        for (String[] student : STUDENTS) {
-            list.add(student.clone());
-        }
-        return list;
-    }
-
-    public static List<String[]> getAtRiskStudentProfiles() {
-        List<String[]> list = new ArrayList<>();
-        for (String[] s : STUDENTS) {
-            int absences = Integer.parseInt(s[4]);
-            double moyenne = Double.parseDouble(s[3]);
-            if (s[2].toLowerCase().contains("risque") || absences >= 3 || moyenne < 11.0) {
-                list.add(s.clone());
-            }
-        }
-        return list;
-    }
 
     /**
      * Retourne un contexte détaillé sur 10 étudiants types de la classe 3A36.
