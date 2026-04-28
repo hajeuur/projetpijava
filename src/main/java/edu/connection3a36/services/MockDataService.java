@@ -30,4 +30,23 @@ public class MockDataService {
         suggère un plan d'action de remédiation immédiat impliquant l'enseignant, la psychologue de l'école et les parents.
         """;
     }
+
+    /**
+     * Retourne une liste de profils étudiants sous forme de tableau.
+     * Format: [ID, Nom, Statut, Moyenne, Absences, Profil]
+     */
+    public static java.util.List<String[]> getStudentProfiles() {
+        return java.util.Arrays.asList(
+            new String[]{"101", "Amine Ben Ali", "Excellent", "18.5", "0", "Très engagé, participe activement"},
+            new String[]{"102", "Sarah Trabelsi", "À risque (Décrochage)", "09.2", "5", "Baisse brutale de notes depuis 1 mois"},
+            new String[]{"103", "Youssef Gharbi", "Difficultés d'attention", "11.5", "1", "Perturbateur mais bonnes capacités pratiques"},
+            new String[]{"104", "Mariem Jlassi", "Dyslexique", "13.0", "2", "Temps supplémentaire nécessaire. Très créative"},
+            new String[]{"105", "Ahmed Khelil", "Moyen", "12.5", "0", "Discret, régulier. Besoin d'encouragement"},
+            new String[]{"106", "Nour Hentati", "Excellente (Technique)", "16.0", "1", "Brillante en programmation"},
+            new String[]{"107", "Rayen Khemiri", "À risque (Absentéisme)", "08.5", "8", "Ne vient pas aux TD du matin"},
+            new String[]{"108", "Eya Rekik", "Performante", "15.2", "0", "Déléguée de classe, très responsable"},
+            new String[]{"109", "Mehdi Bouaziz", "Irrégulier", "10.8", "3", "Notes très variables. Manque de méthode"},
+            new String[]{"110", "Farah Mansour", "En progression", "14.1", "0", "Forte amélioration récente"}
+        );
+    }
 }
