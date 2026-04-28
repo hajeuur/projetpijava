@@ -4,6 +4,7 @@ import com.mentorai.models.Feedback;
 import com.mentorai.models.Traitement;
 import com.mentorai.services.FeedbackService;
 import com.mentorai.services.TraitementService;
+import com.mentorai.services.PrioriteService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,6 +25,7 @@ public class MesFeedbacksController implements Initializable {
 
     @FXML private TableView<Feedback> tableFeedbacks;
     @FXML private TableColumn<Feedback, Integer> colId;
+    @FXML private TableColumn<Feedback, Void>    colPriorite;
     @FXML private TableColumn<Feedback, String>  colType;
     @FXML private TableColumn<Feedback, String>  colDate;
     @FXML private TableColumn<Feedback, Integer> colNote;
@@ -41,6 +43,7 @@ public class MesFeedbacksController implements Initializable {
 
     private FeedbackService feedbackService = new FeedbackService();
     private TraitementService traitementService = new TraitementService();
+    private PrioriteService prioriteService = new PrioriteService();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -74,6 +77,28 @@ public class MesFeedbacksController implements Initializable {
 
     private void configurerColonnes() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        
+        // ===== PRIORITÉ badge =====
+        colPriorite.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getIndex() >= getTableView().getItems().size()) {
+                    setGraphic(null);
+                    return;
+                }
+                Feedback f = getTableView().getItems().get(getIndex());
+                String priorite = prioriteService.calculerPriorite(f);
+                String couleur = prioriteService.getCouleurPriorite(priorite);
+                Label badge = new Label(priorite);
+                badge.setStyle("-fx-background-color: " + couleur + "; -fx-text-fill: white;" +
+                        "-fx-padding: 3 8 3 8; -fx-background-radius: 10;" +
+                        "-fx-font-size: 11px; -fx-font-weight: bold;");
+                setGraphic(badge);
+                setText(null);
+            }
+        });
+        
         colDate.setCellValueFactory(new PropertyValueFactory<>("datefeedback"));
         colNote.setCellValueFactory(new PropertyValueFactory<>("note"));
         colMessage.setCellValueFactory(new PropertyValueFactory<>("contenu"));
