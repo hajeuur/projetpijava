@@ -59,6 +59,12 @@ public class MesFeedbacksController implements Initializable {
         
         // ✅ CHARGER LES DONNÉES
         chargerDonnees();
+        
+        // ✅ RECHERCHE DYNAMIQUE (temps réel)
+        champRecherche.textProperty().addListener((obs, old, nouveau) -> filtrer());
+        
+        // ✅ TRI DYNAMIQUE
+        comboTri.valueProperty().addListener((obs, old, nouveau) -> filtrer());
     }
 
     public void setUtilisateurId(int id) {
