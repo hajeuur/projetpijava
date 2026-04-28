@@ -54,7 +54,7 @@ public class AIDecisionnelController {
     private String lastAIResponse = "";
 
     // Historique persistant
-    private static final List<String[]> chatHistory = new ArrayList<>();
+    private static final Map<Integer, List<String[]>> chatHistoryByUser = new HashMap<>();
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("dd/MM HH:mm");
 
     @FXML
@@ -94,7 +94,7 @@ public class AIDecisionnelController {
                 aiMsg.put("content", response);
                 conversationHistory.add(aiMsg);
 
-                chatHistory.add(new String[]{
+                getCurrentUserHistory().add(new String[]{
                         LocalDateTime.now().format(TIME_FMT),
                         finalMessage,
                         response
@@ -362,7 +362,8 @@ public class AIDecisionnelController {
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #102c59;");
         root.getChildren().add(title);
 
-        if (chatHistory.isEmpty()) {
+        List<String[]> userHistory = new ArrayList<>(getCurrentUserHistory());
+        if (userHistory.isEmpty()) {
             root.getChildren().add(new Label("Aucune conversation en mémoire.") {{
                 setStyle("-fx-text-fill: #7a8fa5; -fx-font-style: italic;");
             }});
@@ -374,7 +375,7 @@ public class AIDecisionnelController {
             VBox histList = new VBox(10);
             histList.setPadding(new Insets(5));
 
-            List<String[]> reversed = new ArrayList<>(chatHistory);
+            List<String[]> reversed = new ArrayList<>(userHistory);
             Collections.reverse(reversed);
 
             for (String[] entry : reversed) {
@@ -555,5 +556,10 @@ public class AIDecisionnelController {
 
     private void scrollToBottom() {
         Platform.runLater(() -> chatScroll.setVvalue(1.0));
+    }
+
+    private List<String[]> getCurrentUserHistory() {
+        int uid = SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getId() : -1;
+        return chatHistoryByUser.computeIfAbsent(uid, k -> new ArrayList<>());
     }
 }
