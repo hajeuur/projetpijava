@@ -83,9 +83,21 @@
             <VBox fx:id="vboxChat" spacing="8" style="-fx-padding: 10;"/>
         </ScrollPane>
 
-        <HBox spacing="5" style="-fx-padding: 10;">
-            <TextField fx:id="txtChatInput" HBox.hgrow="ALWAYS" promptText="Question..."/>
-            <Button onAction="#envoyerMessage" text="🚀" />
+        <HBox spacing="5" alignment="CENTER_LEFT" style="-fx-padding: 10;">
+            <Button fx:id="btnMic" onAction="#handleMicAction" 
+                    style="-fx-background-color: #f1f5f9; -fx-background-radius: 50; -fx-min-width: 35; -fx-min-height: 35; -fx-cursor: hand;">
+                <graphic>
+                    <StackPane>
+                        <javafx.scene.shape.SVGPath fx:id="micIcon" 
+                                content="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8" 
+                                fill="#64748b" stroke="#64748b" strokeWidth="1" scaleX="0.8" scaleY="0.8"/>
+                    </StackPane>
+                </graphic>
+            </Button>
+            <TextField fx:id="txtChatInput" HBox.hgrow="ALWAYS" promptText="Question..." 
+                       style="-fx-background-radius: 15; -fx-padding: 5 10;"/>
+            <Button onAction="#envoyerMessage" text="🚀" 
+                    style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 50; -fx-min-width: 35; -fx-min-height: 35; -fx-cursor: hand;"/>
         </HBox>
     </VBox>
 

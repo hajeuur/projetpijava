@@ -3,6 +3,7 @@ package edu.connection3a36.Controller;
 import edu.connection3a36.entities.Parcours;
 import edu.connection3a36.entities.Projet;
 import edu.connection3a36.services.ProjetService;
+import edu.connection3a36.services.VoiceRecorderService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -52,6 +53,10 @@ public class AjouterProjetController implements Initializable {
     @FXML private TextField txtChatInput;
     @FXML private ScrollPane scrollChat;
     @FXML private Button btnFloatingChat;
+    @FXML private Button btnMic;
+    @FXML private javafx.scene.shape.SVGPath micIcon;
+
+    private final VoiceRecorderService voiceService = new VoiceRecorderService();
 
     @FXML
     private void toggleChat() {
@@ -60,6 +65,40 @@ public class AjouterProjetController implements Initializable {
         paneChat.setManaged(!isVisible);
         if (!isVisible) {
             txtChatInput.requestFocus();
+        }
+    }
+
+    @FXML
+    private void handleMicAction() {
+        if (!voiceService.isRecording()) {
+            voiceService.startRecording();
+            micIcon.setFill(javafx.scene.paint.Color.web("#ef4444"));
+            micIcon.setStroke(javafx.scene.paint.Color.web("#ef4444"));
+            btnMic.setStyle("-fx-background-color: #fee2e2; -fx-background-radius: 50; -fx-min-width: 35; -fx-min-height: 35;");
+            ajouterMessageBot("J'écoute...");
+        } else {
+            micIcon.setFill(javafx.scene.paint.Color.web("#64748b"));
+            micIcon.setStroke(javafx.scene.paint.Color.web("#64748b"));
+            btnMic.setDisable(true);
+            java.io.File audioFile = voiceService.stopRecording();
+
+            if (audioFile != null) {
+                voiceService.transcribe(audioFile).thenAccept(text -> {
+                    javafx.application.Platform.runLater(() -> {
+                        btnMic.setDisable(false);
+                        btnMic.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 50; -fx-min-width: 35; -fx-min-height: 35;");
+                        
+                        if (text != null && !text.startsWith("Erreur")) {
+                            txtChatInput.setText(text);
+                        } else {
+                            ajouterMessageBot("Erreur transcription: " + text);
+                        }
+                    });
+                });
+            } else {
+                btnMic.setDisable(false);
+                btnMic.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 50; -fx-min-width: 35; -fx-min-height: 35;");
+            }
         }
     }
 
