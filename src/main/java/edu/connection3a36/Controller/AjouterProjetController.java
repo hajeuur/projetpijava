@@ -3,6 +3,7 @@ package edu.connection3a36.Controller;
 import edu.connection3a36.entities.Parcours;
 import edu.connection3a36.entities.Projet;
 import edu.connection3a36.services.ProjetService;
+import edu.connection3a36.services.WikipediaService;
 import edu.connection3a36.services.VoiceRecorderService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -152,21 +153,41 @@ public class AjouterProjetController implements Initializable {
             });
     }
 
-    private void ajouterMessageUser(String text) {
-        Label lbl = new Label(text);
-        lbl.setWrapText(true);
-        lbl.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-padding: 10; -fx-background-radius: 15 15 0 15;");
-        HBox container = new HBox(lbl);
-        container.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
-        vboxChat.getChildren().add(container);
-        scrollChat.setVvalue(1.0);
-    }
-
     private void ajouterMessageBot(String text) {
-        Label lbl = new Label(text);
-        lbl.setWrapText(true);
-        lbl.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #1e293b; -fx-padding: 10; -fx-background-radius: 15 15 15 0;");
-        HBox container = new HBox(lbl);
+        javafx.scene.text.TextFlow flow = new javafx.scene.text.TextFlow();
+        flow.setMaxWidth(200);
+        
+        String[] words = text.split("(?<=\\s)|(?=\\s)");
+        for (String word : words) {
+            javafx.scene.text.Text textNode = new javafx.scene.text.Text(word);
+            textNode.setFill(javafx.scene.paint.Color.web("#1e293b"));
+            
+            textNode.setOnMouseClicked(e -> {
+                if (e.isShiftDown()) {
+                    String cleanWord = word.trim().replaceAll("[^a-zA-ZÀ-ÿ0-9]", "");
+                    if (!cleanWord.isEmpty()) {
+                        handleWikiLookup(cleanWord);
+                    }
+                }
+            });
+            
+            textNode.setOnMouseEntered(e -> {
+                if (e.isShiftDown()) {
+                    textNode.setUnderline(true);
+                    textNode.setCursor(javafx.scene.Cursor.HAND);
+                }
+            });
+            textNode.setOnMouseExited(e -> {
+                textNode.setUnderline(false);
+                textNode.setCursor(javafx.scene.Cursor.DEFAULT);
+            });
+
+            flow.getChildren().add(textNode);
+        }
+
+        flow.setStyle("-fx-background-color: #f1f5f9; -fx-padding: 8; -fx-background-radius: 12 12 12 0;");
+        
+        HBox container = new HBox(flow);
         container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         vboxChat.getChildren().add(container);
         scrollChat.setVvalue(1.0);

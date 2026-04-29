@@ -35,9 +35,9 @@
                         <Circle radius="15" fill="#6366f1"/>
                         <Label text="MentorAI" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
                     </HBox>
-                    <Label fx:id="lblQuestion" text="Cliquez sur 'Démarrer l'entretien' pour commencer." 
-                           onMouseClicked="#zoomQuestion" wrapText="true" maxWidth="800" 
-                           style="-fx-font-size: 18px; -fx-text-fill: #1e293b; -fx-line-spacing: 5; -fx-cursor: hand;"/>
+                    <javafx.scene.text.TextFlow fx:id="flowQuestion" 
+                           onMouseClicked="#zoomQuestion" maxWidth="800" 
+                           style="-fx-font-size: 18px; -fx-line-spacing: 5; -fx-cursor: hand;"/>
                 </VBox>
 
                 <!-- User Answer Area -->

@@ -3,6 +3,7 @@ package edu.connection3a36.Controller;
 import edu.connection3a36.entities.Parcours;
 import edu.connection3a36.entities.Projet;
 import edu.connection3a36.services.ProjetService;
+import edu.connection3a36.services.WikipediaService;
 import edu.connection3a36.services.VoiceRecorderService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -184,14 +185,61 @@ public class AfficherProjetsController implements Initializable {
     }
 
     private void ajouterMessageBot(String text) {
-        Label lbl = new Label(text);
-        lbl.setWrapText(true);
-        lbl.setStyle(
-                "-fx-background-color: #f1f5f9; -fx-text-fill: #1e293b; -fx-padding: 10; -fx-background-radius: 15 15 15 0;");
-        HBox container = new HBox(lbl);
+        javafx.scene.text.TextFlow flow = new javafx.scene.text.TextFlow();
+        flow.setMaxWidth(300); // Pour forcer le wrap dans le VBox
+        
+        String[] words = text.split("(?<=\\s)|(?=\\s)"); // Garde les espaces
+        for (String word : words) {
+            javafx.scene.text.Text textNode = new javafx.scene.text.Text(word);
+            textNode.setFill(javafx.scene.paint.Color.web("#1e293b"));
+            
+            textNode.setOnMouseClicked(e -> {
+                if (e.isShiftDown()) {
+                    String cleanWord = word.trim().replaceAll("[^a-zA-ZÀ-ÿ0-9]", "");
+                    if (!cleanWord.isEmpty()) {
+                        handleWikiLookup(cleanWord);
+                    }
+                }
+            });
+            
+            // Indiquer que c'est interactif si Shift est pressé
+            textNode.setOnMouseEntered(e -> {
+                if (e.isShiftDown()) {
+                    textNode.setUnderline(true);
+                    textNode.setCursor(javafx.scene.Cursor.HAND);
+                }
+            });
+            textNode.setOnMouseExited(e -> {
+                textNode.setUnderline(false);
+                textNode.setCursor(javafx.scene.Cursor.DEFAULT);
+            });
+
+            flow.getChildren().add(textNode);
+        }
+
+        flow.setStyle("-fx-background-color: #f1f5f9; -fx-padding: 10; -fx-background-radius: 15 15 15 0;");
+        
+        HBox container = new HBox(flow);
         container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         vboxChat.getChildren().add(container);
         scrollChat.setVvalue(1.0);
+    }
+
+    private void handleWikiLookup(String word) {
+        WikipediaService.getSummary(word).thenAccept(summary -> {
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Wikipedia : " + word);
+                alert.setHeaderText("Définition de " + word);
+                
+                Label lbl = new Label(summary);
+                lbl.setWrapText(true);
+                lbl.setPrefWidth(400);
+                
+                alert.getDialogPane().setContent(lbl);
+                alert.showAndWait();
+            });
+        });
     }
 
     private void proposerRemplissage(org.json.JSONObject suggestion) {

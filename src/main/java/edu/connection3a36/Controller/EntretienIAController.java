@@ -1,5 +1,6 @@
 package edu.connection3a36.Controller;
 
+import edu.connection3a36.services.WikipediaService;
 import edu.connection3a36.services.GroqService;
 import edu.connection3a36.services.VoiceRecorderService;
 import edu.connection3a36.tools.SessionManager;
@@ -13,6 +14,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -22,7 +25,8 @@ import java.util.ResourceBundle;
 
 public class EntretienIAController implements Initializable {
 
-    @FXML private Label lblStatus, lblQuestion, lblScore, lblFeedback, lblTip, lblLoadingText;
+    @FXML private Label lblStatus, lblScore, lblFeedback, lblTip, lblLoadingText;
+    @FXML private TextFlow flowQuestion;
     @FXML private TextArea txtAnswer;
     @FXML private Button btnStart, btnMic, btnNext;
     @FXML private VBox paneEvaluation, paneLoading;
@@ -62,7 +66,7 @@ public class EntretienIAController implements Initializable {
             Platform.runLater(() -> {
                 hideLoading();
                 currentQuestion = question;
-                lblQuestion.setText(question);
+                updateQuestionFlow(question);
                 lblStatus.setText("Question " + questionCount);
                 txtAnswer.clear();
                 paneEvaluation.setVisible(false);
@@ -70,6 +74,53 @@ public class EntretienIAController implements Initializable {
                 btnNext.setVisible(false);
                 btnNext.setManaged(false);
                 btnMic.setDisable(false);
+            });
+        });
+    }
+
+    private void updateQuestionFlow(String text) {
+        flowQuestion.getChildren().clear();
+        String[] words = text.split("(?<=\\s)|(?=\\s)");
+        for (String word : words) {
+            Text textNode = new Text(word);
+            textNode.setFill(Color.web("#1e293b"));
+            textNode.setStyle("-fx-font-size: 18px;");
+
+            textNode.setOnMouseClicked(e -> {
+                if (e.isShiftDown()) {
+                    String cleanWord = word.trim().replaceAll("[^a-zA-ZÀ-ÿ0-9]", "");
+                    if (!cleanWord.isEmpty()) {
+                        handleWikiLookup(cleanWord);
+                    }
+                }
+            });
+
+            textNode.setOnMouseEntered(e -> {
+                if (e.isShiftDown()) {
+                    textNode.setUnderline(true);
+                    textNode.setCursor(javafx.scene.Cursor.HAND);
+                }
+            });
+            textNode.setOnMouseExited(e -> {
+                textNode.setUnderline(false);
+                textNode.setCursor(javafx.scene.Cursor.DEFAULT);
+            });
+
+            flowQuestion.getChildren().add(textNode);
+        }
+    }
+
+    private void handleWikiLookup(String word) {
+        WikipediaService.getSummary(word).thenAccept(summary -> {
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Wikipedia : " + word);
+                alert.setHeaderText("Définition de " + word);
+                Label lbl = new Label(summary);
+                lbl.setWrapText(true);
+                lbl.setPrefWidth(400);
+                alert.getDialogPane().setContent(lbl);
+                alert.showAndWait();
             });
         });
     }
@@ -162,9 +213,9 @@ public class EntretienIAController implements Initializable {
             Parent view = loader.load();
             
             // On cherche le BorderPane principal pour changer le centre
-            BorderPane mainLayout = (BorderPane) lblQuestion.getScene().lookup("#mainContainer");
+            BorderPane mainLayout = (BorderPane) flowQuestion.getScene().lookup("#mainContainer");
             if (mainLayout == null) {
-                mainLayout = (BorderPane) lblQuestion.getScene().getRoot();
+                mainLayout = (BorderPane) flowQuestion.getScene().getRoot();
             }
             mainLayout.setCenter(view);
         } catch (IOException e) {
