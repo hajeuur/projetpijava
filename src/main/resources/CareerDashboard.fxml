@@ -18,8 +18,12 @@
                 <Label text="📊 Dashboard de Carrière IA" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
                 <Label text="Analyse prédictive basée sur vos projets et compétences réelles." style="-fx-text-fill: #64748b; -fx-font-size: 14px;"/>
             </VBox>
-            <Button text="🔃 Analyser à nouveau" onAction="#refreshAnalysis"
-                    style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;"/>
+            <HBox spacing="10">
+                <Button text="🎙️ Entraînement Interview" onAction="#ouvrirEntretien"
+                        style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <Button text="🔃 Analyser à nouveau" onAction="#refreshAnalysis"
+                        style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;"/>
+            </HBox>
         </HBox>
 
         <Separator/>

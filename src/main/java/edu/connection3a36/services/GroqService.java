@@ -54,4 +54,45 @@ public class GroqService {
                                 })
                                 .exceptionally(ex -> "Erreur de connexion : " + ex.getMessage());
         }
+
+        public static CompletableFuture<String> getInterviewQuestion(String userContext) {
+                String prompt = "Tu es un recruteur expert. Génère UNE seule question d'entretien d'embauche technique ou comportementale "
+                                + "pour un profil ayant le contexte suivant : " + userContext + ". "
+                                + "La question doit être directe, professionnelle et stimulante. Ne réponds QUE par la question.";
+                return getResponse(prompt, false);
+        }
+
+        public static CompletableFuture<String> evaluateAnswer(String question, String answer) {
+                String prompt = "En tant que recruteur expert, évalue la réponse suivante à la question : '" + question + "'. "
+                                + "Réponse de l'utilisateur : '" + answer + "'. "
+                                + "Fournis une évaluation structurée en JSON comme ceci : "
+                                + "{\"score\": 8, \"feedback\": \"...\", \"tip\": \"...\"}. "
+                                + "Le score est sur 10. Le feedback doit être constructif. Le tip est un conseil court.";
+                
+                HttpClient client = HttpClient.newHttpClient();
+                JSONObject requestBody = new JSONObject();
+                requestBody.put("model", "llama-3.3-70b-versatile");
+                requestBody.put("response_format", new JSONObject().put("type", "json_object"));
+
+                JSONArray messages = new JSONArray();
+                messages.put(new JSONObject().put("role", "system").put("content", "Tu es un expert en recrutement qui répond uniquement en JSON."));
+                messages.put(new JSONObject().put("role", "user").put("content", prompt));
+                requestBody.put("messages", messages);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                                .uri(URI.create(API_URL))
+                                .header("Content-Type", "application/json")
+                                .header("Authorization", "Bearer " + API_KEY)
+                                .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
+                                .build();
+
+                return client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                                .thenApply(response -> {
+                                        if (response.statusCode() == 200) {
+                                                return new JSONObject(response.body()).getJSONArray("choices")
+                                                                .getJSONObject(0).getJSONObject("message").getString("content");
+                                        }
+                                        return "{\"score\": 0, \"feedback\": \"Erreur API\", \"tip\": \"\"}";
+                                });
+        }
 }

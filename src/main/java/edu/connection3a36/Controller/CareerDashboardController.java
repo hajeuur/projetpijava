@@ -18,7 +18,29 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.layout.BorderPane;
+import java.io.IOException;
+
 public class CareerDashboardController implements Initializable {
+
+    @FXML
+    private void ouvrirEntretien() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/EntretienIA.fxml"));
+            Parent view = loader.load();
+            
+            BorderPane mainLayout = (BorderPane) lblTopJob.getScene().lookup("#mainContainer");
+            if (mainLayout == null) {
+                mainLayout = (BorderPane) lblTopJob.getScene().getRoot();
+            }
+            mainLayout.setCenter(view);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @FXML private Label lblTopJob, lblTopScore, lblSalary, lblDemand;
     @FXML private VBox vboxPredictions, paneLoading;
