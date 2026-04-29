@@ -66,7 +66,7 @@
                             onAction="#showProjets" styleClass="header-nav-btn" visible="false" managed="false"/>
                             
                     <!-- Games Hub (Point #7) -->
-                    <Button fx:id="btnGamesHub" text="🎮 Hub Accessibilité"
+                    <Button fx:id="btnGamesHub" text="🧩 Hub Intervention"
                             onAction="#showGamesHub" styleClass="header-nav-btn" />
 
                     <!-- Preferences -->
@@ -144,10 +144,6 @@
                 <Separator/>
                 <Separator/>
                 <Label text="BACK CRUD" styleClass="sidebar-section"/>
-                <Button fx:id="btnBackParcours" text="Gestion des Parcours" onAction="#showBackParcours"
-                        styleClass="sidebar-btn" maxWidth="Infinity"/>
-                <Button fx:id="btnBackProjets" text="Gestion des Projets" onAction="#showBackProjets"
-                        styleClass="sidebar-btn" maxWidth="Infinity"/>
                 <Button fx:id="btnIoT" text="IoT &amp; Présences" onAction="#showIoT"
                         styleClass="sidebar-btn" maxWidth="Infinity"/>
                 <Button fx:id="btnAtRisk" text="🚨 Étudiant à Risque" onAction="#showAtRisk"
@@ -158,6 +154,12 @@
                         styleClass="sidebar-btn" maxWidth="Infinity"/>
                 <Button fx:id="btnCategories" text="Catégories d'Articles"
                         onAction="#showCategories" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnBackParcours" text="🎓 Gestion Parcours"
+                        onAction="#showBackParcours" styleClass="sidebar-btn" maxWidth="Infinity"
+                        visible="false" managed="false"/>
+                <Button fx:id="btnBackProjets" text="📂 Gestion Projets"
+                        onAction="#showBackProjets" styleClass="sidebar-btn" maxWidth="Infinity"
+                        visible="false" managed="false"/>
             </VBox>
 
             <!-- Spacer -->

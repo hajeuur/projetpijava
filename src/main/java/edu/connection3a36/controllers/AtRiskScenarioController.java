@@ -2,17 +2,22 @@ package edu.connection3a36.controllers;
 
 import edu.connection3a36.enums.CategorieSortie;
 import edu.connection3a36.enums.Statut;
+import edu.connection3a36.services.EmailService;
 import edu.connection3a36.services.GroqService;
 import edu.connection3a36.services.MockDataService;
 import edu.connection3a36.services.NotificationService;
 import edu.connection3a36.services.PlanActionsService;
 import edu.connection3a36.tools.AlertUtil;
+import edu.connection3a36.tools.AIJsonParser;
+import edu.connection3a36.tools.AIJsonSchemas;
 import edu.connection3a36.tools.MarkdownRenderer;
 import edu.connection3a36.tools.SessionManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+
+import java.util.List;
 
 /**
  * Scénario guidé : Étudiant à risque → Analyse IA → Plan personnalisé → Suivi
@@ -31,34 +36,32 @@ public class AtRiskScenarioController {
     private final GroqService groq = new GroqService();
     private final PlanActionsService planService = new PlanActionsService();
     private final NotificationService notifService = new NotificationService();
+    private final EmailService emailService = new EmailService();
 
     private String lastAiAnalysis = "";
     private String selectedStudentKey = "";
 
-    // Mock student profiles with risk indicators
-    private static final String[][] STUDENTS = {
-        {"Sarah Trabelsi (ID:102)", "À RISQUE", "Moyenne: 9.2 | Absences: 5 | Baisse brutale des notes depuis 1 mois | Semble isolée"},
-        {"Rayen Khemiri (ID:107)", "À RISQUE", "Moyenne: 8.5 | Absences: 8 | Absentéisme chronique le matin | Convocation nécessaire"},
-        {"Mehdi Bouaziz (ID:109)", "IRRÉGULIER", "Moyenne: 10.8 | Absences: 3 | Notes très fluctuantes | Manque de méthode"},
-        {"Youssef Gharbi (ID:103)", "ATTENTION", "Moyenne: 11.5 | Absences: 1 | Perturbateur mais capacités pratiques réelles"},
-        {"Ahmed Khelil (ID:105)", "SUIVI", "Moyenne: 12.5 | Absences: 0 | Discret, besoin d'encouragement"},
-    };
+    private List<String[]> students;
 
     @FXML public void initialize() {
-        for (String[] s : STUDENTS) comboStudent.getItems().add(s[0]);
+        students = MockDataService.getStudentProfiles();
+        for (String[] s : students) {
+            comboStudent.getItems().add(s[1] + " (ID:" + s[0] + ")");
+        }
         comboStudent.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> onStudentSelected(newV));
-        lblStep.setText("Étape 1 : Sélectionnez un étudiant à risque");
+        lblStep.setText("Étape 1 : Sélectionnez un étudiant à risque (mock 10 profils)");
         progressScenario.setProgress(0.0);
     }
 
     private void onStudentSelected(String name) {
-        for (String[] s : STUDENTS) {
-            if (s[0].equals(name)) {
-                selectedStudentKey = s[0];
+        for (String[] s : students) {
+            String display = s[1] + " (ID:" + s[0] + ")";
+            if (display.equals(name)) {
+                selectedStudentKey = display;
                 lblStudentProfile.setText(
-                    "🚨 Statut : " + s[1] + "\n📊 Indicateurs : " + s[2]
+                    "🚨 Statut : " + s[2] + "\n📊 Indicateurs : Moyenne: " + s[3] + " | Absences: " + s[4] + " | " + s[5]
                 );
-                lblStudentProfile.setStyle("-fx-text-fill: " + (s[1].contains("RISQUE") ? "#dc2626" : "#d97706") + "; -fx-font-size: 13px;");
+                lblStudentProfile.setStyle("-fx-text-fill: " + (s[2].toUpperCase().contains("RISQUE") ? "#dc2626" : "#d97706") + "; -fx-font-size: 13px;");
                 boxAnalysis.getChildren().clear();
                 boxPlanResult.getChildren().clear();
                 lastAiAnalysis = "";
@@ -87,8 +90,15 @@ public class AtRiskScenarioController {
                 String prompt = "Effectue une analyse pédagogique détaillée pour l'étudiant suivant :\n"
                     + selectedStudentKey + "\n"
                     + MockDataService.getEtudiants3A36Context()
-                    + "\n\nFournis :\n1. Diagnostic des causes probables\n2. Risques identifiés\n3. Recommandations pédagogiques immédiates\n4. Plan d'action suggéré (décision + description)\nFormat Markdown.";
-                lastAiAnalysis = groq.sendSimpleMessage(prompt, "ADMIN");
+                    + "\n\nContrainte scénario: Étudiant à risque → Analyse IA → Plan personnalisé → Suivi."
+                    + "\nFournis :\n1. Diagnostic des causes probables\n2. Risques identifiés\n3. Recommandations pédagogiques immédiates\n4. Plan d'action suggéré (décision + description)\n5. KPIs de suivi hebdomadaire\nFormat Markdown.";
+                String raw = groq.sendSimpleJsonMessage(prompt, "ADMIN", AIJsonSchemas.ANALYSIS);
+                org.json.JSONObject json = AIJsonParser.extractFirstJsonObject(raw);
+                lastAiAnalysis = json != null
+                        ? "## Resume executif\n" + json.optString("resume_executif", "")
+                        + "\n\n## Points forts\n" + json.optString("points_forts", "")
+                        + "\n\n## Axes d'amelioration\n" + json.optString("axes_amelioration", "")
+                        : raw;
                 Platform.runLater(() -> {
                     boxAnalysis.getChildren().clear();
                     MarkdownRenderer.render(lastAiAnalysis, boxAnalysis);
@@ -136,6 +146,25 @@ public class AtRiskScenarioController {
                     "Plan IA créé pour " + selectedStudentKey + " (ID: " + plan.getId() + ")",
                     "SUCCESS"
                 );
+
+                // ── Envoi email alerte at-risk ────────────────────────────────
+                new Thread(() -> {
+                    try {
+                        edu.connection3a36.entities.Utilisateur currentUser = SessionManager.getCurrentUser();
+                        if (currentUser != null && currentUser.getEmail() != null && !currentUser.getEmail().isBlank()) {
+                            emailService.sendAtRiskAlert(
+                                currentUser.getEmail(),
+                                currentUser.getPrenom() + " " + currentUser.getNom(),
+                                selectedStudentKey,
+                                lastAiAnalysis.length() > 500 ? lastAiAnalysis.substring(0, 500) + "..." : lastAiAnalysis
+                            );
+                            System.out.println("✅ Email alerte at-risk envoyé à " + currentUser.getEmail());
+                        }
+                    } catch (Exception e) {
+                        System.err.println("⚠️ Email at-risk non envoyé: " + e.getMessage());
+                    }
+                }).start();
+                // ─────────────────────────────────────────────────────────────
 
                 Platform.runLater(() -> {
                     boxPlanResult.getChildren().clear();

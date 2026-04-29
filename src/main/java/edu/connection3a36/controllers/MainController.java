@@ -1,6 +1,8 @@
 package edu.connection3a36.controllers;
 
 import edu.connection3a36.entities.Utilisateur;
+import edu.connection3a36.services.AccessControlService;
+import edu.connection3a36.services.UserPreferencesService;
 import edu.connection3a36.tools.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -62,6 +64,8 @@ public class MainController {
     private Button activeHeaderBtn;
     private Button activeSidebarBtn;
     private String userRole = "";
+    private final UserPreferencesService prefsService = new UserPreferencesService();
+    private final AccessControlService acl = new AccessControlService();
 
     public static MainController getInstance() {
         return instance;
@@ -86,6 +90,7 @@ public class MainController {
         configureByRole();
         // Charger le badge de notifications en arrière-plan
         updateNotifications();
+        applyGlobalPreferences();
     }
 
     /**
@@ -106,25 +111,22 @@ public class MainController {
             showCategories();
 
         } else if (isAdmin()) {
-            // ADMIN SIMPLE (admin@gmail.com) → Back-Office Parcours/Projets UNIQUEMENT
+            // ADMIN SIMPLE (admin@gmail.com) → Back-Office Parcours + Projets uniquement
             showBackMode();
             hide(boxAdmin);
             show(boxBackAdmin);
             hide(boxSwitcher);
-            
-            // On cache les autres outils dans la section CRUD pour cet admin
+
+            // Cacher tout dans boxBackAdmin sauf Parcours et Projets
             for (javafx.scene.Node n : boxBackAdmin.getChildren()) {
-                if (n instanceof Button) {
-                    Button b = (Button) n;
-                    if (b == btnBackParcours || b == btnBackProjets || b == btnIoT || b == btnAtRisk) show(b);
+                if (n instanceof Button b) {
+                    if (b == btnBackParcours || b == btnBackProjets) show(b);
                     else hide(b);
-                } else if (n instanceof Label) {
-                    show(n); // Garder le titre "BACK CRUD"
                 } else {
-                    hide(n); // Cacher les séparateurs etc
+                    hide(n); // Séparateurs, labels
                 }
             }
-            
+
             showBackParcours();
 
         } else if (isEnseignant()) {
@@ -135,6 +137,7 @@ public class MainController {
             hide(btnAIDecisionnel);
             hide(btnParcours);
             hide(btnProjets);
+            hide(btnGamesHub); // Cacher Hub Intervention
             hide(boxAdmin);
             hide(boxBackAdmin);
             hide(boxSwitcher);
@@ -201,14 +204,14 @@ public class MainController {
             show(btnAIDecisionnel);
             show(btnSwitchBack);
             show(btnNotifications);
-            show(btnGamesHub);
+            hide(btnGamesHub); // Cacher Hub Intervention pour ADMINM
             showDashboardAdmin();
         } else if (isEnseignant()) {
             show(btnDashboardEnseignant);
             show(btnPlanActions);
             show(btnArticles);
             show(btnAIPedagogique);
-            show(btnGamesHub);
+            hide(btnGamesHub); // Cacher Hub Intervention pour enseignant
             showDashboardEnseignant();
         }
     }
@@ -231,7 +234,7 @@ public class MainController {
         }
 
         // Par défaut au switch back
-        if (isAdmin()) showBackParcours();
+        if (isAdmin()) showIoT();
         else showCategories();
     }
 
@@ -253,18 +256,21 @@ public class MainController {
 
     @FXML
     void showDashboardAdmin() {
+        if (!acl.canAccess(AccessControlService.Module.DASHBOARD_ADMIN)) return;
         loadView("/fxml/DashboardAdmin.fxml");
         setActiveBtn(btnDashboardAdmin);
     }
 
     @FXML
     void showDashboardEnseignant() {
+        if (!acl.canAccess(AccessControlService.Module.DASHBOARD_ENSEIGNANT)) return;
         loadView("/fxml/DashboardEnseignant.fxml");
         setActiveBtn(btnDashboardEnseignant);
     }
 
     @FXML
     void showPlanActions() {
+        if (!acl.canAccess(AccessControlService.Module.PLAN_ACTIONS)) return;
         // Vue FRONT = cartes, vue BACK = tableau
         if (frontHeader != null && frontHeader.isVisible()) {
             loadView("/fxml/PlanActionsListFront.fxml");
@@ -276,6 +282,7 @@ public class MainController {
 
     @FXML
     void showArticles() {
+        if (!acl.canAccess(AccessControlService.Module.ARTICLES)) return;
         if (frontHeader != null && frontHeader.isVisible()) {
             loadView("/fxml/ArticleListFront.fxml");
         } else {
@@ -286,6 +293,7 @@ public class MainController {
 
     @FXML
     void showParcours() {
+        if (!acl.canAccess(AccessControlService.Module.PARCOURS_FRONT)) return;
         System.out.println("🎓 Loading Parcours View...");
         loadView("/AfficherParcours.fxml");
         setActiveBtn(btnParcours);
@@ -293,6 +301,7 @@ public class MainController {
 
     @FXML
     void showProjets() {
+        if (!acl.canAccess(AccessControlService.Module.PROJETS_FRONT)) return;
         System.out.println("📂 Loading Projects View...");
         loadView("/AfficherProjetsGlobal.fxml");
         setActiveBtn(btnProjets);
@@ -300,6 +309,7 @@ public class MainController {
 
     @FXML
     void showGamesHub() {
+        if (!acl.canAccess(AccessControlService.Module.GAMES_HUB)) return;
         System.out.println("🎮 Loading Games Hub View...");
         loadView("/fxml/GamesHub.fxml");
         setActiveBtn(btnGamesHub);
@@ -307,6 +317,7 @@ public class MainController {
 
     @FXML
     void showIoT() {
+        if (!acl.canAccess(AccessControlService.Module.IOT)) return;
         System.out.println("📡 Loading IoT View...");
         loadView("/fxml/IoTClustering.fxml");
         setActiveBtn(btnIoT);
@@ -319,6 +330,7 @@ public class MainController {
 
     @FXML
     void showAtRisk() {
+        if (!acl.canAccess(AccessControlService.Module.AT_RISK)) return;
         System.out.println("🚨 Loading At-Risk Scenario...");
         loadView("/fxml/AtRiskScenario.fxml");
         setActiveBtn(btnAtRisk);
@@ -367,36 +379,42 @@ public class MainController {
 
     @FXML
     void showCategories() {
+        if (!acl.canAccess(AccessControlService.Module.CATEGORIES)) return;
         loadView("/fxml/CategorieList.fxml");
         setActiveBtn(btnCategories);
     }
 
     @FXML
     void showUtilisateurs() {
+        if (!acl.canAccess(AccessControlService.Module.UTILISATEURS)) return;
         loadView("/fxml/UtilisateurList.fxml");
         setActiveBtn(btnUtilisateurs);
     }
 
     @FXML
     void showAIPedagogique() {
+        if (!acl.canAccess(AccessControlService.Module.IA_PEDAGOGIQUE)) return;
         loadView("/fxml/AIPedagogique.fxml");
         setActiveBtn(btnAIPedagogique);
     }
 
     @FXML
     void showAIDecisionnel() {
+        if (!acl.canAccess(AccessControlService.Module.IA_DECISIONNELLE)) return;
         loadView("/fxml/AIDecisionnel.fxml");
         setActiveBtn(btnAIDecisionnel);
     }
 
     @FXML
     void showBackParcours() {
+        if (!acl.canAccess(AccessControlService.Module.BACK_PARCOURS)) return;
         loadView("/BackOfficeParcours.fxml");
         setActiveBtn(btnBackParcours);
     }
 
     @FXML
     void showBackProjets() {
+        if (!acl.canAccess(AccessControlService.Module.BACK_PROJETS)) return;
         loadView("/BackOfficeProjets.fxml");
         setActiveBtn(btnBackProjets);
     }
@@ -484,6 +502,7 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent view = loader.load();
             contentArea.getChildren().setAll(view);
+            applyGlobalPreferences();
         } catch (Exception e) {
             System.err.println("❌ Erreur chargement vue: " + fxmlPath);
             e.printStackTrace();
@@ -515,6 +534,12 @@ public class MainController {
 
         errorBox.getChildren().addAll(icon, title, message, detail, retryBtn);
         contentArea.getChildren().setAll(errorBox);
+        applyGlobalPreferences();
+    }
+
+    public void applyGlobalPreferences() {
+        if (contentArea == null || contentArea.getScene() == null || contentArea.getScene().getRoot() == null) return;
+        prefsService.applyToRoot((Parent) contentArea.getScene().getRoot(), prefsService.load());
     }
 
     // ─────────────────────────────────────────────────────────────────────────

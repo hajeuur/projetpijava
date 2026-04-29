@@ -4,9 +4,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="edu.connection3a36.controllers.DashboardAdminController"
-      spacing="16">
+<ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="edu.connection3a36.controllers.DashboardAdminController"
+            fitToWidth="true" style="-fx-background-color:transparent;-fx-border-color:transparent;">
+<content>
+<VBox spacing="16" style="-fx-padding: 0 0 20 0;">
 
     <!-- ===== PAGE HEADER ===== -->
     <HBox styleClass="page-header" alignment="CENTER_LEFT" spacing="15">
@@ -40,6 +42,11 @@
             <Label text="Articles (7j)" styleClass="stat-label"/>
             <Label text="🆕" style="-fx-font-size: 20px; -fx-opacity: 0.5;"/>
         </VBox>
+        <VBox styleClass="stat-card-steel" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="5">
+            <Label fx:id="lblFeedbackCoverage" text="0%" styleClass="stat-number"/>
+            <Label text="Plans avec feedback" styleClass="stat-label"/>
+            <Label text="💬" style="-fx-font-size: 20px; -fx-opacity: 0.5;"/>
+        </VBox>
     </HBox>
 
     <!-- ===== GRAPHIQUES ===== -->
@@ -60,11 +67,12 @@
     </HBox>
 
     <!-- ===== LISTE DES RECENT FEEDBACKS ENSEIGNANTS ===== -->
-    <VBox styleClass="card" spacing="10" VBox.vgrow="ALWAYS">
+    <VBox styleClass="card" spacing="10">
         <Label text="Derniers Feedbacks Enseignants"
                style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #102c59;"/>
         <Separator/>
-        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+        <ScrollPane fitToWidth="true" prefHeight="320"
+                    style="-fx-background-color: transparent; -fx-background: transparent;">
             <VBox fx:id="vboxRecentFeedbacks" spacing="8">
                 <!-- Feedbacks load here -->
             </VBox>
@@ -72,3 +80,5 @@
     </VBox>
 
 </VBox>
+</content>
+</ScrollPane>
