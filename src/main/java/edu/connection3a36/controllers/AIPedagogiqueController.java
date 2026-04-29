@@ -7,6 +7,7 @@ import edu.connection3a36.enums.Statut;
 import edu.connection3a36.services.GroqService;
 import edu.connection3a36.services.PlanActionsService;
 import edu.connection3a36.services.ReferenceArticleService;
+import edu.connection3a36.services.WikipediaService;
 import edu.connection3a36.tools.AlertUtil;
 import edu.connection3a36.tools.MarkdownRenderer;
 import edu.connection3a36.tools.SessionManager;
@@ -46,6 +47,7 @@ public class AIPedagogiqueController {
     private final GroqService            groqService   = new GroqService();
     private final PlanActionsService     planService   = new PlanActionsService();
     private final ReferenceArticleService articleService = new ReferenceArticleService();
+    private final WikipediaService       wikiService    = new WikipediaService();
 
     private final List<Map<String, String>> conversationHistory = new ArrayList<>();
     private String lastAIResponse = "";
@@ -65,6 +67,38 @@ public class AIPedagogiqueController {
                 + "• 📰 Recommander des articles pédagogiques\n"
                 + "• ✍️ Générer des articles automatiquement\n\n"
                 + "Comment puis-je vous aider ?");
+    }
+
+    /**
+     * Recherche Wikipedia pour un mot spécifique (via Shift+Clic).
+     */
+    private void lookupWikipedia(String word) {
+        lblStatus.setText("🔍 Recherche rapide : " + word + "...");
+        new Thread(() -> {
+            try {
+                String summary = wikiService.getSummary(word);
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.initOwner(chatBox.getScene().getWindow());
+                    alert.setTitle("Définition Wikipedia : " + word);
+                    alert.setHeaderText("Notion : " + word);
+                    
+                    // Contenu défilable si le texte est long
+                    TextArea textArea = new TextArea(summary);
+                    textArea.setEditable(false);
+                    textArea.setWrapText(true);
+                    textArea.setPrefHeight(200);
+                    textArea.setPrefWidth(450);
+                    textArea.setStyle("-fx-font-size: 13px;");
+                    
+                    alert.getDialogPane().setContent(textArea);
+                    alert.show();
+                    lblStatus.setText("✅ Définition affichée");
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> lblStatus.setText("❌ Erreur Wiki : " + e.getMessage()));
+            }
+        }).start();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -230,6 +264,43 @@ public class AIPedagogiqueController {
         } catch (SQLException e) {
             AlertUtil.showError("Erreur chargement articles : " + e.getMessage());
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // WIKIPEDIA SEARCH
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @FXML
+    void handleWikipediaSearch() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("🔍 Expliquer une Notion");
+        dialog.setHeaderText("Quelle notion difficile souhaitez-vous expliquer ?");
+        dialog.setContentText("Notion :");
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(notion -> {
+            if (notion.trim().isEmpty()) return;
+
+            lblStatus.setText("🔍 Recherche Wikipedia...");
+            btnSend.setDisable(true);
+
+            new Thread(() -> {
+                try {
+                    String summary = wikiService.getSummary(notion);
+                    Platform.runLater(() -> {
+                        addAIMessage("📚 **Wikipedia : " + notion + "**\n\n" + summary);
+                        lblStatus.setText("✅ Recherche terminée");
+                        btnSend.setDisable(false);
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> {
+                        addAIMessage("❌ Erreur Wikipedia : " + e.getMessage());
+                        lblStatus.setText("❌ Erreur");
+                        btnSend.setDisable(false);
+                    });
+                }
+            }).start();
+        });
     }
 
     // ─────────────────────────────────────────────────────────────────────────

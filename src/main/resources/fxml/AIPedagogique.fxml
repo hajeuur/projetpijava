@@ -24,12 +24,13 @@
     <VBox styleClass="card" spacing="10">
         <Label text="💡 Questions suggérées"
                style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #102c59;"/>
-        <HBox spacing="8">
+        <FlowPane hgap="8" vgap="8">
+            <Button text="🔍 Aide Notion (Wiki)" onAction="#handleWikipediaSearch" styleClass="chip-primary" style="-fx-background-color: #3b82f6; -fx-text-fill: white;"/>
             <Button text="📊 Analyser les performances"    onAction="#handleSuggestion1" styleClass="chip-primary"/>
             <Button text="⚠️ Détecter les risques"         onAction="#handleSuggestion2" styleClass="chip-warning"/>
             <Button text="📋 Plan d'action recommandé"     onAction="#handleSuggestion3" styleClass="chip-success"/>
             <Button text="📚 Voir articles recommandés"    onAction="#handleRecommendArticles" styleClass="chip-steel"/>
-        </HBox>
+        </FlowPane>
     </VBox>
 
     <!-- ===== ZONE DE CHAT ===== -->
@@ -48,9 +49,11 @@
                 styleClass="chip-steel" style="-fx-font-size: 12px;"/>
     </HBox>
 
-    <!-- ===== BARRE D'ENVOI ===== -->
-    <HBox styleClass="chat-input-area" spacing="10" alignment="CENTER_LEFT">
-        <TextField fx:id="inputField"
+            <!-- Barre d'envoi -->
+            <HBox styleClass="chat-input-area" spacing="10" alignment="CENTER_LEFT">
+                <Button text="❓ WIKI" onAction="#handleWikipediaSearch"
+                        style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10;"/>
+                <TextField fx:id="inputField"
                    promptText="✏️  Posez une question pédagogique..."
                    HBox.hgrow="ALWAYS" styleClass="search-bar" onAction="#handleSend"
                    style="-fx-padding: 11 15; -fx-border-width: 0; -fx-background-radius: 10;"/>

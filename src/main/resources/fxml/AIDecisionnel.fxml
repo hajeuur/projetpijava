@@ -43,11 +43,12 @@
             <VBox styleClass="card" spacing="10">
                 <Label text="Suggestions de discussion"
                        style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #102c59;"/>
-                <HBox spacing="8">
+                <FlowPane hgap="8" vgap="8">
+                    <Button text="🔍 Aide Notion (Wiki)" onAction="#handleWikipediaSearch" styleClass="chip-primary" style="-fx-background-color: #3b82f6; -fx-text-fill: white;"/>
                     <Button text="Situation globale" onAction="#handleSuggestion1" styleClass="chip-primary"/>
                     <Button text="Détecter pbs" onAction="#handleSuggestion2" styleClass="chip-danger"/>
                     <Button text="Plan stratégique" onAction="#handleSuggestion3" styleClass="chip-steel"/>
-                </HBox>
+                </FlowPane>
             </VBox>
 
             <!-- Zone de chat -->

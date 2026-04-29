@@ -97,6 +97,8 @@
                         </StackPane>
                         <Label fx:id="lblUser" text="Utilisateur" styleClass="header-user-label" style="-fx-font-weight: bold; -fx-text-fill: white;"/>
                     </HBox>
+                    <Button text="❓ Aide Wiki" onAction="#handleGlobalWikiHelp"
+                            style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 15; -fx-font-weight: bold; -fx-cursor: hand;"/>
                     <Button text="Déconnexion" onAction="#handleLogout"
                             styleClass="header-logout-btn"/>
                 </HBox>

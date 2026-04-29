@@ -7,13 +7,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.Priority;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
+import java.util.Optional;
 
 import java.io.IOException;
 
@@ -408,6 +404,49 @@ public class MainController {
     // ─────────────────────────────────────────────────────────────────────────
     // DÉCONNEXION
     // ─────────────────────────────────────────────────────────────────────────
+
+    @FXML
+    void handleGlobalWikiHelp() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Aide Wikipedia MentorAI");
+        dialog.setHeaderText("Quelle notion souhaitez-vous expliquer ?");
+        dialog.setContentText("Notion :");
+        dialog.initOwner(contentArea.getScene().getWindow());
+
+        Optional<String> result = Optional.ofNullable(dialog.showAndWait().orElse(null));
+        result.ifPresent(notion -> {
+            if (notion.isEmpty()) return;
+            
+            new Thread(() -> {
+                try {
+                    edu.connection3a36.services.WikipediaService wiki = new edu.connection3a36.services.WikipediaService();
+                    String summary = wiki.getSummary(notion);
+                    javafx.application.Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.initOwner(contentArea.getScene().getWindow());
+                        alert.setTitle("Définition Wikipedia : " + notion);
+                        alert.setHeaderText("Notion : " + notion);
+                        
+                        TextArea textArea = new TextArea(summary);
+                        textArea.setEditable(false);
+                        textArea.setWrapText(true);
+                        textArea.setPrefHeight(250);
+                        textArea.setPrefWidth(480);
+                        textArea.setStyle("-fx-font-size: 13px;");
+                        
+                        alert.getDialogPane().setContent(textArea);
+                        alert.show();
+                    });
+                } catch (Exception e) {
+                    javafx.application.Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setContentText("Impossible de trouver la définition pour : " + notion);
+                        alert.show();
+                    });
+                }
+            }).start();
+        });
+    }
 
     @FXML
     public void handleLogout() {

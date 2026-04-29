@@ -1,6 +1,8 @@
 package edu.connection3a36.controllers;
 
+import edu.connection3a36.services.WikipediaService;
 import edu.connection3a36.tools.AlertUtil;
+import edu.connection3a36.tools.MarkdownRenderer;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -22,8 +24,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class GamesHubController {
 
     // ── Tab buttons ───────────────────────────────────────────────
-    @FXML private Button tab1,tab2,tab3,tab4,tab5,tab6;
-    @FXML private VBox pane1,pane2,pane3,pane4,pane5,pane6;
+    @FXML private Button tab1,tab2,tab3,tab4,tab5,tab6,tab7;
+    @FXML private VBox pane1,pane2,pane3,pane4,pane5,pane6,pane7;
+
+    // ── Tab 7 : Wikipedia ─────────────────────────────────────────
+    @FXML private TextField txtWikiSearch;
+    @FXML private Label lblWikiTitle;
+    @FXML private VBox wikiContentArea;
+
+    private final WikipediaService wikiService = new WikipediaService();
 
     // ── Tab 1 : Breathing ─────────────────────────────────────────
     @FXML private Circle breathingCircle;
@@ -97,6 +106,15 @@ public class GamesHubController {
     @FXML public void initialize() {
         showPane(pane1); updateTimerLabels();
         updateSoundUI(); updatePomodoroDots();
+        
+        // Configuration du Shift+Clic sur les mots (Wikipedia Lookup)
+        MarkdownRenderer.lookupAction = this::handleWikiSearchDirect;
+    }
+
+    /** Version directe de recherche pour le Shift+Clic */
+    private void handleWikiSearchDirect(String word) {
+        txtWikiSearch.setText(word);
+        handleWikiSearch();
     }
 
     // ── TABS ──────────────────────────────────────────────────────
@@ -106,9 +124,10 @@ public class GamesHubController {
     @FXML void showTab4() { showPane(pane4); activateTab(tab4); }
     @FXML void showTab5() { showPane(pane5); activateTab(tab5); }
     @FXML void showTab6() { showPane(pane6); activateTab(tab6); }
+    @FXML void showTab7() { showPane(pane7); activateTab(tab7); }
 
     private void showPane(VBox active) {
-        for (VBox p : new VBox[]{pane1,pane2,pane3,pane4,pane5,pane6}) {
+        for (VBox p : new VBox[]{pane1,pane2,pane3,pane4,pane5,pane6,pane7}) {
             if (p != null) {
                 p.setVisible(p == active); p.setManaged(p == active);
             }
@@ -117,7 +136,7 @@ public class GamesHubController {
     private void activateTab(Button active) {
         String on  = "-fx-background-color:#3b82f6;-fx-text-fill:white;-fx-background-radius:20;-fx-padding:6 16;-fx-cursor:hand;";
         String off = "-fx-background-color:#e2e8f0;-fx-background-radius:20;-fx-padding:6 16;-fx-cursor:hand;";
-        for (Button b : new Button[]{tab1,tab2,tab3,tab4,tab5,tab6}) {
+        for (Button b : new Button[]{tab1,tab2,tab3,tab4,tab5,tab6,tab7}) {
             if (b != null) b.setStyle(b==active?on:off);
         }
     }
@@ -530,5 +549,39 @@ public class GamesHubController {
                 pw.setArgb(x, y, rgb);
             }
         return img;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // TAB 7 : WIKIPEDIA NOTIONS
+    // ══════════════════════════════════════════════════════════════
+    @FXML void handleWikiSearch() {
+        String notion = txtWikiSearch.getText().trim();
+        if (notion.isEmpty()) {
+            AlertUtil.showError("Veuillez entrer une notion à rechercher.");
+            return;
+        }
+
+        lblWikiTitle.setText("🔍 Recherche : " + notion + "...");
+        wikiContentArea.getChildren().clear();
+        Label lblLoading = new Label("Récupération de l'explication en cours...");
+        lblLoading.setStyle("-fx-text-fill: #64748b; -fx-font-style: italic;");
+        wikiContentArea.getChildren().add(lblLoading);
+
+        new Thread(() -> {
+            try {
+                String summary = wikiService.getSummary(notion);
+                Platform.runLater(() -> {
+                    lblWikiTitle.setText("📚 " + notion);
+                    wikiContentArea.getChildren().clear();
+                    MarkdownRenderer.render(summary, wikiContentArea);
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    lblWikiTitle.setText("❌ Erreur");
+                    wikiContentArea.getChildren().clear();
+                    wikiContentArea.getChildren().add(new Label("Une erreur est survenue : " + e.getMessage()));
+                });
+            }
+        }).start();
     }
 }

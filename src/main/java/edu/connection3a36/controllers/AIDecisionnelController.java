@@ -7,6 +7,7 @@ import edu.connection3a36.enums.Statut;
 import edu.connection3a36.services.GroqService;
 import edu.connection3a36.services.PlanActionsService;
 import edu.connection3a36.services.ReferenceArticleService;
+import edu.connection3a36.services.WikipediaService;
 import edu.connection3a36.tools.AlertUtil;
 import edu.connection3a36.tools.MarkdownRenderer;
 import edu.connection3a36.tools.SessionManager;
@@ -46,6 +47,7 @@ public class AIDecisionnelController {
     private final ReferenceArticleService articleService   = new ReferenceArticleService();
     private final GroqService             groqService      = new GroqService();
     private final edu.connection3a36.services.VoiceRecorderService voiceService = new edu.connection3a36.services.VoiceRecorderService();
+    private final WikipediaService        wikiService      = new WikipediaService();
 
     // ── État chatbot ──────────────────────────────────────────────────────────
     private final List<Map<String, String>> conversationHistory = new ArrayList<>();
@@ -131,6 +133,46 @@ public class AIDecisionnelController {
         inputField.setText("Propose un plan stratégique d'urgence pour améliorer la réussite des étudiants. "
                 + "Liste les actions concrètes par priorité.");
         handleSend();
+    }
+
+    @FXML
+    void handleWikipediaSearch() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Aide Notion (Wiki)");
+        dialog.setHeaderText("Quelle notion stratégique ou technique souhaitez-vous expliquer ?");
+        dialog.setContentText("Notion :");
+        dialog.initOwner(chatBox.getScene().getWindow());
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(notion -> {
+            if (notion.isEmpty()) return;
+            
+            lblChatStatus.setText("🔍 Recherche Wiki : " + notion + "...");
+            new Thread(() -> {
+                try {
+                    String summary = wikiService.getSummary(notion);
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.initOwner(chatBox.getScene().getWindow());
+                        alert.setTitle("Définition Wikipedia : " + notion);
+                        alert.setHeaderText("Notion : " + notion);
+                        
+                        TextArea textArea = new TextArea(summary);
+                        textArea.setEditable(false);
+                        textArea.setWrapText(true);
+                        textArea.setPrefHeight(200);
+                        textArea.setPrefWidth(450);
+                        textArea.setStyle("-fx-font-size: 13px;");
+                        
+                        alert.getDialogPane().setContent(textArea);
+                        alert.show();
+                        lblChatStatus.setText("✅ Définition affichée");
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> lblChatStatus.setText("❌ Erreur Wiki"));
+                }
+            }).start();
+        });
     }
 
     // ─────────────────────────────────────────────────────────────────────────
