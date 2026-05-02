@@ -1,7 +1,7 @@
 package com.esprit.controllers;
 
-import com.esprit.dao.UtilisateurDAO;
 import com.esprit.models.Utilisateur;
+import com.esprit.services.UtilisateurService;
 import com.esprit.utils.GoogleAuthService;
 import com.esprit.utils.GoogleUserInfo;
 import com.sun.net.httpserver.HttpServer;
@@ -34,7 +34,7 @@ public class LoginController {
     @FXML private Button googleLoginButton;
     @FXML private VBox captchaContainer;
 
-    private UtilisateurDAO dao = new UtilisateurDAO();
+    private final UtilisateurService service = new UtilisateurService();
     private boolean captchaVerified = false;
     private WebEngine webEngine;
     private HttpServer captchaServer;
@@ -45,9 +45,7 @@ public class LoginController {
             captchaVerified = true;
             Platform.runLater(() -> errorLabel.setText(""));
         }
-        public void captchaExpired() {
-            captchaVerified = false;
-        }
+        public void captchaExpired() { captchaVerified = false; }
     }
 
     private int findFreePort() {
@@ -57,9 +55,6 @@ public class LoginController {
 
     @FXML
     public void initialize() {
-        // ✅ Bouton Se connecter TOUJOURS actif
-        // La validation du captcha se fait dans handleLogin()
-
         if (captchaContainer != null) {
             try {
                 int port = findFreePort();
@@ -87,7 +82,6 @@ public class LoginController {
                         try {
                             JSObject window = (JSObject) webEngine.executeScript("window");
                             window.setMember("javabridge", new JavaBridge());
-                            System.out.println(">>> Bridge injecté !");
                         } catch (Exception e) {
                             System.out.println(">>> Erreur bridge: " + e.getMessage());
                         }
@@ -96,7 +90,6 @@ public class LoginController {
 
                 webEngine.load("http://localhost:" + port + "/hcaptcha.html");
                 captchaContainer.getChildren().add(webView);
-
             } catch (Exception e) {
                 System.out.println(">>> Erreur serveur captcha: " + e.getMessage());
             }
@@ -105,33 +98,25 @@ public class LoginController {
 
     @FXML
     public void handleLogin() {
-        // ✅ 1. Vérifier email et mdp d'abord
         String email = emailField.getText().trim();
-        String mdp = passwordField.getText().trim();
+        String mdp   = passwordField.getText().trim();
 
         if (email.isEmpty() || mdp.isEmpty()) {
-            errorLabel.setText("Veuillez remplir tous les champs !");
-            return;
+            errorLabel.setText("Veuillez remplir tous les champs !"); return;
         }
 
-        // ✅ 2. Vérifier en base
-        Utilisateur u = dao.login(email, mdp);
+        Utilisateur u = service.login(email, mdp);
 
         if (u == null) {
             errorLabel.setText("Email ou mot de passe incorrect !");
             captchaVerified = false;
-            if (webEngine != null) {
-                Platform.runLater(() -> {
-                    try { webEngine.executeScript("hcaptcha.reset()"); }
-                    catch (Exception ignored) {}
-                });
-            }
+            if (webEngine != null)
+                Platform.runLater(() -> { try { webEngine.executeScript("hcaptcha.reset()"); } catch (Exception ignored) {} });
             return;
         }
 
         if (u.getStatus().equals("desactiver")) {
-            errorLabel.setText("Votre compte est désactivé. Contactez l'administrateur !");
-            return;
+            errorLabel.setText("Votre compte est désactivé. Contactez l'administrateur !"); return;
         }
 
         if (captchaServer != null) captchaServer.stop(0);
@@ -148,29 +133,27 @@ public class LoginController {
             try {
                 GoogleUserInfo googleUser = GoogleAuthService.authenticate();
                 if (googleUser == null || googleUser.getEmail() == null) {
-                    Platform.runLater(() -> errorLabel.setText("Authentification Google échouée."));
-                    return;
+                    Platform.runLater(() -> errorLabel.setText("Authentification Google échouée.")); return;
                 }
-                Utilisateur existing = dao.findByEmail(googleUser.getEmail());
+                Utilisateur existing = service.findByEmail(googleUser.getEmail());
                 if (existing != null) {
                     if (existing.getStatus().equals("desactiver")) {
-                        Platform.runLater(() -> errorLabel.setText("Votre compte est désactivé."));
-                        return;
+                        Platform.runLater(() -> errorLabel.setText("Votre compte est désactivé.")); return;
                     }
                     if (captchaServer != null) captchaServer.stop(0);
                     Platform.runLater(() -> redirectByRole(existing));
                 } else {
                     Utilisateur nouveau = new Utilisateur();
                     nouveau.setEmail(googleUser.getEmail());
-                    nouveau.setNom(googleUser.getNom() != null ? googleUser.getNom() : "");
+                    nouveau.setNom(googleUser.getNom()    != null ? googleUser.getNom()    : "");
                     nouveau.setPrenom(googleUser.getPrenom() != null ? googleUser.getPrenom() : "");
                     nouveau.setMdp("");
                     nouveau.setRole("etudiant");
                     nouveau.setStatus("activer");
                     nouveau.setTrustScore(0.0);
                     nouveau.setRiskLevel("low");
-                    dao.ajouter(nouveau);
-                    Utilisateur created = dao.findByEmail(googleUser.getEmail());
+                    service.ajouter(nouveau);
+                    Utilisateur created = service.findByEmail(googleUser.getEmail());
                     if (captchaServer != null) captchaServer.stop(0);
                     Platform.runLater(() -> redirectByRole(created));
                 }

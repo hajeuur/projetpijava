@@ -1,6 +1,6 @@
 package com.esprit.controllers;
 
-import com.esprit.dao.UtilisateurDAO;
+import com.esprit.services.UtilisateurService;
 import com.esprit.models.Utilisateur;
 import com.esprit.utils.OllamaAIService;
 import com.esprit.utils.UserRiskAnalyzer;
@@ -55,7 +55,7 @@ public class BackOfficeController implements Initializable {
     @FXML private Label            countLabel;
     @FXML private Label            aiStatusLabel;
 
-    private final UtilisateurDAO dao = new UtilisateurDAO();
+    private final UtilisateurService service = new UtilisateurService();
     private ObservableList<Utilisateur> data = FXCollections.observableArrayList();
     private Utilisateur currentUser;
 
@@ -88,7 +88,7 @@ public class BackOfficeController implements Initializable {
 
     private void chargerDonnees() {
         data.clear();
-        data.addAll(dao.getAll());
+        data.addAll(service.getAll());
         tableView.setItems(data);
         updateCount();
         updateStats();
@@ -264,7 +264,7 @@ public class BackOfficeController implements Initializable {
             try {
                 String verdict = OllamaAIService.analyzeUser(u);
                 u.setAiVerdict(verdict);
-                dao.saveAiVerdict(u);
+                service.saveAiVerdict(u);
                 Platform.runLater(() -> {
                     chargerDonnees();
                     btn.setDisable(false);
@@ -296,14 +296,14 @@ public class BackOfficeController implements Initializable {
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
-            List<Utilisateur> tous = dao.getAll();
+            List<Utilisateur> tous = service.getAll();
             int total = tous.size();
             int[] count = {0};
             for (Utilisateur u : tous) {
                 try {
                     String verdict = OllamaAIService.analyzeUser(u);
                     u.setAiVerdict(verdict);
-                    dao.saveAiVerdict(u);
+                    service.saveAiVerdict(u);
                     count[0]++;
                     int current = count[0];
                     Platform.runLater(() -> {
@@ -328,9 +328,9 @@ public class BackOfficeController implements Initializable {
     // ── Recalculer risque ─────────────────────────────────────────────────────
 
     private void handleRecalcul(Utilisateur u) {
-        List<Utilisateur> tous = dao.getAll();
+        List<Utilisateur> tous = service.getAll();
         UserRiskAnalyzer.analyze(u, tous);
-        dao.updateRisk(u);
+        service.updateRisk(u);
         chargerDonnees();
         showAlert(Alert.AlertType.INFORMATION, "Score recalculé",
                 u.getNom() + " " + u.getPrenom() +
@@ -340,10 +340,10 @@ public class BackOfficeController implements Initializable {
 
     @FXML
     public void handleRecalculAll() {
-        List<Utilisateur> tous = dao.getAll();
+        List<Utilisateur> tous = service.getAll();
         for (Utilisateur u : tous) {
             UserRiskAnalyzer.analyze(u, tous);
-            dao.updateRisk(u);
+            service.updateRisk(u);
         }
         chargerDonnees();
         showAlert(Alert.AlertType.INFORMATION, "Recalcul terminé",
@@ -372,7 +372,7 @@ public class BackOfficeController implements Initializable {
 
     @FXML public void handleSearch() {
         String kw = searchField.getText().toLowerCase();
-        List<Utilisateur> tous = dao.getAll();
+        List<Utilisateur> tous = service.getAll();
         data.clear();
         for (Utilisateur u : tous) {
             if (u.getNom().toLowerCase().contains(kw) ||
@@ -422,7 +422,7 @@ public class BackOfficeController implements Initializable {
 
     private void handleDesactiver(Utilisateur u) {
         u.setStatus(u.getStatus().equals("actif") ? "desactiver" : "actif");
-        dao.modifier(u);
+        service.modifier(u);
         chargerDonnees();
     }
 

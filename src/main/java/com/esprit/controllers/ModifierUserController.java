@@ -1,7 +1,7 @@
 package com.esprit.controllers;
 
-import com.esprit.dao.UtilisateurDAO;
 import com.esprit.models.Utilisateur;
+import com.esprit.services.UtilisateurService;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -19,7 +19,7 @@ public class ModifierUserController implements Initializable {
     @FXML private ComboBox<String> statusCombo;
     @FXML private Label errorLabel;
 
-    private UtilisateurDAO dao = new UtilisateurDAO();
+    private final UtilisateurService service = new UtilisateurService();
     private Utilisateur utilisateur;
     private BackOfficeController backOfficeController;
 
@@ -42,14 +42,13 @@ public class ModifierUserController implements Initializable {
     @FXML
     public void handleModifier() {
         String prenom = prenomField.getText().trim();
-        String nom = nomField.getText().trim();
-        String email = emailField.getText().trim();
-        String role = roleCombo.getValue();
+        String nom    = nomField.getText().trim();
+        String email  = emailField.getText().trim();
+        String role   = roleCombo.getValue();
         String status = statusCombo.getValue();
 
         if (prenom.isEmpty() || nom.isEmpty() || email.isEmpty() || role == null || status == null) {
-            errorLabel.setText("Veuillez remplir tous les champs !");
-            return;
+            errorLabel.setText("Veuillez remplir tous les champs !"); return;
         }
 
         utilisateur.setPrenom(prenom);
@@ -58,12 +57,9 @@ public class ModifierUserController implements Initializable {
         utilisateur.setRole(role);
         utilisateur.setStatus(status);
 
-        dao.modifier(utilisateur);
+        service.modifier(utilisateur);
 
-        if (backOfficeController != null) {
-            backOfficeController.refreshTable();
-        }
-
+        if (backOfficeController != null) backOfficeController.refreshTable();
         handleAnnuler();
     }
 

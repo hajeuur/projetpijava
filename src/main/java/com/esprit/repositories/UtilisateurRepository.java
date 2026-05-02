@@ -1,4 +1,4 @@
-package com.esprit.dao;
+package com.esprit.repositories;
 
 import com.esprit.models.Utilisateur;
 import com.esprit.DatabaseConnection;
@@ -9,7 +9,13 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UtilisateurDAO implements IUtilisateur {
+/**
+ * Implémentation de IUtilisateur — couche d'accès aux données (Repository)
+ * Contient uniquement la logique SQL, sans logique métier.
+ */
+public class UtilisateurRepository implements IUtilisateur {
+
+    // ── Hachage SHA-256 ───────────────────────────────────────────────────────
 
     private String hashPassword(String password) {
         try {
@@ -26,6 +32,8 @@ public class UtilisateurDAO implements IUtilisateur {
             return password;
         }
     }
+
+    // ── CRUD de base ──────────────────────────────────────────────────────────
 
     @Override
     public void ajouter(Utilisateur u) {
@@ -45,7 +53,6 @@ public class UtilisateurDAO implements IUtilisateur {
             ps.setInt(10, u.getLoginAttempts());
             ps.setString(11, u.getRegistrationIp());
             ps.executeUpdate();
-            System.out.println("Utilisateur ajouté avec succès !");
         } catch (SQLException e) {
             System.out.println("Erreur ajout : " + e.getMessage());
         }
@@ -69,7 +76,6 @@ public class UtilisateurDAO implements IUtilisateur {
             ps.setInt(10, u.getLoginAttempts());
             ps.setInt(11, u.getId());
             ps.executeUpdate();
-            System.out.println("Utilisateur modifié avec succès !");
         } catch (SQLException e) {
             System.out.println("Erreur modification : " + e.getMessage());
         }
@@ -83,7 +89,6 @@ public class UtilisateurDAO implements IUtilisateur {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setInt(1, id);
             ps.executeUpdate();
-            System.out.println("Utilisateur supprimé avec succès !");
         } catch (SQLException e) {
             System.out.println("Erreur suppression : " + e.getMessage());
         }
@@ -136,6 +141,7 @@ public class UtilisateurDAO implements IUtilisateur {
         return null;
     }
 
+    @Override
     public Utilisateur findByEmail(String email) {
         Connection cnx = DatabaseConnection.getInstance();
         String sql = "SELECT * FROM utilisateur WHERE email=?";
@@ -150,7 +156,37 @@ public class UtilisateurDAO implements IUtilisateur {
         return null;
     }
 
-    // ── Incrémenter les tentatives de connexion échouées ──────────────────────
+    @Override
+    public void updateRisk(Utilisateur u) {
+        Connection cnx = DatabaseConnection.getInstance();
+        String sql = "UPDATE utilisateur SET trust_score=?, risk_level=?, flagged_duplicate=? WHERE id=?";
+        try {
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setDouble(1, u.getTrustScore());
+            ps.setString(2, u.getRiskLevel());
+            ps.setInt(3, u.getFlaggedDuplicate());
+            ps.setInt(4, u.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Erreur updateRisk : " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void saveAiVerdict(Utilisateur u) {
+        Connection cnx = DatabaseConnection.getInstance();
+        String sql = "UPDATE utilisateur SET ai_verdict=? WHERE id=?";
+        try {
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setString(1, u.getAiVerdict());
+            ps.setInt(2, u.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Erreur saveAiVerdict : " + e.getMessage());
+        }
+    }
+
+    @Override
     public void incrementLoginAttempts(String email) {
         Connection cnx = DatabaseConnection.getInstance();
         String sql = "UPDATE utilisateur SET login_attempts = login_attempts + 1 WHERE email=?";
@@ -163,7 +199,7 @@ public class UtilisateurDAO implements IUtilisateur {
         }
     }
 
-    // ── Réinitialiser les tentatives après connexion réussie ──────────────────
+    @Override
     public void resetLoginAttempts(String email) {
         Connection cnx = DatabaseConnection.getInstance();
         String sql = "UPDATE utilisateur SET login_attempts = 0 WHERE email=?";
@@ -176,24 +212,8 @@ public class UtilisateurDAO implements IUtilisateur {
         }
     }
 
-    // ── Mettre à jour trust_score et risk_level ───────────────────────────────
-    public void updateRisk(Utilisateur u) {
-        Connection cnx = DatabaseConnection.getInstance();
-        String sql = "UPDATE utilisateur SET trust_score=?, risk_level=?, flagged_duplicate=? WHERE id=?";
-        try {
-            PreparedStatement ps = cnx.prepareStatement(sql);
-            ps.setDouble(1, u.getTrustScore());
-            ps.setString(2, u.getRiskLevel());
-            ps.setInt(3, u.getFlaggedDuplicate());
-            ps.setInt(4, u.getId());
-            ps.executeUpdate();
-            System.out.println("Risk mis à jour pour : " + u.getEmail());
-        } catch (SQLException e) {
-            System.out.println("Erreur updateRisk : " + e.getMessage());
-        }
-    }
-
     // ── Mapping ResultSet → Utilisateur ──────────────────────────────────────
+
     private Utilisateur mapRow(ResultSet rs) throws SQLException {
         Utilisateur u = new Utilisateur();
         u.setId(rs.getInt("id"));
@@ -211,20 +231,5 @@ public class UtilisateurDAO implements IUtilisateur {
         try { u.setPdpUrl(rs.getString("pdp_url")); } catch (Exception ignored) {}
         try { u.setAiVerdict(rs.getString("ai_verdict")); } catch (Exception ignored) {}
         return u;
-    }
-
-    // ── Sauvegarder le verdict IA ─────────────────────────────────────────────
-    public void saveAiVerdict(Utilisateur u) {
-        Connection cnx = DatabaseConnection.getInstance();
-        String sql = "UPDATE utilisateur SET ai_verdict=? WHERE id=?";
-        try {
-            PreparedStatement ps = cnx.prepareStatement(sql);
-            ps.setString(1, u.getAiVerdict());
-            ps.setInt(2, u.getId());
-            ps.executeUpdate();
-            System.out.println("AI Verdict sauvegardé pour : " + u.getEmail());
-        } catch (SQLException e) {
-            System.out.println("Erreur saveAiVerdict : " + e.getMessage());
-        }
     }
 }

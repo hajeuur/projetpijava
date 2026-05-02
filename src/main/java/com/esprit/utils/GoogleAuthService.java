@@ -27,9 +27,9 @@ public class GoogleAuthService {
         int port = findFreePort();
         System.out.println(">>> Port : " + port);
         String redirectUri = "http://localhost:" + port + "/Callback";
-
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<String> codeRef = new AtomicReference<>();
+//    dem Serveur pour recevoir le callback
 
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/Callback", exchange -> {
@@ -59,7 +59,7 @@ public class GoogleAuthService {
                 + "&access_type=online";
 
         Desktop.getDesktop().browse(new URI(authUrl));
-
+        // 4. Attendre le callback
         latch.await();
         server.stop(1);
 
@@ -81,7 +81,7 @@ public class GoogleAuthService {
                 + "&client_secret=" + URLEncoder.encode(CLIENT_SECRET, StandardCharsets.UTF_8)
                 + "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
                 + "&grant_type=authorization_code";
-
+       // POST vers oauth2.googleapis.com/token avec le code
         URL url = new URL("https://oauth2.googleapis.com/token");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");

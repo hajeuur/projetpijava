@@ -1,7 +1,7 @@
 package com.esprit.controllers;
 
-import com.esprit.dao.UtilisateurDAO;
 import com.esprit.models.Utilisateur;
+import com.esprit.services.UtilisateurService;
 import com.esprit.utils.EmailUtil;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,7 +18,7 @@ public class ForgetPasswordController {
     @FXML private Label messageLabel;
     @FXML private Button envoyerButton;
 
-    private final UtilisateurDAO dao = new UtilisateurDAO();
+    private final UtilisateurService service = new UtilisateurService();
 
     @FXML
     public void handleEnvoyer() {
@@ -29,47 +29,37 @@ public class ForgetPasswordController {
 
         if (email.isEmpty()) {
             messageLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12;");
-            messageLabel.setText("Veuillez entrer votre adresse email !");
-            return;
+            messageLabel.setText("Veuillez entrer votre adresse email !"); return;
         }
 
-        if (!email.matches("^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$")) {
+        if (!service.emailValide(email)) {
             messageLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12;");
-            messageLabel.setText("Adresse email invalide !");
-            return;
+            messageLabel.setText("Adresse email invalide !"); return;
         }
 
-        // Vérifie si l'email existe dans la base
-        List<Utilisateur> tous = dao.getAll();
-        boolean existe = tous.stream()
-                .anyMatch(u -> u.getEmail().equalsIgnoreCase(email));
+        // Vérifie si l'email existe
+        List<Utilisateur> tous = service.getAll();
+        boolean existe = tous.stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(email));
 
         if (!existe) {
             messageLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12;");
-            messageLabel.setText("Aucun compte associé à cet email !");
-            return;
+            messageLabel.setText("Aucun compte associé à cet email !"); return;
         }
 
-        // Génère le token
         String token = EmailUtil.genererToken();
-
         messageLabel.setStyle("-fx-text-fill: orange; -fx-font-size: 12;");
         messageLabel.setText("Envoi en cours...");
         envoyerButton.setDisable(true);
 
-        // Envoi dans un thread séparé pour ne pas bloquer l'UI
         new Thread(() -> {
             boolean envoye = EmailUtil.envoyerEmailReset(email, token);
-
             javafx.application.Platform.runLater(() -> {
                 if (envoye) {
                     try {
-                        FXMLLoader loader = new FXMLLoader(
-                                getClass().getResource("/com/esprit/views/ResetPassword.fxml"));
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/views/ResetPassword.fxml"));
                         Parent root = loader.load();
                         ResetPasswordController controller = loader.getController();
-                        controller.setTokenEtEmail(
-                                token.substring(0, 8).toUpperCase(), email);
+                        controller.setTokenEtEmail(token.substring(0, 8).toUpperCase(), email);
                         Stage stage = (Stage) emailField.getScene().getWindow();
                         stage.setScene(new Scene(root));
                         stage.show();
@@ -90,14 +80,11 @@ public class ForgetPasswordController {
     @FXML
     public void handleRetour() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/com/esprit/views/Login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/views/Login.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) emailField.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 }
