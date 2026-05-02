@@ -6,6 +6,7 @@ import com.mentorai.services.ExcelExportService;
 import com.mentorai.services.FeedbackService;
 import com.mentorai.services.PdfExportService;
 import com.mentorai.services.PrioriteService;
+import com.mentorai.services.SentimentService;
 import com.mentorai.services.TraductionService;
 import com.mentorai.services.TraitementService;
 import javafx.collections.FXCollections;
@@ -36,6 +37,7 @@ public class AdminFeedbackController implements Initializable {
 
     @FXML private TableColumn<Feedback, Integer> colIdNT;
     @FXML private TableColumn<Feedback, Void>    colPrioriteNT;
+    @FXML private TableColumn<Feedback, Void>    colSentimentNT;
     @FXML private TableColumn<Feedback, String>  colTypeNT;
     @FXML private TableColumn<Feedback, String>  colDateNT;
     @FXML private TableColumn<Feedback, Integer> colNoteNT;
@@ -43,6 +45,7 @@ public class AdminFeedbackController implements Initializable {
     @FXML private TableColumn<Feedback, Void>    colActionNT;
 
     @FXML private TableColumn<Feedback, Integer> colIdT;
+    @FXML private TableColumn<Feedback, Void>    colSentimentT;
     @FXML private TableColumn<Feedback, String>  colTypeT;
     @FXML private TableColumn<Feedback, String>  colDateT;
     @FXML private TableColumn<Feedback, Integer> colNoteT;
@@ -70,6 +73,7 @@ public class AdminFeedbackController implements Initializable {
     private FeedbackService   feedbackService   = new FeedbackService();
     private TraitementService traitementService = new TraitementService();
     private PrioriteService   prioriteService   = new PrioriteService();
+    private SentimentService  sentimentService  = new SentimentService();
     // ✅ TRADUCTION
     private TraductionService traductionService = new TraductionService();
 
@@ -424,6 +428,25 @@ public class AdminFeedbackController implements Initializable {
             }
         });
 
+        colSentimentNT.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getIndex() < 0 || getIndex() >= getTableView().getItems().size()) {
+                    setGraphic(null); return;
+                }
+                Feedback f = getTableView().getItems().get(getIndex());
+                String sentiment = sentimentService.analyserSentiment(f.getContenu());
+                String emoji = sentimentService.getEmojiSentiment(sentiment);
+                String couleur = sentimentService.getCouleurSentiment(sentiment);
+                Label badge = new Label(emoji + " " + sentiment);
+                badge.setStyle("-fx-background-color: " + couleur + "; -fx-text-fill: white;" +
+                        "-fx-padding: 3 8 3 8; -fx-background-radius: 10;" +
+                        "-fx-font-size: 11px; -fx-font-weight: bold;");
+                setGraphic(badge); setText(null);
+            }
+        });
+
         colActionNT.setCellFactory(col -> new TableCell<>() {
             final Button btnVoir    = new Button("Voir");
             final Button btnTraiter = new Button("Traiter");
@@ -453,6 +476,25 @@ public class AdminFeedbackController implements Initializable {
         colNoteT.setCellValueFactory(new PropertyValueFactory<>("note"));
         colMessageT.setCellValueFactory(new PropertyValueFactory<>("contenu"));
         colTypeT.setCellFactory(col -> badgeType());
+
+        colSentimentT.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getIndex() < 0 || getIndex() >= getTableView().getItems().size()) {
+                    setGraphic(null); return;
+                }
+                Feedback f = getTableView().getItems().get(getIndex());
+                String sentiment = sentimentService.analyserSentiment(f.getContenu());
+                String emoji = sentimentService.getEmojiSentiment(sentiment);
+                String couleur = sentimentService.getCouleurSentiment(sentiment);
+                Label badge = new Label(emoji + " " + sentiment);
+                badge.setStyle("-fx-background-color: " + couleur + "; -fx-text-fill: white;" +
+                        "-fx-padding: 3 8 3 8; -fx-background-radius: 10;" +
+                        "-fx-font-size: 11px; -fx-font-weight: bold;");
+                setGraphic(badge); setText(null);
+            }
+        });
 
         colTraitementT.setCellFactory(col -> new TableCell<>() {
             @Override

@@ -183,13 +183,14 @@
                 <TableView fx:id="tableNonTraites"
                            style="-fx-background-color: transparent;" prefHeight="250">
                     <columns>
-                        <TableColumn fx:id="colIdNT"       text="#"        prefWidth="50"/>
-                        <TableColumn fx:id="colPrioriteNT" text="Priorite" prefWidth="90"/>
-                        <TableColumn fx:id="colTypeNT"     text="Type"     prefWidth="100"/>
-                        <TableColumn fx:id="colDateNT"     text="Date"     prefWidth="100"/>
-                        <TableColumn fx:id="colNoteNT"     text="Note"     prefWidth="60"/>
-                        <TableColumn fx:id="colMessageNT"  text="Message"  prefWidth="300"/>
-                        <TableColumn fx:id="colActionNT"   text="Actions"  prefWidth="190"/>
+                        <TableColumn fx:id="colIdNT"        text="#"        prefWidth="50"/>
+                        <TableColumn fx:id="colPrioriteNT"  text="Priorite" prefWidth="90"/>
+                        <TableColumn fx:id="colSentimentNT" text="Sentiment" prefWidth="100"/>
+                        <TableColumn fx:id="colTypeNT"      text="Type"     prefWidth="100"/>
+                        <TableColumn fx:id="colDateNT"      text="Date"     prefWidth="100"/>
+                        <TableColumn fx:id="colNoteNT"      text="Note"     prefWidth="60"/>
+                        <TableColumn fx:id="colMessageNT"   text="Message"  prefWidth="250"/>
+                        <TableColumn fx:id="colActionNT"    text="Actions"  prefWidth="190"/>
                     </columns>
                 </TableView>
             </VBox>
@@ -206,10 +207,11 @@
                            style="-fx-background-color: transparent;" prefHeight="280">
                     <columns>
                         <TableColumn fx:id="colIdT"         text="#"          prefWidth="55"/>
+                        <TableColumn fx:id="colSentimentT"  text="Sentiment"  prefWidth="100"/>
                         <TableColumn fx:id="colTypeT"       text="Type"       prefWidth="100"/>
                         <TableColumn fx:id="colDateT"       text="Date"       prefWidth="100"/>
                         <TableColumn fx:id="colNoteT"       text="Note"       prefWidth="60"/>
-                        <TableColumn fx:id="colMessageT"    text="Message"    prefWidth="200"/>
+                        <TableColumn fx:id="colMessageT"    text="Message"    prefWidth="150"/>
                         <TableColumn fx:id="colTraitementT" text="Traitement" prefWidth="130"/>
                         <TableColumn fx:id="colActionT"     text="Actions"    prefWidth="220"/>
                     </columns>
