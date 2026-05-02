@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.esprit.controllers.ModifierUserController"
+      spacing="15" style="-fx-padding: 30; -fx-background-color: white;"
+      prefWidth="500">
+
+    <!-- Header violet -->
+    <VBox style="-fx-background-color: #6c5ce7; -fx-background-radius: 8; -fx-padding: 15;">
+        <Label text="Modifier utilisateur"
+               style="-fx-text-fill: white; -fx-font-size: 18; -fx-font-weight: bold;"/>
+    </VBox>
+
+    <!-- Formulaire -->
+    <HBox spacing="15">
+        <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <Label text="Prénom *" style="-fx-font-weight: bold;"/>
+            <TextField fx:id="prenomField"
+                       style="-fx-border-color: #cccccc; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8;"/>
+        </VBox>
+        <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <Label text="Nom *" style="-fx-font-weight: bold;"/>
+            <TextField fx:id="nomField"
+                       style="-fx-border-color: #cccccc; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8;"/>
+        </VBox>
+    </HBox>
+
+    <VBox spacing="8">
+        <Label text="Adresse email *" style="-fx-font-weight: bold;"/>
+        <TextField fx:id="emailField"
+                   style="-fx-border-color: #cccccc; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8;"/>
+    </VBox>
+
+    <VBox spacing="8">
+        <Label text="Rôle *" style="-fx-font-weight: bold;"/>
+        <ComboBox fx:id="roleCombo" maxWidth="Infinity"
+                  style="-fx-border-color: #cccccc; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+    </VBox>
+
+    <VBox spacing="8">
+        <Label text="Status *" style="-fx-font-weight: bold;"/>
+        <ComboBox fx:id="statusCombo" maxWidth="Infinity"
+                  style="-fx-border-color: #cccccc; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+    </VBox>
+
+    <Label fx:id="errorLabel" style="-fx-text-fill: red;"/>
+
+    <!-- Boutons -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Annuler"
+                onAction="#handleAnnuler"
+                style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10 20;"/>
+        <Button text="Modifier"
+                onAction="#handleModifier"
+                style="-fx-background-color: #1a2a4a; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10 20;"/>
+    </HBox>
+
+</VBox>
