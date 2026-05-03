@@ -85,6 +85,11 @@
                     <Button fx:id="btnPreferences" text="Préférences"
                             onAction="#showPreferences" styleClass="header-nav-btn"/>
 
+                    <!-- Mon Profil (Hejer) — visible pour étudiant et enseignant -->
+                    <Button fx:id="btnMonProfil" text="👤 Mon Profil"
+                            onAction="#showMonProfil"
+                            styleClass="header-nav-btn" visible="false" managed="false"/>
+
                     <!-- Notifications / Clochette -->
                     <Button fx:id="btnNotifications" text="🔔 (0)"
                             onAction="#handleNotifications"
@@ -172,6 +177,9 @@
                         visible="false" managed="false"/>
                 <Button fx:id="btnBackFeedbacks" text="📝 Gestion Feedbacks"
                         onAction="#showBackFeedbacks" styleClass="sidebar-btn" maxWidth="Infinity"
+                        visible="false" managed="false"/>
+                <Button fx:id="btnGestionUtilisateursHejer" text="👥 Gestion Utilisateurs"
+                        onAction="#handleGestionUtilisateursHejer" styleClass="sidebar-btn" maxWidth="Infinity"
                         visible="false" managed="false"/>
                 <Button fx:id="btnDashboardObjectifs" text="📊 Dashboard Objectifs"
                         onAction="#showDashboardObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"

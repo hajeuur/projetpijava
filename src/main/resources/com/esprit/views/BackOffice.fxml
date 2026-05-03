@@ -9,14 +9,50 @@
             prefHeight="720.0" prefWidth="1400.0">
 
     <left>
-        <VBox spacing="0" style="-fx-background-color: #1a2a4a; -fx-min-width: 200;">
-            <Label text="MentorAI"
-                   style="-fx-text-fill: white; -fx-font-size: 20; -fx-font-weight: bold; -fx-padding: 30 20 20 20;"/>
-            <Button text="Gestion Utilisateurs" maxWidth="Infinity"
-                    style="-fx-background-color: #2a3a5a; -fx-text-fill: white; -fx-padding: 15 20; -fx-alignment: CENTER-LEFT;"/>
+        <VBox spacing="0" style="-fx-background-color: #1a2a4a; -fx-min-width: 220; -fx-pref-width: 220;">
+
+            <!-- Logo -->
+            <Label text="🎓 MentorAI"
+                   style="-fx-text-fill: white; -fx-font-size: 20; -fx-font-weight: bold; -fx-padding: 25 20 5 20;"/>
+            <Label text="Gestion Utilisateurs"
+                   style="-fx-text-fill: #9dbbce; -fx-font-size: 10; -fx-padding: 0 20 15 20;"/>
+
+            <Separator style="-fx-background-color: #2a3a5a; -fx-opacity: 0.5;"/>
+
+            <!-- Section principale -->
+            <Label text="MON MODULE"
+                   style="-fx-text-fill: #9dbbce; -fx-font-size: 10; -fx-font-weight: bold; -fx-padding: 14 20 6 20;"/>
+            <Button text="👥 Gestion Utilisateurs" maxWidth="Infinity"
+                    style="-fx-background-color: #2a3a5a; -fx-text-fill: white; -fx-padding: 15 20; -fx-alignment: CENTER-LEFT; -fx-cursor: hand; -fx-border-color: transparent; -fx-font-size: 13;"/>
+
+            <Separator style="-fx-background-color: #2a3a5a; -fx-opacity: 0.5;"/>
+
+            <!-- Section actions -->
+            <Label text="ACTIONS"
+                   style="-fx-text-fill: #9dbbce; -fx-font-size: 10; -fx-font-weight: bold; -fx-padding: 14 20 6 20;"/>
+            <Button text="+ Ajouter un utilisateur" maxWidth="Infinity" onAction="#handleAjouter"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-padding: 12 20; -fx-alignment: CENTER-LEFT; -fx-cursor: hand; -fx-font-size: 13;"/>
+            <Button text="⟳ Recalculer les risques" maxWidth="Infinity" onAction="#handleRecalculAll"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-padding: 12 20; -fx-alignment: CENTER-LEFT; -fx-cursor: hand; -fx-font-size: 13;"/>
+            <Button text="🤖 Analyser tous (IA)" maxWidth="Infinity" onAction="#handleAnalyseAllAI"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-padding: 12 20; -fx-alignment: CENTER-LEFT; -fx-cursor: hand; -fx-font-size: 13;"/>
+
+            <Separator style="-fx-background-color: #2a3a5a; -fx-opacity: 0.5;"/>
+
+            <!-- Section exports -->
+            <Label text="EXPORTS"
+                   style="-fx-text-fill: #9dbbce; -fx-font-size: 10; -fx-font-weight: bold; -fx-padding: 14 20 6 20;"/>
+            <Button text="📊 Exporter Excel" maxWidth="Infinity" onAction="#handleExportExcel"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-padding: 12 20; -fx-alignment: CENTER-LEFT; -fx-cursor: hand; -fx-font-size: 13;"/>
+            <Button text="📄 Exporter PDF" maxWidth="Infinity" onAction="#handleExportPDF"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-padding: 12 20; -fx-alignment: CENTER-LEFT; -fx-cursor: hand; -fx-font-size: 13;"/>
+
+            <!-- Spacer -->
             <VBox VBox.vgrow="ALWAYS"/>
-            <Button text="Déconnexion" maxWidth="Infinity" onAction="#handleLogout"
-                    style="-fx-background-color: transparent; -fx-text-fill: #ff6b6b; -fx-padding: 15 20; -fx-alignment: CENTER-LEFT;"/>
+
+            <Separator style="-fx-background-color: #2a3a5a; -fx-opacity: 0.5;"/>
+            <Button text="🚪 Déconnexion" maxWidth="Infinity" onAction="#handleLogout"
+                    style="-fx-background-color: transparent; -fx-text-fill: #ff6b6b; -fx-padding: 15 20; -fx-alignment: CENTER-LEFT; -fx-cursor: hand; -fx-font-size: 13;"/>
         </VBox>
     </left>
 

@@ -76,6 +76,8 @@ public class MainController {
     @FXML private VBox boxSwitcher;
     @FXML private Button btnUtilisateurs;
     @FXML private Button btnCategories;
+    @FXML private Button btnGestionUtilisateursHejer;
+    @FXML private Button btnMonProfil;
     @FXML private Label lblUserBack;
 
     // ── État interne ──────────────────────────────────────────────────────────
@@ -139,7 +141,7 @@ public class MainController {
             // Cacher tout dans boxBackAdmin sauf Parcours et Projets
             for (javafx.scene.Node n : boxBackAdmin.getChildren()) {
                 if (n instanceof Button b) {
-                    if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks) show(b);
+                    if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks || b == btnGestionUtilisateursHejer) show(b);
                     else hide(b);
                 } else {
                     hide(n); // Séparateurs, labels
@@ -167,6 +169,7 @@ public class MainController {
             show(btnAIPedagogique);
             show(btnPlanActions);
             show(btnArticles);
+            if (btnMonProfil != null) show(btnMonProfil);
             
             // MentorAI dans le header FRONT
             if (btnHeaderHumeur != null) show(btnHeaderHumeur);
@@ -190,6 +193,7 @@ public class MainController {
             if (btnMesFeedbacks != null) show(btnMesFeedbacks);
             if (btnObjectifs != null) show(btnObjectifs);
             if (btnHeaderCarnet != null) show(btnHeaderCarnet);
+            if (btnMonProfil != null) show(btnMonProfil);
             
             showParcours();
 
@@ -422,6 +426,50 @@ public class MainController {
     }
 
     @FXML
+    public void handleGestionUtilisateursHejer() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/esprit/views/BackOffice.fxml"));
+            javafx.scene.layout.BorderPane bp = loader.load();
+            // Supprimer la sidebar bleue — elle est redondante dans MainView
+            bp.setLeft(null);
+            contentArea.getChildren().setAll(bp);
+            setActiveBtn(btnGestionUtilisateursHejer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void showMonProfil() {
+        try {
+            // Construire un com.esprit.models.Utilisateur depuis la session courante
+            edu.connection3a36.entities.Utilisateur session = SessionManager.getCurrentUser();
+            if (session == null) return;
+
+            com.esprit.models.Utilisateur u = new com.esprit.models.Utilisateur();
+            u.setId(session.getId());
+            u.setNom(session.getNom());
+            u.setPrenom(session.getPrenom());
+            u.setEmail(session.getEmail());
+            u.setMdp(session.getMdp());
+            u.setRole(session.getRole());
+            u.setStatus(session.getStatus());
+
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/esprit/views/FrontOffice.fxml"));
+            javafx.scene.layout.BorderPane bp = loader.load();
+            com.esprit.controllers.FrontOfficeController ctrl = loader.getController();
+            ctrl.setUtilisateur(u);
+            // Supprimer la navbar du FrontOffice — on est déjà dans MainView
+            bp.setTop(null);
+            contentArea.getChildren().setAll(bp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     void showAIPedagogique() {
         if (!acl.canAccess(AccessControlService.Module.IA_PEDAGOGIQUE)) return;
         loadView("/fxml/AIPedagogique.fxml");
@@ -500,7 +548,7 @@ public class MainController {
         try {
             SessionManager.logout();
             Stage stage = (Stage) contentArea.getScene().getWindow();
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/Login.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/com/esprit/views/Login.fxml"));
             Scene scene = new Scene(root, 1200, 750);
             scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
             stage.setScene(scene);
