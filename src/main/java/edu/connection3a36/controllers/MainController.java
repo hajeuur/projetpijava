@@ -504,6 +504,7 @@ public class MainController {
             Scene scene = new Scene(root, 1200, 750);
             scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
             stage.setScene(scene);
+            stage.setMaximized(true);
             stage.centerOnScreen();
             stage.show();
         } catch (IOException e) {

@@ -158,6 +158,15 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Notification spécifique pour un feedback enseignant (vers l'admin).
+     */
+    public void addFeedbackNotificationForAdmin(int planId, String decision, String profName) {
+        String titre = "💬 Feedback de " + profName;
+        String message = "L'enseignant " + profName + " a ajouté un feedback sur le plan #" + planId + " : \"" + decision + "\".";
+        addSystemNotification(titre, message, "FEEDBACK");
+    }
+
     private Notification mapRow(ResultSet rs) throws SQLException {
         Notification n = new Notification();
         n.setId(rs.getInt("id"));

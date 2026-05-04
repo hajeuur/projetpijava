@@ -82,6 +82,7 @@ public class LoginController {
             sc.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
             stage.setTitle("MentorAI — Espace Connecté");
             stage.setScene(sc);
+            stage.setMaximized(true);
             stage.centerOnScreen();
         } catch (Exception e) {
             e.printStackTrace();

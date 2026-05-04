@@ -403,6 +403,7 @@ public class AIDecisionnelController {
         Scene scene = new Scene(root, 600, 500);
         scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
         histStage.setScene(scene);
+        histStage.setMaximized(true);
         histStage.show();
     }
 

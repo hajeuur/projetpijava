@@ -380,7 +380,7 @@ public class AIPedagogiqueController {
         Scene scene = new Scene(root, 600, 520);
         scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
         histStage.setScene(scene);
-        histStage.setScene(scene);
+        histStage.setMaximized(true);
         histStage.show();
     }
 

@@ -138,4 +138,13 @@ public class GroqService {
     public String sendSimpleMessage(String message, String roleContext) throws Exception {
         return sendMessage(message, new ArrayList<>(), roleContext);
     }
+
+    /**
+     * Envoie un message en demandant un format JSON spécifique.
+     */
+    public String sendSimpleJsonMessage(String message, String roleContext, String jsonSchema) throws Exception {
+        String jsonPrompt = message + "\n\nTU DOIS RÉPONDRE EXCLUSIVEMENT AU FORMAT JSON SUIVANT :\n" + jsonSchema 
+                + "\nNe mets aucun texte avant ou après le JSON.";
+        return sendSimpleMessage(jsonPrompt, roleContext);
+    }
 }
