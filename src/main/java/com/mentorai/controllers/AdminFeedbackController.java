@@ -644,11 +644,7 @@ public class AdminFeedbackController implements Initializable {
             VBox root = loader.load();
             TraiterFeedbackController ctrl = loader.getController();
             ctrl.setFeedback(feedback, this);
-            Stage popup = new Stage();
-            popup.setTitle("Traiter #" + feedback.getId());
-            popup.setScene(new Scene(root));
-            popup.initModality(Modality.APPLICATION_MODAL);
-            popup.showAndWait();
+            edu.connection3a36.controllers.MainController.getInstance().loadInContentArea(root);
         } catch (Exception e) {
             System.out.println("Erreur traiter : " + e.getMessage());
         }
@@ -660,11 +656,7 @@ public class AdminFeedbackController implements Initializable {
             VBox root = loader.load();
             ModifierTraitementController ctrl = loader.getController();
             ctrl.setFeedback(feedback, this);
-            Stage popup = new Stage();
-            popup.setTitle("Modifier traitement #" + feedback.getId());
-            popup.setScene(new Scene(root));
-            popup.initModality(Modality.APPLICATION_MODAL);
-            popup.showAndWait();
+            edu.connection3a36.controllers.MainController.getInstance().loadInContentArea(root);
         } catch (Exception e) {
             System.out.println("Erreur modifier : " + e.getMessage());
         }

@@ -60,6 +60,23 @@
     -fx-background-radius: 0;
 }
 
+/* Styles pour le MenuButton dans le header */
+.menu-button.header-nav-btn {
+    -fx-background-color: transparent;
+}
+.menu-button.header-nav-btn > .label {
+    -fx-text-fill: rgba(255,255,255,0.78);
+}
+.menu-button.header-nav-btn:hover > .label {
+    -fx-text-fill: white;
+}
+.menu-button.header-nav-btn > .arrow-button > .arrow {
+    -fx-background-color: rgba(255,255,255,0.6);
+}
+.menu-button.header-nav-btn:hover > .arrow-button > .arrow {
+    -fx-background-color: white;
+}
+
 .header-switcher-btn {
     -fx-background-color: rgba(157,187,206,0.15);
     -fx-text-fill: #9dbbce;

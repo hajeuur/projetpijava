@@ -2,138 +2,156 @@ package edu.connection3a36.controllers;
 
 import edu.connection3a36.entities.Parcours;
 import edu.connection3a36.services.ParcoursService;
+import edu.connection3a36.services.CVService;
+import edu.connection3a36.services.ProjetService;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.*;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class AfficherParcoursController implements Initializable {
 
-    @FXML
-    private FlowPane flowPaneParcours;
-    @FXML
-    private TextField txtRecherche;
-    @FXML
-    private ComboBox<String> cbFiltreType;
-    @FXML
-    private Label lblStats;
-    @FXML
-    private Button btnAjouter;
+    @FXML private FlowPane flowPaneParcours;
+    @FXML private TextField txtRecherche;
+    @FXML private ComboBox<String> cbFiltreType;
+    @FXML private Label lblStats;
 
     private final ParcoursService parcoursService = new ParcoursService();
-    private ObservableList<Parcours> allParcours = FXCollections.observableArrayList();
+    private List<Parcours> allParcours = new ArrayList<>();
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        cbFiltreType.setItems(FXCollections.observableArrayList(
-                "Tous", "Formation", "Stage", "Alternance", "Emploi", "Personnel"));
+    public void initialize(URL url, ResourceBundle rb) {
+        cbFiltreType.setItems(FXCollections.observableArrayList("Tous", "Formation", "Stage", "Alternance", "Emploi", "Personnel"));
         cbFiltreType.setValue("Tous");
-
-        txtRecherche.textProperty().addListener((observable, oldValue, newValue) -> filterData());
-
+        
         chargerDonnees();
+        
+        txtRecherche.textProperty().addListener((obs, oldVal, newVal) -> appliquerFiltres());
     }
 
-    public void chargerDonnees() {
+    private void chargerDonnees() {
         try {
-            List<Parcours> list = parcoursService.getData();
-            allParcours = FXCollections.observableArrayList(list);
-            filterData();
-            updateStats();
+            allParcours = parcoursService.getData();
+            appliquerFiltres();
+            if (lblStats != null) lblStats.setText("Nombre de parcours : " + allParcours.size());
         } catch (SQLException e) {
-            afficherErreur("Erreur de chargement", e.getMessage());
+            afficherErreur("Erreur", "Impossible de charger les données : " + e.getMessage());
         }
     }
 
-    private void filterData() {
-        String searchText = txtRecherche.getText() == null ? "" : txtRecherche.getText().toLowerCase().trim();
-        String selectedType = cbFiltreType.getValue();
+    @FXML
+    private void filtrerParType() {
+        appliquerFiltres();
+    }
+
+    private void appliquerFiltres() {
+        String query = txtRecherche.getText().toLowerCase();
+        String typeFilter = cbFiltreType.getValue();
 
         List<Parcours> filtered = allParcours.stream()
-                .filter(p -> {
-                    boolean matchesSearch = p.getTitre().toLowerCase().contains(searchText) ||
-                            (p.getEtablissement() != null && p.getEtablissement().toLowerCase().contains(searchText)) ||
-                            (p.getDiplome() != null && p.getDiplome().toLowerCase().contains(searchText));
-                    boolean matchesType = selectedType.equals("Tous") ||
-                            (p.getTypeParcours() != null && p.getTypeParcours().equalsIgnoreCase(selectedType));
-                    return matchesSearch && matchesType;
-                })
+                .filter(p -> (typeFilter.equals("Tous") || p.getTypeParcours().equalsIgnoreCase(typeFilter)))
+                .filter(p -> (p.getTitre().toLowerCase().contains(query) || 
+                             p.getEtablissement().toLowerCase().contains(query)))
                 .collect(Collectors.toList());
 
-        displayCards(filtered);
+        afficherCartes(filtered);
     }
 
-    private void displayCards(List<Parcours> list) {
+    private void afficherCartes(List<Parcours> list) {
         flowPaneParcours.getChildren().clear();
         for (Parcours p : list) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/ParcoursCard.fxml"));
-                Parent card = loader.load();
-                ParcoursCardController controller = loader.getController();
-                controller.setData(p, this);
-                flowPaneParcours.getChildren().add(card);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            VBox card = creerCard(p);
+            flowPaneParcours.getChildren().add(card);
         }
     }
 
-    private void updateStats() {
-        int count = allParcours.size();
-        lblStats.setText("Nombre total de parcours : " + count);
+    private VBox creerCard(Parcours p) {
+        VBox card = new VBox(10);
+        card.setPrefWidth(300);
+        card.getStyleClass().add("parcours-card");
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; " +
+                     "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 4);");
+
+        Label lblType = new Label(p.getTypeParcours().toUpperCase());
+        lblType.setStyle("-fx-background-color: #e0f2fe; -fx-text-fill: #0369a1; -fx-padding: 2 10; -fx-background-radius: 10; -fx-font-size: 10px; -fx-font-weight: bold;");
+
+        Label lblTitre = new Label(p.getTitre());
+        lblTitre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #102c59;");
+        lblTitre.setWrapText(true);
+
+        Label lblEcole = new Label("📍 " + p.getEtablissement());
+        lblEcole.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13px;");
+
+        Label lblDates = new Label("📅 " + p.getDateDebut() + " - " + (p.getDateFin() != null ? p.getDateFin() : "Présent"));
+        lblDates.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 12px;");
+
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
+        HBox actions = new HBox(10);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        Button btnEdit = new Button("✏");
+        Button btnDelete = new Button("🗑");
+        Button btnView = new Button("👁");
+        
+        btnEdit.setStyle("-fx-background-color: #f1f5f9; -fx-cursor: hand;");
+        btnDelete.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #ef4444; -fx-cursor: hand;");
+        btnView.setStyle("-fx-background-color: #e0e7ff; -fx-text-fill: #4338ca; -fx-cursor: hand;");
+
+        btnEdit.setOnAction(e -> modifierParcours(p));
+        btnDelete.setOnAction(e -> supprimerParcours(p));
+        btnView.setOnAction(e -> voirProjets(p));
+
+        actions.getChildren().addAll(btnView, btnEdit, btnDelete);
+        card.getChildren().addAll(lblType, lblTitre, lblEcole, lblDates, spacer, actions);
+        
+        card.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) voirProjets(p);
+        });
+        
+        return card;
     }
 
     @FXML
     private void ajouterParcours() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterParcours.fxml"));
-            Parent view = loader.load();
-            MainController.getInstance().loadInContentArea(view);
-        } catch (IOException e) {
-            afficherErreur("Erreur", e.getMessage());
-        }
+        ouvrirFormulaire(null);
     }
 
-    public void modifierParcoursSpecific(Parcours p) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ModifierParcours.fxml"));
-            Parent view = loader.load();
-            ModifierParcoursController controller = loader.getController();
-            controller.initData(p);
-            MainController.getInstance().loadInContentArea(view);
-        } catch (IOException e) {
-            afficherErreur("Erreur", e.getMessage());
-        }
+    public void modifierParcours(Parcours p) {
+        ouvrirFormulaire(p);
     }
 
-    public void supprimerParcoursSpecific(Parcours p) {
-        Optional<ButtonType> result = new Alert(Alert.AlertType.CONFIRMATION,
-                "Supprimer le parcours \"" + p.getTitre() + "\" ?",
-                ButtonType.YES, ButtonType.NO).showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.YES) {
-            try {
-                parcoursService.deleteEntity(p);
-                chargerDonnees();
-            } catch (SQLException e) {
-                afficherErreur("Erreur suppression", e.getMessage());
+    public void supprimerParcours(Parcours p) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer ce parcours ?", ButtonType.YES, ButtonType.NO);
+        alert.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.YES) {
+                try {
+                    parcoursService.deleteEntity(p);
+                    chargerDonnees();
+                } catch (SQLException e) {
+                    afficherErreur("Erreur", e.getMessage());
+                }
             }
-        }
+        });
     }
 
-    public void voirProjetsSpecific(Parcours p) {
+    public void voirProjets(Parcours p) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherProjets.fxml"));
             Parent view = loader.load();
@@ -141,19 +159,57 @@ public class AfficherParcoursController implements Initializable {
             controller.initData(p);
             MainController.getInstance().loadInContentArea(view);
         } catch (IOException e) {
-            afficherErreur("Erreur", e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    @FXML
-    private void filtrerParType() {
-        filterData();
+    private void ouvrirFormulaire(Parcours p) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterParcours.fxml"));
+            Parent root = loader.load();
+            if (p != null) {
+                AjouterParcoursController ctrl = loader.getController();
+                ctrl.setParcours(p);
+            }
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle(p == null ? "Ajouter un parcours" : "Modifier le parcours");
+            stage.showAndWait();
+            chargerDonnees();
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
-    private void afficherErreur(String titre, String msg) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(titre);
-        alert.setContentText(msg);
-        alert.show();
+    @FXML
+    private void genererCV() {
+        try {
+            ProjetService ps = new ProjetService();
+            CVService.genererEtOuvrirCV(parcoursService.getData(), ps.getData());
+        } catch (Exception e) { afficherErreur("Erreur PDF", e.getMessage()); }
+    }
+
+    @FXML
+    private void ouvrirAnalyseCV() {
+        naviguer("/AnalyseCV.fxml");
+    }
+
+    @FXML
+    private void ouvrirRecommandationsIA() {
+        naviguer("/RecommendationIA.fxml");
+    }
+
+    private void naviguer(String fxml) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
+            Parent view = loader.load();
+            MainController.getInstance().loadInContentArea(view);
+        } catch (IOException e) {
+            afficherErreur("Erreur", "Navigation impossible vers " + fxml);
+            e.printStackTrace();
+        }
+    }
+
+    private void afficherErreur(String titre, String message) {
+        new Alert(Alert.AlertType.ERROR, message).show();
     }
 }

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="mainContainer" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="edu.connection3a36.controllers.FrontLayoutController"
+            style="-fx-background-color: #f0f4f8;" prefWidth="1200" prefHeight="800">
+
+    <!-- Header / Navbar -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20"
+              style="-fx-background-color: #e8ecf1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);">
+            <padding><Insets top="12" right="40" bottom="12" left="40"/></padding>
+
+            <!-- Logo -->
+            <VBox alignment="CENTER_LEFT">
+                <Label text="MentorAI" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                <Label text="Se former autrement" style="-fx-font-size: 10px; -fx-text-fill: #e74c3c;"/>
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Navigation Links -->
+            <HBox alignment="CENTER" spacing="20">
+                <Button text="Home" style="-fx-background-color: transparent; -fx-text-fill: #34495e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <Button text="Parcours" onAction="#loadParcours" style="-fx-background-color: transparent; -fx-text-fill: #102c59; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <Button text="Projets" onAction="#loadProjets" style="-fx-background-color: transparent; -fx-text-fill: #102c59; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <!-- Dropdown Menu IA -->
+                <MenuButton text="Espace IA ✨" 
+                            style="-fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6); -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 2 10; -fx-cursor: hand;">
+                    <items>
+                        <MenuItem text="📊 Analyse Skill Gap" onAction="#loadSkillGap" style="-fx-font-weight: bold;"/>
+                        <MenuItem text="📈 Carrière Prédictive" onAction="#loadCareer" style="-fx-font-weight: bold;"/>
+                    </items>
+                </MenuButton>
+                <Button text="Contact" style="-fx-background-color: transparent; -fx-text-fill: #34495e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <Button text="Pricing" onAction="#loadPricing" style="-fx-background-color: transparent; -fx-text-fill: #34495e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <Button text="About" onAction="#loadAbout" style="-fx-background-color: transparent; -fx-text-fill: #34495e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+            </HBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Profile & Auth -->
+            <HBox alignment="CENTER" spacing="15">
+                <!-- Solid Red Button for Profile -->
+                <HBox alignment="CENTER" spacing="8" style="-fx-background-color: #e74c3c; -fx-background-radius: 20; -fx-padding: 6 15; -fx-cursor: hand;">
+                    <Label text="👤" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+                    <Label fx:id="lblUserName" text="Profil" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;"/>
+                </HBox>
+
+                <!-- Outline Red Button for Disconnect -->
+                <Button text="🚪 Déconnexion" onAction="#logout"
+                        style="-fx-background-color: transparent; -fx-border-color: #e74c3c; -fx-border-radius: 20; -fx-text-fill: #e74c3c; -fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 6 15; -fx-cursor: hand;"/>
+            </HBox>
+        </HBox>
+    </top>
+
+    <!-- Center Content -->
+    <center>
+        <!-- Les vues comme AfficherParcoursFront.fxml y seront injectées -->
+    </center>
+
+    <!-- News Ticker -->
+    <bottom>
+        <VBox>
+            <HBox fx:id="newsTickerContainer" alignment="CENTER_LEFT" spacing="0" 
+                  style="-fx-background-color: #ffffff; -fx-border-color: #d1d9e6; -fx-border-width: 1 0 1 0; -fx-padding: 5 0;">
+                <HBox alignment="CENTER" style="-fx-background-color: #e74c3c; -fx-padding: 5 15;">
+                    <Label text="TENDANCES TECH" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;"/>
+                </HBox>
+                <Pane fx:id="tickerClipPane" HBox.hgrow="ALWAYS">
+                    <HBox fx:id="newsTicker" alignment="CENTER_LEFT" spacing="50" style="-fx-padding: 0 20;">
+                        <!-- News items will be injected here -->
+                    </HBox>
+                </Pane>
+            </HBox>
+
+            <!-- Footer -->
+            <HBox alignment="CENTER" style="-fx-background-color: #0a1a36; -fx-padding: 15;">
+                <Label text="© 2026 MentorAI. All Rights Reserved." style="-fx-text-fill: #9dbbce; -fx-font-size: 12px;"/>
+            </HBox>
+        </VBox>
+    </bottom>
+
+</BorderPane>

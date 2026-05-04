@@ -163,6 +163,6 @@ public class TraiterFeedbackController implements Initializable {
     private void annuler() { fermerPopup(); }
 
     private void fermerPopup() {
-        ((Stage) comboType.getScene().getWindow()).close();
+        edu.connection3a36.controllers.MainController.getInstance().loadInContentArea("/fxml/AdminFeedback.fxml");
     }
 }

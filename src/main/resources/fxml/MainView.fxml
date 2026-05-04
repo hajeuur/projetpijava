@@ -49,21 +49,33 @@
                     <Button fx:id="btnArticles" text="Articles"
                             onAction="#showArticles" styleClass="header-nav-btn"/>
 
-                    <!-- IA (varie selon le rôle) -->
+                    <!-- IA (Individuelles) -->
                     <Button fx:id="btnAIPedagogique" text="IA Pédagogique"
                             onAction="#showAIPedagogique"
                             styleClass="header-nav-btn" visible="false" managed="false"/>
                     <Button fx:id="btnAIDecisionnel" text="IA Décisionnelle"
                             onAction="#showAIDecisionnel"
                             styleClass="header-nav-btn" visible="false" managed="false"/>
+
+                    <!-- Menu Assistant IA (Reste des outils) -->
+                    <MenuButton fx:id="menuIA" text="🤖 Outils IA"
+                                styleClass="header-nav-btn" visible="false" managed="false">
+                        <items>
+                            <MenuItem text="Analyse Skill Gap" onAction="#showSkillGap"/>
+                            <MenuItem text="Career Predictor" onAction="#showCareerPredictor"/>
+                            <MenuItem text="Analyse de CV" onAction="#showAnalyseCV"/>
+                            <MenuItem text="Simulation d'Entretien" onAction="#showEntretienIA"/>
+                        </items>
+                    </MenuButton>
                     
-                    <!-- Gestion Parcours (Étudiant) -->
-                    <Button fx:id="btnParcours" text="Mon Parcours"
-                            onAction="#showParcours" styleClass="header-nav-btn" visible="false" managed="false"/>
-                    
-                    <!-- Gestion Projets (Étudiant) -->
-                    <Button fx:id="btnProjets" text="Portfolio Projets"
-                            onAction="#showProjets" styleClass="header-nav-btn" visible="false" managed="false"/>
+                    <!-- Menu Ma Carrière (Regroupement) -->
+                    <MenuButton fx:id="menuCarriere" text="🎓 Ma Carrière"
+                                styleClass="header-nav-btn" visible="false" managed="false">
+                        <items>
+                            <MenuItem text="Mon Parcours" onAction="#showParcours"/>
+                            <MenuItem text="Portfolio Projets" onAction="#showProjets"/>
+                        </items>
+                    </MenuButton>
                             
                     <!-- Games Hub (Point #7) -->
                     <Button fx:id="btnGamesHub" text="🧩 Hub Intervention"
@@ -95,7 +107,13 @@
 
                 <!-- Zone droite : mode switcher + user -->
                 <HBox alignment="CENTER_RIGHT" spacing="10">
-                    <!-- Switcher ADMINM -->
+                    <Button fx:id="btnFullScreen" text="⛶"
+                            onAction="#toggleFullScreen" styleClass="header-nav-btn">
+                        <tooltip>
+                            <Tooltip text="Plein écran"/>
+                        </tooltip>
+                    </Button>
+
                     <Button fx:id="btnSwitchBack" text="Mode Back-Office"
                             onAction="#switchToBack" styleClass="header-switcher-btn"
                             visible="false" managed="false"/>
@@ -116,6 +134,13 @@
 
             <!-- SIDEBAR BACK (visible quand backMode) — on réutilise le top pour le header du back -->
             <!-- NB: la sidebar sera dans left -->
+            <!-- NEWS BAR -->
+            <HBox fx:id="newsBar" style="-fx-background-color: #1e293b; -fx-padding: 6 20;" alignment="CENTER_LEFT" spacing="15" visible="false" managed="false">
+                <Label text="LATEST NEWS" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-padding: 2 8; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 10px;"/>
+                <Pane HBox.hgrow="ALWAYS" style="-fx-background-color: transparent;">
+                    <HBox fx:id="hBoxNews" alignment="CENTER_LEFT" spacing="30" layoutY="2"/>
+                </Pane>
+            </HBox>
         </VBox>
     </top>
 

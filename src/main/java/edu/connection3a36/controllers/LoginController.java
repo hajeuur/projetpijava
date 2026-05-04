@@ -72,6 +72,63 @@ public class LoginController {
         }
     }
 
+    @FXML
+    void loginAsStudent() {
+        try {
+            // Chercher Arslen (ID 21) spécifiquement comme demandé
+            Utilisateur student = service.getData().stream()
+                .filter(u -> u.getId() == 21)
+                .findFirst()
+                .orElse(null);
+
+            if (student == null) {
+                // Fallback si l'ID 21 n'existe pas encore (on cherche un autre étudiant)
+                student = service.getData().stream()
+                    .filter(u -> u.getRole().toUpperCase().contains("ETUDIANT"))
+                    .findFirst()
+                    .orElse(null);
+            }
+
+            if (student == null) {
+                // Mock fallback ultime
+                student = new Utilisateur();
+                student.setId(21);
+                student.setNom("Arslen");
+                student.setPrenom("Etudiant");
+                student.setEmail("arslen@mentor.com");
+                student.setRole("ROLE_ETUDIANT");
+            }
+
+            SessionManager.setCurrentUser(student);
+            loadMainApp();
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    @FXML
+    void loginAsAdmin() {
+        try {
+            // Chercher le premier admin en base
+            java.util.List<Utilisateur> users = service.getData();
+            Utilisateur admin = users.stream()
+                .filter(u -> u.getRole().toUpperCase().contains("ADMIN"))
+                .findFirst()
+                .orElse(null);
+
+            if (admin == null) {
+                // Mock fallback si base vide
+                admin = new Utilisateur();
+                admin.setId(2);
+                admin.setNom("Admin");
+                admin.setPrenom("System");
+                admin.setEmail("admin@mentor.com");
+                admin.setRole("ROLE_ADMIN");
+            }
+
+            SessionManager.setCurrentUser(admin);
+            loadMainApp();
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
     private void loadMainApp() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainView.fxml"));

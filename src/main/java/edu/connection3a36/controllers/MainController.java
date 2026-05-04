@@ -3,6 +3,7 @@ package edu.connection3a36.controllers;
 import edu.connection3a36.entities.Utilisateur;
 import edu.connection3a36.services.AccessControlService;
 import edu.connection3a36.services.UserPreferencesService;
+import edu.connection3a36.services.NewsService;
 import edu.connection3a36.tools.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,12 +12,22 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.control.Hyperlink;
 import javafx.stage.Stage;
 
+import javafx.scene.layout.Pane;
+import javafx.animation.TranslateTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.Animation;
+import javafx.util.Duration;
+import java.util.List;
+import javafx.application.Platform;
 import java.io.IOException;
 
 /**
@@ -57,6 +68,10 @@ public class MainController {
     @FXML private Button btnMesFeedbacks;
     @FXML private Button btnObjectifs;
     @FXML private Button btnDashboardObjectifs;
+    @FXML private MenuButton menuCarriere;
+    @FXML private MenuButton menuIA;
+    @FXML private HBox newsBar;
+    @FXML private HBox hBoxNews;
 
     // ── MentorAI features (sidebar BACK) ──────────────────────────────────────
     @FXML private VBox    boxMentorAI;
@@ -85,6 +100,7 @@ public class MainController {
     private String userRole = "";
     private final UserPreferencesService prefsService = new UserPreferencesService();
     private final AccessControlService acl = new AccessControlService();
+    private final NewsService newsService = new NewsService();
 
     public static MainController getInstance() {
         return instance;
@@ -110,6 +126,17 @@ public class MainController {
         // Charger le badge de notifications en arrière-plan
         updateNotifications();
         applyGlobalPreferences();
+        startNewsAnimation();
+
+        // Rendre en plein écran / maximiser
+
+        // Rendre en plein écran / maximiser
+        javafx.application.Platform.runLater(() -> {
+            if (contentArea.getScene() != null) {
+                Stage stage = (Stage) contentArea.getScene().getWindow();
+                stage.setMaximized(true);
+            }
+        });
     }
 
     /**
@@ -159,6 +186,9 @@ public class MainController {
             hide(btnAIDecisionnel);
             hide(btnParcours);
             hide(btnProjets);
+            hide(menuCarriere);
+            hide(menuIA);
+            hide(newsBar);
             hide(btnGamesHub); // Cacher Hub Intervention
             hide(boxAdmin);
             hide(boxBackAdmin);
@@ -182,10 +212,11 @@ public class MainController {
             hide(btnDashboardEnseignant); hide(btnDashboardAdmin);
             hide(btnPlanActions);
             hide(btnArticles);
-            hide(btnAIPedagogique); hide(btnAIDecisionnel);
-            
-            show(btnParcours);
-            show(btnProjets);
+            hide(btnAIPedagogique); 
+            hide(btnAIDecisionnel);
+            show(menuIA);
+            show(newsBar);
+            show(menuCarriere);
             show(btnGamesHub);
             if (btnMesFeedbacks != null) show(btnMesFeedbacks);
             if (btnObjectifs != null) show(btnObjectifs);
@@ -201,7 +232,7 @@ public class MainController {
             hide(btnPlanActions);
             hide(btnArticles);
             hide(btnAIPedagogique); hide(btnAIDecisionnel);
-            hide(btnParcours); hide(btnProjets); hide(btnGamesHub);
+            hide(btnParcours); hide(btnProjets); hide(menuCarriere); hide(menuIA); hide(newsBar); hide(btnGamesHub);
             contentArea.getChildren().clear();
         }
     }
@@ -223,7 +254,7 @@ public class MainController {
         hide(btnDashboardEnseignant); hide(btnDashboardAdmin);
         hide(btnPlanActions); hide(btnArticles);
         hide(btnAIPedagogique); hide(btnAIDecisionnel);
-        hide(btnParcours); hide(btnProjets); hide(btnGamesHub);
+        hide(btnParcours); hide(btnProjets); hide(menuCarriere); hide(menuIA); hide(newsBar); hide(btnGamesHub);
         hide(btnSwitchBack); hide(btnNotifications);
 
         if (isSuperAdmin()) {
@@ -241,8 +272,17 @@ public class MainController {
             show(btnPlanActions);
             show(btnArticles);
             show(btnAIPedagogique);
-            hide(btnGamesHub); // Cacher Hub Intervention pour enseignant
+            show(menuIA);
+            show(newsBar);
+            hide(btnGamesHub); 
             showDashboardEnseignant();
+        } else if (isEtudiant()) {
+            // Étudiant : Parcours + Projets + Outils IA (Skill Gap, etc.)
+            show(menuCarriere);
+            show(menuIA);
+            show(newsBar);
+            show(btnGamesHub);
+            showParcours(); // Vue par défaut
         }
     }
 
@@ -271,12 +311,14 @@ public class MainController {
     /** Affiche le header TOP, masque la sidebar. */
     private void showFrontMode() {
         show(frontHeader);
+        show(newsBar);
         hide(backSidebar);
     }
 
     /** Affiche la sidebar LEFT, masque le header. */
     private void showBackMode() {
         hide(frontHeader);
+        hide(newsBar);
         show(backSidebar);
     }
 
@@ -436,6 +478,30 @@ public class MainController {
     }
 
     @FXML
+    void showSkillGap() {
+        loadView("/SkillGap.fxml");
+        setActiveBtn(null);
+    }
+
+    @FXML
+    void showCareerPredictor() {
+        loadView("/CareerDashboard.fxml");
+        setActiveBtn(null);
+    }
+
+    @FXML
+    void showAnalyseCV() {
+        loadView("/AnalyseCV.fxml");
+        setActiveBtn(null);
+    }
+
+    @FXML
+    void showEntretienIA() {
+        loadView("/EntretienIA.fxml");
+        setActiveBtn(null);
+    }
+
+    @FXML
     void showBackParcours() {
         if (!acl.canAccess(AccessControlService.Module.BACK_PARCOURS)) return;
         loadView("/BackOfficeParcours.fxml");
@@ -489,6 +555,53 @@ public class MainController {
     void showCarnet() {
         loadView("/views/carnet.fxml");
         setActiveBtn(btnCarnet);
+    }
+
+    @FXML
+    void toggleFullScreen() {
+        Stage stage = (Stage) contentArea.getScene().getWindow();
+        stage.setFullScreen(!stage.isFullScreen());
+    }
+
+    private void startNewsAnimation() {
+        if (hBoxNews == null) return;
+        
+        new Thread(() -> {
+            try {
+                List<NewsService.NewsItem> news = newsService.getLatestTechNews();
+                if (news.isEmpty()) return;
+
+                Platform.runLater(() -> {
+                    hBoxNews.getChildren().clear();
+                    for (NewsService.NewsItem item : news) {
+                        Hyperlink link = new Hyperlink(item.getTitle());
+                        link.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-underline: false;");
+                        link.setOnAction(e -> {
+                            try {
+                                java.awt.Desktop.getDesktop().browse(new java.net.URI(item.getUrl()));
+                            } catch (Exception ex) { ex.printStackTrace(); }
+                        });
+                        hBoxNews.getChildren().add(link);
+                        
+                        // Separator
+                        Label sep = new Label("|");
+                        sep.setStyle("-fx-text-fill: rgba(255,255,255,0.3);");
+                        hBoxNews.getChildren().add(sep);
+                    }
+                    
+                    double textWidth = hBoxNews.getChildren().size() * 300; // Estimation large car width pas encore calculée
+                    
+                    javafx.animation.TranslateTransition tt = new javafx.animation.TranslateTransition(
+                        javafx.util.Duration.seconds(40), hBoxNews);
+                    
+                    tt.setFromX(1200);
+                    tt.setToX(-3000); // Défilement vers la gauche
+                    tt.setCycleCount(javafx.animation.Animation.INDEFINITE);
+                    tt.setInterpolator(javafx.animation.Interpolator.LINEAR);
+                    tt.play();
+                });
+            } catch (Exception e) { e.printStackTrace(); }
+        }).start();
     }
 
     // ─────────────────────────────────────────────────────────────────────────

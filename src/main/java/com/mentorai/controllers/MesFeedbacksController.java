@@ -36,8 +36,8 @@ public class MesFeedbacksController implements Initializable {
     @FXML private ComboBox<String> comboTri;
     @FXML private Label labelTotal;
 
-    private int utilisateurId = 11;
-    private List<Feedback> tousLesFeedbacks;
+    private int utilisateurId = edu.connection3a36.tools.SessionManager.getCurrentUser() != null ? edu.connection3a36.tools.SessionManager.getCurrentUser().getId() : 0;
+    private List<Feedback> tousLesFeedbacks = new java.util.ArrayList<>();
 
     private FeedbackService feedbackService = new FeedbackService();
     private TraitementService traitementService = new TraitementService();
@@ -220,9 +220,11 @@ public class MesFeedbacksController implements Initializable {
         String motCle = champRecherche.getText().trim().toLowerCase();
         String tri = comboTri.getValue();
 
+        if (tousLesFeedbacks == null) return;
+
         List<Feedback> filtre = tousLesFeedbacks.stream()
                 .filter(f -> motCle.isEmpty() ||
-                        f.getContenu().toLowerCase().contains(motCle))
+                        (f.getContenu() != null && f.getContenu().toLowerCase().contains(motCle)))
                 .collect(Collectors.toList());
 
         switch (tri) {
@@ -248,9 +250,7 @@ public class MesFeedbacksController implements Initializable {
             ModifierFeedbackController ctrl = loader.getController();
             ctrl.setFeedback(feedback, this);
 
-            Stage stage = (Stage) tableFeedbacks.getScene().getWindow();
-            stage.setTitle("MentorAI - Modifier mon feedback");
-            stage.setScene(new Scene(root));
+            edu.connection3a36.controllers.MainController.getInstance().loadInContentArea(root);
         } catch (Exception e) {
             System.out.println("❌ Erreur modification : " + e.getMessage());
             e.printStackTrace();
@@ -277,9 +277,7 @@ public class MesFeedbacksController implements Initializable {
                     getClass().getResource("/fxml/AjouterFeedback.fxml")
             );
             VBox root = loader.load();
-            Stage stage = (Stage) tableFeedbacks.getScene().getWindow();
-            stage.setTitle("MentorAI - Donner un feedback");
-            stage.setScene(new Scene(root));
+            edu.connection3a36.controllers.MainController.getInstance().loadInContentArea(root);
         } catch (Exception e) {
             System.out.println("❌ Erreur : " + e.getMessage());
         }

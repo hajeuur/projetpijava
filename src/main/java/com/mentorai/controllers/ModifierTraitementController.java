@@ -126,6 +126,6 @@ public class ModifierTraitementController implements Initializable {
     private void annuler() { fermer(); }
 
     private void fermer() {
-        ((Stage) comboType.getScene().getWindow()).close();
+        edu.connection3a36.controllers.MainController.getInstance().loadInContentArea("/fxml/AdminFeedback.fxml");
     }
 }

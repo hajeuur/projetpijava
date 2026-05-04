@@ -132,9 +132,7 @@ public class ModifierFeedbackController implements Initializable {
             MesFeedbacksController ctrl = loader.getController();
             ctrl.setUtilisateurId(feedbackAModifier.getUtilisateurId());
 
-            Stage stage = (Stage) comboType.getScene().getWindow();
-            stage.setTitle("MentorAI - Mes Feedbacks");
-            stage.setScene(new Scene(root));
+            edu.connection3a36.controllers.MainController.getInstance().loadInContentArea(root);
         } catch (Exception e) {
             System.out.println("❌ Erreur retour : " + e.getMessage());
         }
