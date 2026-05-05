@@ -1,0 +1,9 @@
+# Configuration Azure Text Analytics
+# Pour obtenir vos clés API, visitez : https://portal.azure.com/
+azure.sentiment.endpoint=https://votre-endpoint.cognitiveservices.azure.com/
+azure.sentiment.key=VOTRE_CLE_API_AZURE
+
+# Instructions :
+# 1. Copiez ce fichier et renommez-le en "config.properties"
+# 2. Remplacez les valeurs par vos vraies clés API Azure
+# 3. Le fichier config.properties est dans .gitignore pour protéger vos clés

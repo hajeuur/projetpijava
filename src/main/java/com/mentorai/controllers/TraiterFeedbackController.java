@@ -7,6 +7,7 @@ import com.mentorai.services.FeedbackService;
 import com.mentorai.services.GeminiService;
 import com.mentorai.services.TraitementService;
 import com.mentorai.services.UtilisateurService;
+import com.mentorai.services.SentimentService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -27,6 +28,14 @@ public class TraiterFeedbackController implements Initializable {
     @FXML private Label labelErreur;
     @FXML private Button btnGemini;
     @FXML private Label labelGeminiStatus;
+    
+    // Analyse de sentiment
+    @FXML private Label labelSentimentPrincipal;
+    @FXML private Label labelScorePositif;
+    @FXML private Label labelScoreNeutre;
+    @FXML private Label labelScoreNegatif;
+    @FXML private Label labelRecommandation;
+    @FXML private Label labelExplication;
 
     private Feedback feedbackATraiter;
     private AdminFeedbackController adminController;
@@ -36,6 +45,7 @@ public class TraiterFeedbackController implements Initializable {
     private GeminiService       geminiService       = new GeminiService();
     private EmailService        emailService        = new EmailService();
     private UtilisateurService  utilisateurService  = new UtilisateurService();
+    private SentimentService    sentimentService    = new SentimentService();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -60,6 +70,42 @@ public class TraiterFeedbackController implements Initializable {
                         "  |  Date : " + feedback.getDatefeedback() +
                         "\n\nMessage : " + feedback.getContenu()
         );
+        
+        // ✅ ANALYSE DE SENTIMENT AUTOMATIQUE
+        analyserSentimentFeedback();
+    }
+
+    /**
+     * Analyse le sentiment du feedback avec Azure IA
+     */
+    private void analyserSentimentFeedback() {
+        if (feedbackATraiter == null) return;
+        
+        new Thread(() -> {
+            java.util.Map<String, String> analyse = sentimentService.analyserSentimentDetaille(
+                    feedbackATraiter.getContenu()
+            );
+            
+            Platform.runLater(() -> {
+                String sentiment = analyse.get("sentiment");
+                String emoji = sentimentService.getEmojiSentiment(sentiment);
+                String couleur = sentimentService.getCouleurSentiment(sentiment);
+                
+                labelSentimentPrincipal.setText(emoji + " " + sentiment.toUpperCase());
+                labelSentimentPrincipal.setStyle(
+                        "-fx-background-color: " + couleur + "; -fx-text-fill: white;" +
+                        "-fx-padding: 8 16 8 16; -fx-background-radius: 20;" +
+                        "-fx-font-size: 14px; -fx-font-weight: bold;" +
+                        "-fx-effect: dropshadow(gaussian,rgba(0,0,0,0.2),4,0,0,2);"
+                );
+                
+                labelScorePositif.setText(analyse.get("positif") + "%");
+                labelScoreNeutre.setText(analyse.get("neutre") + "%");
+                labelScoreNegatif.setText(analyse.get("negatif") + "%");
+                labelRecommandation.setText(analyse.get("recommandation"));
+                labelExplication.setText(analyse.get("explication"));
+            });
+        }).start();
     }
 
     // ✅ GEMINI
@@ -163,6 +209,6 @@ public class TraiterFeedbackController implements Initializable {
     private void annuler() { fermerPopup(); }
 
     private void fermerPopup() {
-        ((Stage) comboType.getScene().getWindow()).close();
+        edu.connection3a36.controllers.MainController.getInstance().loadInContentArea("/fxml/AdminFeedback.fxml");
     }
 }

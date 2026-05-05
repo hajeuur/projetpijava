@@ -207,14 +207,17 @@ public class ArticleListController {
         if (cardsContainer == null) return;
         cardsContainer.getChildren().clear();
 
+        int displayedCount = 0;
         for (ReferenceArticle article : articlesList) {
-            // En front, on peut choisir d'afficher que les publiés ou tous
-            // Ici on affiche tout mais on différencie visuellement
+            if (!article.isPublished()) {
+                continue;
+            }
             cardsContainer.getChildren().add(buildArticleCard(article));
+            displayedCount++;
         }
 
-        if (articlesList.isEmpty()) {
-            Label empty = new Label("Aucun article disponible.");
+        if (displayedCount == 0) {
+            Label empty = new Label("Aucun article publié disponible.");
             empty.setStyle("-fx-text-fill: #7a8fa5; -fx-font-style: italic; -fx-font-size: 14px;");
             cardsContainer.getChildren().add(empty);
         }

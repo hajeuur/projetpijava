@@ -3,6 +3,7 @@ package edu.connection3a36.controllers;
 import edu.connection3a36.entities.Utilisateur;
 import edu.connection3a36.services.AccessControlService;
 import edu.connection3a36.services.UserPreferencesService;
+import edu.connection3a36.services.NewsService;
 import edu.connection3a36.tools.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,12 +12,23 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Separator;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.control.Hyperlink;
 import javafx.stage.Stage;
 
+import javafx.scene.layout.Pane;
+import javafx.animation.TranslateTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.Animation;
+import javafx.util.Duration;
+import java.util.List;
+import javafx.application.Platform;
 import java.io.IOException;
 
 /**
@@ -48,35 +60,50 @@ public class MainController {
     @FXML private Button btnParcours;
     @FXML private Button btnProjets;
     @FXML private Button btnGamesHub;
-    @FXML private Button btnIoT;
-    @FXML private Button btnAtRisk;
+    @FXML private MenuButton menuPlus;
+    // ── Sidebar (BACK) ────────────────────────────────────────────────────────
+    @FXML private VBox backSidebar;
+    @FXML private VBox boxSwitcher;
+    @FXML private VBox boxGestions;
+
+    // ── Boutons Sidebar (BACK) ────────────────────────────────────────────────
+    @FXML private Button btnUtilisateurs;
+    @FXML private Button btnCategories;
     @FXML private Button btnBackParcours;
     @FXML private Button btnBackProjets;
-    @FXML private Button btnNotifSidebar; // Bouton clochette dans la sidebar
     @FXML private Button btnBackFeedbacks;
-    @FXML private Button btnMesFeedbacks;
-    @FXML private Button btnObjectifs;
+    @FXML private Button btnBackObjectifs;
     @FXML private Button btnDashboardObjectifs;
-
-    // ── MentorAI features (sidebar BACK) ──────────────────────────────────────
-    @FXML private VBox    boxMentorAI;
-    @FXML private Button  btnHumeur;
-    @FXML private Button  btnPlanning;
-    @FXML private Button  btnCarnet;
+    @FXML private Button btnPlanActionsBack;
+    @FXML private Button btnArticlesBack;
+    @FXML private Button btnIoT;
+    @FXML private Button btnAtRisk;
+    @FXML private Button btnHumeur;
+    @FXML private Button btnPlanning;
+    @FXML private Button btnCarnet;
+    @FXML private Button btnNotifSidebar;
+    @FXML private Label  lblUserBack;
+    
+    // Labels/Separators Sidebar (pour contrôle fin)
+    @FXML private Label lblAdminSection;
+    @FXML private Label lblPedagoSection;
+    @FXML private Label lblIASection;
+    @FXML private Label lblMentorSection;
+    @FXML private Separator sepPedago;
+    @FXML private Separator sepIA;
+    @FXML private Separator sepMentor;
+    @FXML private Separator sepSwitcher;
 
     // ── MentorAI features (header FRONT) ──────────────────────────────────────
     @FXML private Button  btnHeaderHumeur;
     @FXML private Button  btnHeaderPlanning;
     @FXML private Button  btnHeaderCarnet;
-
-    // ── Sidebar (BACK) ────────────────────────────────────────────────────────
-    @FXML private VBox backSidebar;
-    @FXML private VBox boxAdmin;
-    @FXML private VBox boxBackAdmin;
-    @FXML private VBox boxSwitcher;
-    @FXML private Button btnUtilisateurs;
-    @FXML private Button btnCategories;
-    @FXML private Label lblUserBack;
+    @FXML private Button  btnMesFeedbacks;
+    @FXML private Button  btnObjectifs;
+    @FXML private MenuButton menuCarriere;
+    @FXML private MenuButton menuIA;
+    @FXML private HBox newsBar;
+    @FXML private HBox hBoxNews;
 
     // ── État interne ──────────────────────────────────────────────────────────
     private static MainController instance;
@@ -85,6 +112,7 @@ public class MainController {
     private String userRole = "";
     private final UserPreferencesService prefsService = new UserPreferencesService();
     private final AccessControlService acl = new AccessControlService();
+    private final NewsService newsService = new NewsService();
 
     public static MainController getInstance() {
         return instance;
@@ -110,6 +138,17 @@ public class MainController {
         // Charger le badge de notifications en arrière-plan
         updateNotifications();
         applyGlobalPreferences();
+        startNewsAnimation();
+
+        // Rendre en plein écran / maximiser
+
+        // Rendre en plein écran / maximiser
+        javafx.application.Platform.runLater(() -> {
+            if (contentArea.getScene() != null) {
+                Stage stage = (Stage) contentArea.getScene().getWindow();
+                stage.setMaximized(true);
+            }
+        });
     }
 
     /**
@@ -117,39 +156,35 @@ public class MainController {
      */
     private void configureByRole() {
         if (isSuperAdmin()) {
-            // SUPERADMIN (admin@esprit.tn) → BACK-Office complet au démarrage + accès FRONT
             showBackMode();
-            show(boxAdmin);
-            show(boxBackAdmin);
-            show(boxSwitcher); // ADMINM peut basculer vers le FRONT
-            show(btnNotifSidebar); // Bouton notifications visible
+            show(boxSwitcher);
+            show(btnNotifSidebar);
 
-            // Tous les boutons CRUD visibles
-            for (javafx.scene.Node n : boxBackAdmin.getChildren()) show(n);
-
+            if (boxGestions != null) {
+                show(boxGestions);
+                for (javafx.scene.Node n : boxGestions.getChildren()) show(n);
+            }
             showCategories();
 
         } else if (isAdmin()) {
-            // ADMIN SIMPLE (admin@gmail.com) → Back-Office Parcours + Projets uniquement
+            // admin@gmail.com
             showBackMode();
-            hide(boxAdmin);
-            show(boxBackAdmin);
             hide(boxSwitcher);
+            hide(sepSwitcher);
 
-            // Cacher tout dans boxBackAdmin sauf Parcours, Projets, Feedbacks et Dashboard Objectifs
-            for (javafx.scene.Node n : boxBackAdmin.getChildren()) {
-                if (n instanceof Button b) {
-                    if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks
-                            || b == btnDashboardObjectifs) show(b);
-                    else hide(b);
-                } else {
-                    hide(n); // Séparateurs, labels
+            // Cacher tout dans boxGestions sauf Parcours, Projets, Feedbacks et Dashboard Objectifs
+            if (boxGestions != null) {
+                show(boxGestions);
+                for (javafx.scene.Node n : boxGestions.getChildren()) {
+                    if (n instanceof Button b) {
+                        if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks
+                                || b == btnDashboardObjectifs) show(b);
+                        else hide(b);
+                    } else {
+                        hide(n); // Séparateurs, labels
+                    }
                 }
             }
-
-            // MentorAI visible en sidebar pour admin
-            if (boxMentorAI != null) show(boxMentorAI);
-
             showBackParcours();
 
         } else if (isEnseignant()) {
@@ -160,9 +195,11 @@ public class MainController {
             hide(btnAIDecisionnel);
             hide(btnParcours);
             hide(btnProjets);
+            hide(menuCarriere);
+            hide(menuIA);
+            hide(newsBar);
             hide(btnGamesHub); // Cacher Hub Intervention
-            hide(boxAdmin);
-            hide(boxBackAdmin);
+            hide(boxGestions);
             hide(boxSwitcher);
             show(btnDashboardEnseignant);
             show(btnAIPedagogique);
@@ -170,9 +207,9 @@ public class MainController {
             show(btnArticles);
             
             // MentorAI dans le header FRONT
-            if (btnHeaderHumeur != null) show(btnHeaderHumeur);
-            if (btnHeaderPlanning != null) show(btnHeaderPlanning);
-            if (btnHeaderCarnet != null) show(btnHeaderCarnet);
+            if (btnHeaderHumeur != null) hide(btnHeaderHumeur);
+            if (btnHeaderPlanning != null) hide(btnHeaderPlanning);
+            if (btnHeaderCarnet != null) hide(btnHeaderCarnet);
 
             showDashboardEnseignant();
 
@@ -183,14 +220,16 @@ public class MainController {
             hide(btnDashboardEnseignant); hide(btnDashboardAdmin);
             hide(btnPlanActions);
             hide(btnArticles);
-            hide(btnAIPedagogique); hide(btnAIDecisionnel);
-            
-            show(btnParcours);
-            show(btnProjets);
-            show(btnGamesHub);
+            hide(btnAIPedagogique); 
+            hide(btnAIDecisionnel);
+            show(menuIA);
+            show(newsBar);
+            show(menuCarriere);
+            hide(btnGamesHub);
             if (btnMesFeedbacks != null) show(btnMesFeedbacks);
             if (btnObjectifs != null) show(btnObjectifs);
             if (btnHeaderCarnet != null) show(btnHeaderCarnet);
+            if (menuPlus != null) show(menuPlus);
             
             showParcours();
 
@@ -202,7 +241,7 @@ public class MainController {
             hide(btnPlanActions);
             hide(btnArticles);
             hide(btnAIPedagogique); hide(btnAIDecisionnel);
-            hide(btnParcours); hide(btnProjets); hide(btnGamesHub);
+            hide(btnParcours); hide(btnProjets); hide(menuCarriere); hide(menuIA); hide(newsBar); hide(btnGamesHub);
             contentArea.getChildren().clear();
         }
     }
@@ -224,7 +263,7 @@ public class MainController {
         hide(btnDashboardEnseignant); hide(btnDashboardAdmin);
         hide(btnPlanActions); hide(btnArticles);
         hide(btnAIPedagogique); hide(btnAIDecisionnel);
-        hide(btnParcours); hide(btnProjets); hide(btnGamesHub);
+        hide(btnParcours); hide(btnProjets); hide(menuCarriere); hide(menuIA); hide(newsBar); hide(btnGamesHub);
         hide(btnSwitchBack); hide(btnNotifications);
 
         if (isSuperAdmin()) {
@@ -242,8 +281,18 @@ public class MainController {
             show(btnPlanActions);
             show(btnArticles);
             show(btnAIPedagogique);
-            hide(btnGamesHub); // Cacher Hub Intervention pour enseignant
+            show(menuIA);
+            show(newsBar);
+            hide(btnGamesHub); 
             showDashboardEnseignant();
+        } else if (isEtudiant()) {
+            // Étudiant : Parcours + Projets + Outils IA (Skill Gap, etc.)
+            show(menuCarriere);
+            show(menuIA);
+            show(newsBar);
+            show(menuPlus);
+            hide(btnGamesHub);
+            showParcours(); // Vue par défaut
         }
     }
 
@@ -254,14 +303,24 @@ public class MainController {
 
         // Gestion visibilité sidebar selon le niveau d'admin
         if (isSuperAdmin()) {
-            show(boxAdmin);
-            show(boxBackAdmin);
             show(boxSwitcher);
-            for (javafx.scene.Node n : boxBackAdmin.getChildren()) show(n);
+            show(sepSwitcher);
+            if (boxGestions != null) {
+                show(boxGestions);
+                for (javafx.scene.Node n : boxGestions.getChildren()) show(n);
+            }
         } else if (isAdmin()) {
-            hide(boxAdmin);
-            show(boxBackAdmin);
-            show(boxSwitcher);
+            hide(boxSwitcher);
+            hide(sepSwitcher);
+            if (boxGestions != null) {
+                show(boxGestions);
+                for (javafx.scene.Node n : boxGestions.getChildren()) {
+                    if (n instanceof Button b) {
+                        if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks || b == btnHumeur || b == btnPlanning || b == btnCarnet) show(b);
+                        else hide(b);
+                    } else hide(n);
+                }
+            }
         }
 
         // Par défaut au switch back
@@ -272,12 +331,14 @@ public class MainController {
     /** Affiche le header TOP, masque la sidebar. */
     private void showFrontMode() {
         show(frontHeader);
+        show(newsBar);
         hide(backSidebar);
     }
 
     /** Affiche la sidebar LEFT, masque le header. */
     private void showBackMode() {
         hide(frontHeader);
+        hide(newsBar);
         show(backSidebar);
     }
 
@@ -437,6 +498,40 @@ public class MainController {
     }
 
     @FXML
+    void showSkillGap() {
+        loadView("/SkillGap.fxml");
+        setActiveBtn(null);
+    }
+
+    @FXML
+    void showCareerPredictor() {
+        loadView("/CareerDashboard.fxml");
+        setActiveBtn(null);
+    }
+
+    @FXML
+    void showAnalyseCV() {
+        loadView("/AnalyseCV.fxml");
+        setActiveBtn(null);
+    }
+
+    @FXML
+    void showEntretienIA() {
+        loadView("/EntretienIA.fxml");
+        setActiveBtn(null);
+    }
+
+    @FXML
+    void showPricing() {
+        loadView("/Pricing.fxml");
+    }
+
+    @FXML
+    void showAbout() {
+        loadView("/About.fxml");
+    }
+
+    @FXML
     void showBackParcours() {
         if (!acl.canAccess(AccessControlService.Module.BACK_PARCOURS)) return;
         loadView("/BackOfficeParcours.fxml");
@@ -492,6 +587,53 @@ public class MainController {
         setActiveBtn(btnCarnet);
     }
 
+    @FXML
+    void toggleFullScreen() {
+        Stage stage = (Stage) contentArea.getScene().getWindow();
+        stage.setFullScreen(!stage.isFullScreen());
+    }
+
+    private void startNewsAnimation() {
+        if (hBoxNews == null) return;
+        
+        new Thread(() -> {
+            try {
+                List<NewsService.NewsItem> news = newsService.getLatestTechNews();
+                if (news.isEmpty()) return;
+
+                Platform.runLater(() -> {
+                    hBoxNews.getChildren().clear();
+                    for (NewsService.NewsItem item : news) {
+                        Hyperlink link = new Hyperlink(item.getTitle());
+                        link.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-underline: false;");
+                        link.setOnAction(e -> {
+                            try {
+                                java.awt.Desktop.getDesktop().browse(new java.net.URI(item.getUrl()));
+                            } catch (Exception ex) { ex.printStackTrace(); }
+                        });
+                        hBoxNews.getChildren().add(link);
+                        
+                        // Separator
+                        Label sep = new Label("|");
+                        sep.setStyle("-fx-text-fill: rgba(255,255,255,0.3);");
+                        hBoxNews.getChildren().add(sep);
+                    }
+                    
+                    double textWidth = hBoxNews.getChildren().size() * 300; // Estimation large car width pas encore calculée
+                    
+                    javafx.animation.TranslateTransition tt = new javafx.animation.TranslateTransition(
+                        javafx.util.Duration.seconds(40), hBoxNews);
+                    
+                    tt.setFromX(1200);
+                    tt.setToX(-3000); // Défilement vers la gauche
+                    tt.setCycleCount(javafx.animation.Animation.INDEFINITE);
+                    tt.setInterpolator(javafx.animation.Interpolator.LINEAR);
+                    tt.play();
+                });
+            } catch (Exception e) { e.printStackTrace(); }
+        }).start();
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // DÉCONNEXION
     // ─────────────────────────────────────────────────────────────────────────
@@ -505,6 +647,7 @@ public class MainController {
             Scene scene = new Scene(root, 1200, 750);
             scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
             stage.setScene(scene);
+            stage.setMaximized(true);
             stage.centerOnScreen();
             stage.show();
         } catch (IOException e) {
@@ -576,32 +719,27 @@ public class MainController {
     // HELPERS UI
     // ─────────────────────────────────────────────────────────────────────────
 
-    /** Gère le style actif pour les boutons du header FRONT. */
+    /** Gère le style actif pour les boutons du header FRONT et de la sidebar BACK. */
     private void setActiveBtn(Button btn) {
-        // Header buttons
-        Button[] headerBtns = {
-            btnDashboardEnseignant, btnDashboardAdmin,
-            btnPlanActions, btnArticles,
-            btnAIPedagogique, btnAIDecisionnel,
-            btnParcours, btnProjets,
-            btnBackParcours, btnBackProjets
+        // Liste de TOUS les boutons pouvant être actifs
+        Button[] allBtns = {
+            btnDashboardEnseignant, btnDashboardAdmin, btnPlanActions, btnArticles,
+            btnAIPedagogique, btnAIDecisionnel, btnParcours, btnProjets,
+            btnBackParcours, btnBackProjets, btnBackFeedbacks, btnBackObjectifs,
+            btnDashboardObjectifs, btnUtilisateurs, btnCategories, btnIoT,
+            btnAtRisk, btnPlanActionsBack, btnArticlesBack, btnHumeur,
+            btnPlanning, btnCarnet, btnGamesHub
         };
-        for (Button b : headerBtns) {
+
+        for (Button b : allBtns) {
             if (b != null) {
                 b.getStyleClass().remove("header-nav-btn-active");
                 b.getStyleClass().remove("sidebar-btn-active");
             }
         }
 
-        // Sidebar buttons
-        Button[] sidebarBtns = {btnUtilisateurs, btnCategories};
-        for (Button b : sidebarBtns) {
-            if (b != null) {
-                b.getStyleClass().remove("sidebar-btn-active");
-            }
-        }
-
         if (btn != null) {
+            // Appliquer le style selon le mode actuel
             if (frontHeader != null && frontHeader.isVisible()) {
                 btn.getStyleClass().add("header-nav-btn-active");
             } else {

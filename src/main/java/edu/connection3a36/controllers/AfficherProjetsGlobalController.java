@@ -9,9 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
-
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -26,8 +24,6 @@ public class AfficherProjetsGlobalController implements Initializable {
     private FlowPane flowPaneProjets;
     @FXML
     private TextField txtRecherche;
-    @FXML
-    private Button btnAjouter;
 
     private final ProjetService projetService = new ProjetService();
     private ObservableList<Projet> allProjets = FXCollections.observableArrayList();
@@ -41,7 +37,7 @@ public class AfficherProjetsGlobalController implements Initializable {
     public void chargerDonnees() {
         try {
             List<Projet> list = projetService.getData();
-            allProjets = FXCollections.observableArrayList(list);
+            allProjets.setAll(list);
             filterData();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -78,12 +74,10 @@ public class AfficherProjetsGlobalController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherProjets.fxml"));
             Parent view = loader.load();
             AfficherProjetsController controller = loader.getController();
-            controller.initData(null); // Mode global (aucun parcours pré-sélectionné)
-
+            controller.initData(null); 
             MainController.getInstance().loadInContentArea(view);
         } catch (IOException e) {
             e.printStackTrace();
-            afficherInfo("Erreur", "Impossible de charger la vue projet : " + e.getMessage());
         }
     }
 
@@ -92,19 +86,16 @@ public class AfficherProjetsGlobalController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherProjets.fxml"));
             Parent view = loader.load();
             AfficherProjetsController controller = loader.getController();
-            controller.initData(null); // On charge tout pour permettre de switcher si besoin
-            controller.selectProject(p); // On sélectionne le projet pour l'édition
-
+            controller.initData(null); 
+            controller.selectProject(p); 
             MainController.getInstance().loadInContentArea(view);
         } catch (IOException e) {
             e.printStackTrace();
-            afficherInfo("Erreur", "Impossible de charger la vue projet : " + e.getMessage());
         }
     }
 
     public void supprimerProjetSpecific(Projet p) {
-        Optional<ButtonType> result = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer le projet ?", ButtonType.YES,
-                ButtonType.NO).showAndWait();
+        Optional<ButtonType> result = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer le projet ?", ButtonType.YES, ButtonType.NO).showAndWait();
         if (result.isPresent() && result.get() == ButtonType.YES) {
             try {
                 projetService.deleteEntity(p);
@@ -113,12 +104,5 @@ public class AfficherProjetsGlobalController implements Initializable {
                 e.printStackTrace();
             }
         }
-    }
-
-    private void afficherInfo(String titre, String msg) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(titre);
-        alert.setContentText(msg);
-        alert.show();
     }
 }

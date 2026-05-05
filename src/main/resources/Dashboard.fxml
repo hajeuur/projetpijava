@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="mainContainer" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="edu.connection3a36.controllers.DashboardController"
+            style="-fx-background-color: #f0f4f8;" prefWidth="1200" prefHeight="800">
+
+    <!-- Sidebar Menu -->
+    <left>
+        <VBox prefWidth="240" spacing="5"
+              style="-fx-background-color: #102c59; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 0);">
+            <padding><Insets top="25" right="0" bottom="20" left="0"/></padding>
+
+            <!-- Logo -->
+            <VBox alignment="CENTER" spacing="5" style="-fx-padding: 0 0 30 0;">
+                <Label text="MentorAI" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white; -fx-letter-spacing: 2;"/>
+                <Label text="BY CONNECTION 3A36" style="-fx-font-size: 8px; -fx-text-fill: #9dbbce; -fx-font-weight: bold;"/>
+            </VBox>
+
+            <!-- Navigation Items -->
+            <VBox spacing="2">
+                <Button text="⌂  Home" fx:id="btnHome" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#loadHome"
+                        style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
+                <Button text="▦  Etude" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                        style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
+                <Button text="✎  Note" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                        style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
+                <Button text="📁  Projets" fx:id="btnProjets" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#loadProjets"
+                        style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
+                <Button text="⚙  Parcours" fx:id="btnParcours" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#loadParcours"
+                        style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
+                <Button text="⌚  Productivity" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                        style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
+                <Button text="✉  Contact" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                        style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
+                <Button text="＄  Pricing" fx:id="btnPricing" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#loadPricing"
+                        style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
+                <Button text="ⓘ  About" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                        style="-fx-background-color: transparent; -fx-text-fill: #9dbbce; -fx-font-size: 13px; -fx-padding: 12 25; -fx-cursor: hand;"/>
+            </VBox>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <!-- User Profil Card -->
+            <VBox spacing="10" style="-fx-background-color: #1a3a6d; -fx-padding: 15; -fx-background-radius: 10; -fx-margin: 0 15 15 15;">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <StackPane style="-fx-background-color: #ffffff; -fx-background-radius: 50; -fx-min-width: 35; -fx-min-height: 35;">
+                        <Label text="👤" style="-fx-font-size: 18;"/>
+                    </StackPane>
+                    <VBox>
+                        <Label fx:id="lblSidebarName" text="admin" style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 13;"/>
+                        <Label fx:id="lblSidebarRole" text="Administrateur" style="-fx-text-fill: #9dbbce; -fx-font-size: 10;"/>
+                    </VBox>
+                </HBox>
+                <Button text="👤 Mon Profil" maxWidth="Infinity" alignment="CENTER"
+                        style="-fx-background-color: #a0c4ff; -fx-text-fill: #102c59; -fx-font-size: 12; -fx-background-radius: 20; -fx-padding: 8; -fx-cursor: hand;"/>
+                <Button text="⚙️ Admin" maxWidth="Infinity" alignment="CENTER"
+                        style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-size: 12; -fx-background-radius: 20; -fx-padding: 8; -fx-cursor: hand; -fx-border-color: #a0c4ff; -fx-border-radius: 20;"/>
+                <Button text="🚪 Déconnexion" onAction="#logout" maxWidth="Infinity" alignment="CENTER"
+                        style="-fx-background-color: transparent; -fx-text-fill: #f87171; -fx-font-size: 11; -fx-padding: 5; -fx-cursor: hand;"/>
+            </VBox>
+        </VBox>
+    </left>
+
+    <!-- Center Content -->
+    <center>
+        <ScrollPane fitToWidth="true" vbarPolicy="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+            <StackPane fx:id="centerContent" style="-fx-background-color: transparent;"/>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

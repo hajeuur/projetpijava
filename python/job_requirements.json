@@ -1,0 +1,8 @@
+{
+  "Data Scientist": ["Python", "Machine Learning", "SQL", "Statistics", "Data Visualization", "Pandas", "Scikit-Learn", "R"],
+  "Fullstack Developer": ["Java", "Spring Boot", "React", "JavaScript", "SQL", "Git", "Docker", "REST API"],
+  "Frontend Developer": ["React", "JavaScript", "HTML", "CSS", "TypeScript", "Tailwind", "State Management", "Git"],
+  "Backend Developer": ["Java", "Spring Boot", "SQL", "Hibernate", "Microservices", "Unit Testing", "AWS", "API Security"],
+  "Mobile Developer": ["Flutter", "Dart", "Firebase", "State Management", "Android", "iOS", "API Integration", "Clean Architecture"],
+  "DevOps Engineer": ["Docker", "Kubernetes", "Jenkins", "AWS", "Linux", "Terraform", "CI/CD", "Python"]
+}

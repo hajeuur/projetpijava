@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="edu.connection3a36.controllers.ConnexionController"
+           style="-fx-background-color: #f0f4f8;" prefWidth="600" prefHeight="500">
+
+    <VBox alignment="CENTER" spacing="20" maxWidth="400" maxHeight="380"
+          style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.1),15,0,0,5);">
+        <padding><Insets top="40" right="40" bottom="40" left="40"/></padding>
+
+        <Label text="MentorAI" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+        <Label text="Veuillez vous connecter" style="-fx-font-size: 14px; -fx-text-fill: #9dbbce; -fx-padding: 0 0 10 0;"/>
+
+        <Label fx:id="lblErreur" text="" style="-fx-text-fill: #d52e28; -fx-font-size: 13px; -fx-wrap-text: true;" wrapText="true"/>
+
+        <VBox spacing="8" alignment="CENTER_LEFT">
+            <Label text="Email" style="-fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+            <TextField fx:id="txtEmail" promptText="admin@mentor.com" 
+                       style="-fx-background-radius: 8; -fx-padding: 10; -fx-border-color: #9dbbce; -fx-border-radius: 8; -fx-border-width: 1;"/>
+        </VBox>
+
+        <VBox spacing="8" alignment="CENTER_LEFT">
+            <Label text="Mot de passe" style="-fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+            <PasswordField fx:id="txtMdp" promptText="••••••••" 
+                           style="-fx-background-radius: 8; -fx-padding: 10; -fx-border-color: #9dbbce; -fx-border-radius: 8; -fx-border-width: 1;"/>
+        </VBox>
+
+        <Button text="Se Connecter" onAction="#seConnecter" prefWidth="320"
+                style="-fx-background-color: linear-gradient(to right, #102c59, #0a1a36); -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12; -fx-cursor: hand;"/>
+
+        <HBox spacing="15" alignment="CENTER">
+            <Button text="👤 Etudiant (Arslen)" onAction="#loginArslen"
+                    style="-fx-background-color: #f0f4f8; -fx-text-fill: #102c59; -fx-font-size: 12px; -fx-background-radius: 20; -fx-padding: 8 15; -fx-cursor: hand; -fx-border-color: #9dbbce; -fx-border-radius: 20;"/>
+            <Button text="🛠 Admin" onAction="#loginAdmin"
+                    style="-fx-background-color: #f0f4f8; -fx-text-fill: #d52e28; -fx-font-size: 12px; -fx-background-radius: 20; -fx-padding: 8 15; -fx-cursor: hand; -fx-border-color: #d52e28; -fx-border-radius: 20;"/>
+        </HBox>
+    </VBox>
+
+</StackPane>

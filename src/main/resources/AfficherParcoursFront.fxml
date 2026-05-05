@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.AfficherParcoursController"
+      spacing="10" style="-fx-background-color: transparent;" prefWidth="950" prefHeight="650">
+
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <!-- Header Front Office -->
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <Label text="🎓 Découvrir les Parcours" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="🤖 Embauche IA" onAction="#ouvrirRecommandationsIA"
+                style="-fx-background-color: #d52e28; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 8 20; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(213, 46, 40, 0.3), 10, 0, 0, 0);"/>
+    </HBox>
+
+    <Label fx:id="lblStats" text="Chargement..." style="-fx-font-size: 13px; -fx-text-fill: #102c59; -fx-background-color: #9dbbce; -fx-padding: 6 12 6 12; -fx-background-radius: 6;"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <TextField fx:id="txtRecherche" promptText="🔍 Rechercher un parcours..." prefWidth="300"
+                   style="-fx-background-radius: 8; -fx-border-color: #9dbbce; -fx-border-radius: 8; -fx-padding: 8;"/>
+        <Button text="Rechercher" onAction="#rechercherParcours"
+                style="-fx-background-color: linear-gradient(to right, #9dbbce, #7ca0b8); -fx-text-fill: #102c59; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;"/>
+        <Separator orientation="VERTICAL"/>
+        <Label text="Type :" style="-fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+        <ComboBox fx:id="cbFiltreType" onAction="#filtrerParType" prefWidth="160"
+                  style="-fx-background-radius: 8; -fx-border-color: #9dbbce; -fx-border-radius: 8;"/>
+    </HBox>
+
+    <TableView fx:id="tableParcours" VBox.vgrow="ALWAYS"
+               style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.08),8,0,0,2); -fx-border-color: #9dbbce; -fx-border-radius: 10; -fx-border-width: 1;">
+        <columns>
+            <TableColumn fx:id="colType" text="Type" prefWidth="120"/>
+            <TableColumn fx:id="colTitre" text="Titre" prefWidth="250"/>
+            <TableColumn fx:id="colEtablissement" text="Établissement" prefWidth="200"/>
+            <TableColumn fx:id="colDiplome" text="Diplôme" prefWidth="150"/>
+            <TableColumn fx:id="colDateDebut" text="Date Début" prefWidth="110"/>
+        </columns>
+        <placeholder><Label text="Aucun parcours disponible"/></placeholder>
+    </TableView>
+
+    <!-- Only View Projects in Front -->
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="📁 Voir les Projets de ce parcours" onAction="#voirProjets"
+                style="-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 10 25; -fx-cursor: hand;"/>
+    </HBox>
+</VBox>
