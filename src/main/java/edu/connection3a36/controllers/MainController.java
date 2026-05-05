@@ -60,6 +60,7 @@ public class MainController {
     @FXML private Button btnParcours;
     @FXML private Button btnProjets;
     @FXML private Button btnGamesHub;
+    @FXML private MenuButton menuPlus;
     // ── Sidebar (BACK) ────────────────────────────────────────────────────────
     @FXML private VBox backSidebar;
     @FXML private VBox boxSwitcher;
@@ -226,6 +227,7 @@ public class MainController {
             if (btnMesFeedbacks != null) show(btnMesFeedbacks);
             if (btnObjectifs != null) show(btnObjectifs);
             if (btnHeaderCarnet != null) show(btnHeaderCarnet);
+            if (menuPlus != null) show(menuPlus);
             
             showParcours();
 
@@ -286,6 +288,7 @@ public class MainController {
             show(menuCarriere);
             show(menuIA);
             show(newsBar);
+            show(menuPlus);
             hide(btnGamesHub);
             showParcours(); // Vue par défaut
         }
@@ -514,6 +517,16 @@ public class MainController {
     void showEntretienIA() {
         loadView("/EntretienIA.fxml");
         setActiveBtn(null);
+    }
+
+    @FXML
+    void showPricing() {
+        loadView("/Pricing.fxml");
+    }
+
+    @FXML
+    void showAbout() {
+        loadView("/About.fxml");
     }
 
     @FXML

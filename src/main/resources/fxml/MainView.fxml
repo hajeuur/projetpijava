@@ -96,6 +96,13 @@
                     <!-- Preferences -->
                     <Button fx:id="btnPreferences" text="Préférences"
                             onAction="#showPreferences" styleClass="header-nav-btn"/>
+                    
+                    <MenuButton fx:id="menuPlus" text="➕ Plus" styleClass="header-nav-btn">
+                        <items>
+                            <MenuItem text="💰 Pricing" onAction="#showPricing"/>
+                            <MenuItem text="ℹ️ À Propos" onAction="#showAbout"/>
+                        </items>
+                    </MenuButton>
 
                     <!-- Notifications / Clochette -->
                     <Button fx:id="btnNotifications" text="🔔 (0)"

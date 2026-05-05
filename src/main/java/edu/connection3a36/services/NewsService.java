@@ -76,7 +76,6 @@ public class NewsService {
                             String source = article.optJSONObject("source") != null
                                     ? article.getJSONObject("source").optString("name", "")
                                     : "";
-                            // Ignorer les articles sans titre ou avec "[Removed]"
                             if (!title.isEmpty() && !title.equalsIgnoreCase("[Removed]") && !articleUrl.isEmpty()) {
                                 buckets.get(q).add(new NewsItem(
                                         categories[q] + "  " + title + (source.isEmpty() ? "" : " ── " + source),
@@ -88,6 +87,9 @@ public class NewsService {
                     }
                 } else {
                     System.err.println("NewsAPI HTTP " + response.statusCode() + " pour : " + QUERIES[q]);
+                    if (response.statusCode() == 429) {
+                        return getMockNews(); // Fallback immédiat si quota atteint
+                    }
                 }
             } catch (Exception e) {
                 System.err.println("Error fetching news for query [" + QUERIES[q] + "]: " + e.getMessage());
@@ -109,6 +111,19 @@ public class NewsService {
             round++;
         }
 
-        return interleaved;
+        return interleaved.isEmpty() ? getMockNews() : interleaved;
+    }
+
+    private List<NewsItem> getMockNews() {
+        List<NewsItem> mock = new ArrayList<>();
+        mock.add(new NewsItem("🤖 IA  GPT-5 : OpenAI prépare une révolution pour fin 2024", "https://openai.com", "🤖 IA"));
+        mock.add(new NewsItem("☁️ Cloud  AWS déploie de nouvelles instances optimisées pour le calcul quantique", "https://aws.amazon.com", "☁️ Cloud"));
+        mock.add(new NewsItem("☕ Java  Java 23 : Les nouveautés attendues pour le Project Panama", "https://www.oracle.com/java/", "☕ Java"));
+        mock.add(new NewsItem("🧠 ML  Google DeepMind présente AlphaGeometry 2 pour la résolution d'énigmes", "https://deepmind.google", "🧠 ML"));
+        mock.add(new NewsItem("🔐 Sécurité  Nouvelle faille critique découverte dans les processeurs modernes", "https://www.theverge.com/tech", "🔐 Sécurité"));
+        mock.add(new NewsItem("🤖 IA  L'IA générative transforme le développement logiciel en 2024", "https://www.wired.com", "🤖 IA"));
+        mock.add(new NewsItem("☁️ Cloud  Azure renforce sa présence en Europe avec trois nouveaux datacenters", "https://azure.microsoft.com", "☁️ Cloud"));
+        mock.add(new NewsItem("☕ Java  Spring Boot 3.3 : Amélioration des performances et de l'observabilité", "https://spring.io", "☕ Java"));
+        return mock;
     }
 }
