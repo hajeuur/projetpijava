@@ -208,6 +208,9 @@ public class LoginController {
             if (role.equals("admin")) {
                 sessionUser.setRole("ADMIN");
                 edu.connection3a36.tools.SessionManager.setFrontMode(false);
+            } else if (role.equals("adminm")) {
+                sessionUser.setRole("ADMINM");
+                edu.connection3a36.tools.SessionManager.setFrontMode(false);
             } else if (role.equals("enseignant")) {
                 sessionUser.setRole("ENSEIGNANT");
                 edu.connection3a36.tools.SessionManager.setFrontMode(true);
