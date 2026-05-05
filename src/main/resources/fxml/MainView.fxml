@@ -198,6 +198,8 @@
                             onAction="#showBackProjets" styleClass="sidebar-btn" maxWidth="Infinity"/>
                     <Button fx:id="btnBackFeedbacks" text="📝 Gestion Feedbacks"
                             onAction="#showBackFeedbacks" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                    <Button fx:id="btnDashboardObjectifs" text="🎯 Objectifs Utilisateurs"
+                            onAction="#showDashboardObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"/>
                     <Button fx:id="btnBackObjectifs" text="🎯 Gestion Objectifs"
                             onAction="#showObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"/>
                     <Button fx:id="btnDashboardObjectifs" text="📊 Dashboard Objectifs"
