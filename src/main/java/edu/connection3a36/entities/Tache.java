@@ -1,80 +1,53 @@
 package edu.connection3a36.entities;
 
 /**
- * ============================================================
- * ENTITÉ : Tache
- * ============================================================
  * Représente une étape concrète à réaliser dans un programme.
  * Les tâches sont les "briques" qui composent un objectif.
  *
- * RELATION :
- * Programme (1) ──────────── (N) Tache
+ * Relation : Programme (1) ←→ (N) Tache
  *
- * STRUCTURE EN BASE DE DONNÉES (table "tache") :
- * ┌──────────────┬──────────────────────────────────────────────┐
- * │ Colonne      │ Description                                  │
- * ├──────────────┼──────────────────────────────────────────────┤
- * │ id           │ Identifiant unique auto-incrémenté           │
- * │ ordre        │ Numéro d'ordre (1, 2, 3...) pour le tri      │
- * │ titre        │ Nom de la tâche (ex: "Lire le chapitre 1")   │
- * │ description  │ Détails de la tâche (optionnel)              │
- * │ etat         │ encours / realisee / Abandonner              │
- * │ programme_id │ Clé étrangère → table programme              │
- * └──────────────┴──────────────────────────────────────────────┘
+ * Table BDD : "tache"
+ * Colonnes  : id, ordre, titre, description, etat, programme_id
  *
- * IMPACT SUR LE SCORE :
  * Chaque changement d'état d'une tâche déclenche un recalcul du score
- * du programme via ScoreService.recalculerEtSauvegarder().
- *
- * GÉNÉRATION PAR IA :
- * Les tâches peuvent être générées automatiquement par Ollama (llama3.1:8b)
- * via OllamaService.genererTaches() lors de la création d'un objectif.
- * ============================================================
+ * via ScoreService.recalculerEtSauvegarder().
+ * Les tâches peuvent être générées automatiquement par l'IA Ollama.
  */
 public class Tache {
 
     // ── Attributs ─────────────────────────────────────────────────────────────
 
-    /** Identifiant unique en base de données */
+    /** Identifiant unique généré par la BDD */
     private int id;
 
-    /**
-     * Numéro d'ordre de la tâche dans le programme (1, 2, 3...).
-     * Utilisé pour trier les tâches dans l'affichage.
-     */
+    /** Numéro d'ordre dans le programme (1, 2, 3...) — utilisé pour le tri */
     private int ordre;
 
-    /** Titre de la tâche (ex: "Lire le chapitre 1 du cours") */
+    /** Nom de la tâche, ex : "Lire le chapitre 1 du cours" */
     private String titre;
 
-    /** Description détaillée de la tâche (peut être null ou vide) */
+    /** Description détaillée de la tâche (optionnelle) */
     private String description;
 
     /**
-     * État actuel de la tâche.
-     * Valeurs possibles (enum Etat) :
-     * - encours    : tâche en cours de réalisation (état par défaut)
-     * - realisee   : tâche terminée (compte dans le score)
-     * - Abandonner : tâche abandonnée (déclenche l'analyse de risque IA)
+     * État actuel de la tâche (voir enum Etat) :
+     *   encours    → en cours de réalisation (état par défaut)
+     *   realisee   → terminée, compte dans le score
+     *   Abandonner → abandonnée, déclenche l'analyse de risque IA
      */
     private Etat etat;
 
-    /** ID du programme auquel appartient cette tâche */
+    /** ID du programme auquel cette tâche appartient */
     private int programmeId;
 
     // ── Constructeurs ─────────────────────────────────────────────────────────
 
-    /** Constructeur vide requis pour le mapping depuis la base de données */
+    /** Constructeur vide — requis pour lire les données depuis la BDD */
     public Tache() {}
 
     /**
-     * Constructeur complet utilisé lors de la création d'une tâche.
-     *
-     * @param ordre       Numéro d'ordre dans le programme
-     * @param titre       Nom de la tâche
-     * @param description Description détaillée
-     * @param etat        État initial (généralement Etat.encours)
-     * @param programmeId ID du programme parent
+     * Constructeur utilisé lors de la création d'une tâche.
+     * L'état initial est généralement Etat.encours.
      */
     public Tache(int ordre, String titre, String description, Etat etat, int programmeId) {
         this.ordre = ordre;
@@ -104,7 +77,7 @@ public class Tache {
     public int getProgrammeId() { return programmeId; }
     public void setProgrammeId(int programmeId) { this.programmeId = programmeId; }
 
-    /** Affiche "1. Titre de la tâche" dans les listes JavaFX */
+    /** Retourne "1. Titre de la tâche" — utilisé dans les listes JavaFX */
     @Override
     public String toString() { return ordre + ". " + titre; }
 }

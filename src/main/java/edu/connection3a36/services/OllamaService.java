@@ -194,28 +194,30 @@ public class OllamaService {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json");
-        conn.setDoOutput(true);
-        conn.setConnectTimeout(15000);  // 15 secondes pour se connecter
-        conn.setReadTimeout(120000);    // 2 minutes pour lire la réponse
+        conn.setDoOutput(true);       // autoriser l'envoi d'un corps de requête
+        conn.setConnectTimeout(15000);  // 15 secondes pour établir la connexion
+        conn.setReadTimeout(120000);    // 2 minutes pour lire la réponse (le modèle est lent)
 
-        // Construire le corps de la requête JSON
+        // Construire le corps JSON de la requête
         JSONObject body = new JSONObject();
         body.put("model", MODEL);
         body.put("prompt", prompt);
-        body.put("stream", false); // Réponse complète en une fois
+        body.put("stream", false); // false = réponse complète en une fois (pas de streaming)
         body.put("options", new JSONObject()
-                .put("temperature", 0.7)   // Équilibre créativité/cohérence
-                .put("num_predict", 512));  // Max 512 tokens dans la réponse
+                .put("temperature", 0.7)   // 0=réponses identiques, 1=très créatif, 0.7=équilibré
+                .put("num_predict", 512));  // nombre max de tokens (mots) dans la réponse
 
-        // Envoyer le corps de la requête
+        // Envoyer le corps de la requête via le flux de sortie de la connexion
+        // try-with-resources : ferme automatiquement le flux après utilisation
         try (OutputStream os = conn.getOutputStream()) {
             os.write(body.toString().getBytes(StandardCharsets.UTF_8));
         }
 
-        // Vérifier le code de statut HTTP
+        // Vérifier le code HTTP retourné par Ollama
+        // 200 = succès, autre = erreur
         int status = conn.getResponseCode();
         if (status != 200) {
-            // Lire le message d'erreur
+            // Lire le message d'erreur depuis le flux d'erreur
             BufferedReader err = new BufferedReader(
                     new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder();
@@ -224,14 +226,15 @@ public class OllamaService {
             throw new Exception("Erreur Ollama (" + status + "): " + sb);
         }
 
-        // Lire la réponse JSON
+        // Lire la réponse ligne par ligne et la concaténer dans un StringBuilder
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
         StringBuilder sb = new StringBuilder();
         String line;
         while ((line = reader.readLine()) != null) sb.append(line);
 
-        // Extraire le champ "response" du JSON retourné par Ollama
+        // La réponse d'Ollama est un JSON : {"model":"llama3.1:8b","response":"...","done":true}
+        // On extrait uniquement le champ "response" qui contient le texte généré
         return new JSONObject(sb.toString()).getString("response");
     }
 

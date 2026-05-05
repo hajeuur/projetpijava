@@ -225,40 +225,58 @@ public class ProgrammeDetailController {
         for (Tache t : filtrees) vboxTaches.getChildren().add(buildTacheRow(t));
     }
 
+    /**
+     * Construit dynamiquement une carte JavaFX pour une tâche.
+     * Chaque carte contient :
+     *   - Une ligne principale (numéro, titre, flèche, badge état, boutons)
+     *   - Un panneau description caché (tiroir) qui s'ouvre au clic
+     *
+     * @param t La tâche à afficher
+     * @return Un VBox représentant la carte complète de la tâche
+     */
     private VBox buildTacheRow(Tache t) {
+
+        // Carte principale : fond coloré selon l'état de la tâche
+        // bgEtat() retourne : vert clair si réalisée, rouge clair si abandonnée, blanc si en cours
         VBox card = new VBox(0);
         card.setStyle("-fx-background-color: " + bgEtat(t.getEtat())
                 + "; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.05), 6, 0, 0, 2);");
-        card.setCursor(javafx.scene.Cursor.HAND);
+        card.setCursor(javafx.scene.Cursor.HAND); // curseur main pour indiquer que c'est cliquable
 
         // ── Ligne principale (toujours visible) ───────────────────────────────
         HBox row = new HBox(12);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(14, 20, 14, 20));
 
+        // Numéro d'ordre de la tâche (1. 2. 3. ...)
         Label lblOrdre = new Label(t.getOrdre() + ".");
         lblOrdre.setStyle("-fx-font-weight: bold; -fx-text-fill: #aaa; -fx-min-width: 28; -fx-font-size: 14px;");
 
+        // Titre de la tâche — barré si réalisée (strikethrough)
         Label lblTitre = new Label(t.getTitre());
         String titreStyle = "-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;";
         if (t.getEtat() == Etat.realisee)
+            // Tâche réalisée → texte gris barré pour indiquer qu'elle est terminée
             titreStyle = "-fx-font-weight: bold; -fx-text-fill: #aaa; -fx-font-size: 13px; -fx-strikethrough: true;";
         lblTitre.setStyle(titreStyle);
         lblTitre.setWrapText(true);
-        HBox.setHgrow(lblTitre, Priority.ALWAYS);
+        HBox.setHgrow(lblTitre, Priority.ALWAYS); // le titre prend tout l'espace disponible
 
-        // Icône tiroir
+        // Flèche indicatrice du tiroir : ▼ = fermé, ▲ = ouvert
         Label lblArrow = new Label("▼");
         lblArrow.setStyle("-fx-text-fill: #aaa; -fx-font-size: 10px;");
 
+        // Badge coloré indiquant l'état : "🔄 En cours", "✅ Realisee", "⛔ Abandonnee"
         Label badge = new Label(labelEtat(t.getEtat()));
         badge.setStyle("-fx-background-color: " + couleurEtat(t.getEtat())
                 + "; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 4 12 4 12;"
                 + " -fx-font-size: 11px; -fx-font-weight: bold; -fx-min-width: 100; -fx-alignment: CENTER;");
 
+        // Ajouter numéro + titre + flèche dans la ligne
         row.getChildren().addAll(lblOrdre, lblTitre, lblArrow);
 
-        // Badge risque — visible uniquement si tache abandonnee a risque
+        // Badge risque 🚨 — affiché uniquement si la tâche est abandonnée ET identifiée
+        // comme dangereuse par RisqueAbandonService (liste tachesARisque)
         if (t.getEtat() == Etat.Abandonner && tachesARisque.contains(t.getTitre())) {
             Label badgeRisque = new Label("🚨");
             badgeRisque.setStyle(
@@ -269,17 +287,22 @@ public class ProgrammeDetailController {
         }
 
         if (!readOnly) {
-            // Spacer pour tout pousser à droite
+            // Mode étudiant : afficher les contrôles de modification
+
+            // Spacer invisible qui pousse badge + ComboBox + boutons vers la droite
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
+            // ComboBox pour changer l'état de la tâche directement dans la liste
+            // Quand l'utilisateur change la valeur → changerEtat() est appelé
             ComboBox<String> cbEtat = new ComboBox<>();
             cbEtat.getItems().addAll("encours", "realisee", "Abandonner");
             cbEtat.setValue(t.getEtat() != null ? t.getEtat().getValue() : "encours");
             cbEtat.setPrefWidth(115);
             cbEtat.setStyle("-fx-font-size: 11px; -fx-background-radius: 8;");
-            cbEtat.setOnAction(e -> changerEtat(t, cbEtat.getValue()));
+            cbEtat.setOnAction(e -> changerEtat(t, cbEtat.getValue())); // déclenche recalcul score
 
+            // Bouton modifier ✎ → ouvre le formulaire inline en mode modification
             Button btnEdit = new Button("✎");
             btnEdit.setStyle(
                     "-fx-background-color: transparent;"
@@ -292,6 +315,7 @@ public class ProgrammeDetailController {
             btnEdit.setTooltip(new Tooltip("Modifier"));
             btnEdit.setOnAction(e -> ouvrirFormModification(t));
 
+            // Bouton supprimer 🗑 → demande confirmation puis supprime la tâche
             Button btnDel = new Button("🗑");
             btnDel.setStyle(
                     "-fx-background-color: transparent;"
@@ -306,45 +330,71 @@ public class ProgrammeDetailController {
 
             row.getChildren().addAll(spacer, badge, cbEtat, btnEdit, btnDel);
         } else {
+            // Mode admin (readOnly) : afficher seulement le badge, pas les boutons
             HBox.setHgrow(lblTitre, Priority.ALWAYS);
             row.getChildren().add(badge);
         }
 
         // ── Panneau description (tiroir, masqué par défaut) ───────────────────
+        // Ce panneau est caché au départ et s'affiche quand l'utilisateur clique sur la carte.
+        // C'est le principe du "tiroir" ou "accordion" en UI design.
         VBox descPane = new VBox(6);
+
+        // setVisible(false) → invisible
+        // setManaged(false) → ne prend PAS de place dans le layout (important !)
+        // Sans setManaged(false), il y aurait un espace vide entre les cartes même quand fermé
         descPane.setVisible(false);
         descPane.setManaged(false);
-        descPane.setPadding(new Insets(0, 20, 14, 56));
+        descPane.setPadding(new Insets(0, 20, 14, 56)); // décalé à droite pour aligner avec le titre
         descPane.setStyle("-fx-border-color: transparent transparent transparent #e2e8f0;"
-                + " -fx-border-width: 0 0 0 3;");
+                + " -fx-border-width: 0 0 0 3;"); // bordure gauche grise (effet visuel de tiroir)
 
+        // Petit label "Description" en gris au-dessus du texte
         Label lblDescLabel = new Label("Description");
         lblDescLabel.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #aaa;");
 
+        // Texte de la description
+        // Si la description est null ou vide → afficher un message par défaut
         Label lblDesc = new Label(t.getDescription() != null && !t.getDescription().isBlank()
-                ? t.getDescription() : "Aucune description pour cette tache.");
+                ? t.getDescription()
+                : "Aucune description pour cette tache.");
         lblDesc.setStyle("-fx-text-fill: #555; -fx-font-size: 12px; -fx-line-spacing: 2;");
-        lblDesc.setWrapText(true);
+        lblDesc.setWrapText(true); // retour à la ligne automatique si le texte est long
 
         descPane.getChildren().addAll(lblDescLabel, lblDesc);
 
+        // La carte contient : ligne principale (row) + tiroir description (descPane)
+        // descPane est invisible au départ, il apparaît sous row au clic
         card.getChildren().addAll(row, descPane);
 
         // ── Clic sur la carte = toggle tiroir ─────────────────────────────────
+        // setOnMouseClicked : écoute les clics sur toute la surface de la carte
         card.setOnMouseClicked(e -> {
-            // Ignorer les clics sur les boutons/combobox
+
+            // Ne pas ouvrir le tiroir si l'utilisateur a cliqué sur un bouton ou le ComboBox
+            // (sinon le tiroir s'ouvrirait en même temps qu'on clique sur "Modifier" ou "Supprimer")
             if (e.getTarget() instanceof Button || e.getTarget() instanceof ComboBox
                     || e.getTarget() instanceof javafx.scene.control.skin.ComboBoxListViewSkin) return;
 
+            // Lire l'état actuel du tiroir
             boolean ouvert = descPane.isVisible();
+
+            // Toggle : inverser l'état
+            // Si ouvert → fermer (visible=false, managed=false)
+            // Si fermé  → ouvrir (visible=true, managed=true)
             descPane.setVisible(!ouvert);
             descPane.setManaged(!ouvert);
+
+            // Changer la flèche selon l'état
+            // ouvert=true (on ferme) → mettre ▼ (flèche vers le bas = fermé)
+            // ouvert=false (on ouvre) → mettre ▲ (flèche vers le haut = ouvert)
             lblArrow.setText(ouvert ? "▼" : "▲");
-            lblArrow.setStyle(ouvert ? "-fx-text-fill: #aaa; -fx-font-size: 10px;"
-                    : "-fx-text-fill: #102c59; -fx-font-size: 10px; -fx-font-weight: bold;");
+            lblArrow.setStyle(ouvert
+                    ? "-fx-text-fill: #aaa; -fx-font-size: 10px;"                          // fermé → gris
+                    : "-fx-text-fill: #102c59; -fx-font-size: 10px; -fx-font-weight: bold;"); // ouvert → bleu gras
         });
 
-        return card;
+        return card; // retourner la carte complète pour l'ajouter dans vboxTaches
     }
 
     private void changerEtat(Tache t, String nouvelEtat) {
@@ -554,42 +604,66 @@ public class ProgrammeDetailController {
     private void genererEtAfficherMotivation(boolean avecToast) {
         if (readOnly) return;
 
-        // Afficher le spinner et désactiver le bouton
+        // Afficher le spinner et désactiver le bouton pendant la génération
         if (progressMotivation != null) { progressMotivation.setVisible(true); progressMotivation.setManaged(true); }
         if (btnRefreshMotivation != null) btnRefreshMotivation.setDisable(true);
 
-        // Indiquer visuellement que la génération est en cours
         if (avecToast) {
             lblMotivation.setText("Génération en cours...");
         } else {
-            // Mise à jour silencieuse : on garde l'ancien message pendant la génération
+            // Mise à jour silencieuse : rendre le message semi-transparent
+            // pour indiquer qu'une mise à jour est en cours sans effacer le texte
             lblMotivation.setOpacity(0.5);
         }
 
-        // Capturer les valeurs nécessaires avant le thread
-        final String titreObjectif   = objectif.getTitre();
-        final int    scoreCourant    = programme.getScorePourcentage();
-        final int    scorePrec       = scorePrecedent;
-        final LocalDate deadline     = objectif.getDatefin();
-        final int    programmeId     = programme.getId();
+        // ════════════════════════════════════════════════════════════════════
+        // POURQUOI CAPTURER CES VALEURS AVANT LE THREAD ?
+        //
+        // Le thread s'exécute en arrière-plan, APRÈS que la méthode
+        // genererEtAfficherMotivation() a terminé. À ce moment-là,
+        // les variables "objectif", "programme", etc. pourraient avoir
+        // changé (si l'utilisateur navigue vers un autre objectif).
+        //
+        // En capturant les valeurs dans des variables "final" AVANT de
+        // démarrer le thread, on garantit que le thread travaille avec
+        // les bonnes données, même si l'état du contrôleur change.
+        // ════════════════════════════════════════════════════════════════════
+        final String titreObjectif = objectif.getTitre();
+        final int    scoreCourant  = programme.getScorePourcentage();
+        final int    scorePrec     = scorePrecedent;
+        final LocalDate deadline   = objectif.getDatefin();
+        final int    programmeId   = programme.getId();
 
         Thread thread = new Thread(() -> {
+            // ════════════════════════════════════════════════════════════════
+            // CE CODE S'EXÉCUTE EN ARRIÈRE-PLAN (pas sur le thread UI).
+            // Pourquoi ? Ollama peut prendre 10-30 secondes pour répondre.
+            // Si on l'appelait sur le thread UI, l'application se figerait
+            // complètement pendant ce temps (plus de clics, plus d'animations).
+            // ════════════════════════════════════════════════════════════════
             try {
-                // Appel à Ollama pour générer le message
+                // Appel à Ollama (peut prendre plusieurs secondes)
                 String message = ollamaService.genererMessageMotivant(
                         titreObjectif, scoreCourant, scorePrec, deadline);
 
-                // Sauvegarder en BDD
+                // Sauvegarder le message en BDD
                 Motivation m = new Motivation();
                 m.setMessagemotivant(message);
                 m.setDategeneration(LocalDate.now());
                 m.setProgrammeId(programmeId);
                 motivationService.addEntity(m);
 
-                // Mettre à jour l'UI sur le thread JavaFX
+                // ════════════════════════════════════════════════════════════
+                // Platform.runLater() : remet l'exécution sur le thread UI.
+                // OBLIGATOIRE pour modifier des composants JavaFX (Label, etc.)
+                // depuis un thread background. Sans ça → exception au runtime.
+                //
+                // Le lambda passé à runLater() sera exécuté dès que le thread
+                // UI sera disponible (généralement dans la prochaine frame).
+                // ════════════════════════════════════════════════════════════
                 Platform.runLater(() -> {
-                    lblMotivation.setText(message);
-                    lblMotivation.setOpacity(1.0);
+                    lblMotivation.setText(message);   // ← modification UI → doit être sur thread UI
+                    lblMotivation.setOpacity(1.0);    // remettre l'opacité normale
                     if (progressMotivation != null) { progressMotivation.setVisible(false); progressMotivation.setManaged(false); }
                     if (btnRefreshMotivation != null) btnRefreshMotivation.setDisable(false);
                     if (avecToast) {
@@ -598,6 +672,7 @@ public class ProgrammeDetailController {
                 });
 
             } catch (Exception e) {
+                // Ollama indisponible → afficher un message d'erreur sur le thread UI
                 Platform.runLater(() -> {
                     lblMotivation.setOpacity(1.0);
                     if (avecToast) {
@@ -609,8 +684,8 @@ public class ProgrammeDetailController {
                 });
             }
         });
-        thread.setDaemon(true);
-        thread.start();
+        thread.setDaemon(true); // daemon = le thread s'arrête si l'application se ferme
+        thread.start();         // démarrer le thread en arrière-plan
     }
 
     @FXML void handleExportExcel() {
@@ -620,7 +695,11 @@ public class ProgrammeDetailController {
         fc.setInitialFileName(objectif.getTitre().replaceAll("[^a-zA-Z0-9]", "_") + ".xlsx");
         File file = fc.showSaveDialog(vboxTaches.getScene().getWindow());
         if (file != null) {
-            try { ExportUtil.exporterExcel(file.getAbsolutePath(), objectif, programme, taches); ToastNotification.showSuccess("Export Excel réussi", file.getName() + " sauvegardé."); }
+            try {
+                ExportUtil.exporterExcel(file.getAbsolutePath(), objectif, programme, taches);
+                ToastNotification.showSuccess("Export Excel réussi", file.getName() + " sauvegardé.");
+                ExportUtil.ouvrirFichier(file.getAbsolutePath()); // ouvrir automatiquement
+            }
             catch (Exception e) { ToastNotification.showError("Erreur export Excel", e.getMessage()); }
         }
     }
@@ -632,7 +711,11 @@ public class ProgrammeDetailController {
         fc.setInitialFileName(objectif.getTitre().replaceAll("[^a-zA-Z0-9]", "_") + ".docx");
         File file = fc.showSaveDialog(vboxTaches.getScene().getWindow());
         if (file != null) {
-            try { ExportUtil.exporterWord(file.getAbsolutePath(), objectif, programme, taches); ToastNotification.showSuccess("Export Word réussi", file.getName() + " sauvegardé."); }
+            try {
+                ExportUtil.exporterWord(file.getAbsolutePath(), objectif, programme, taches);
+                ToastNotification.showSuccess("Export Word réussi", file.getName() + " sauvegardé.");
+                ExportUtil.ouvrirFichier(file.getAbsolutePath()); // ouvrir automatiquement
+            }
             catch (Exception e) { ToastNotification.showError("Erreur export Word", e.getMessage()); }
         }
     }

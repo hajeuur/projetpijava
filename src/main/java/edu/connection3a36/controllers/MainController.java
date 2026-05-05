@@ -136,10 +136,11 @@ public class MainController {
             show(boxBackAdmin);
             hide(boxSwitcher);
 
-            // Cacher tout dans boxBackAdmin sauf Parcours et Projets
+            // Cacher tout dans boxBackAdmin sauf Parcours, Projets, Feedbacks et Dashboard Objectifs
             for (javafx.scene.Node n : boxBackAdmin.getChildren()) {
                 if (n instanceof Button b) {
-                    if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks) show(b);
+                    if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks
+                            || b == btnDashboardObjectifs) show(b);
                     else hide(b);
                 } else {
                     hide(n); // Séparateurs, labels

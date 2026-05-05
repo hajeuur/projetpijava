@@ -66,8 +66,19 @@ public class ObjectifService implements IService<Objectif> {
     @Override
     public void addEntity(Objectif o) throws SQLException {
 
+        // ════════════════════════════════════════════════════════════════════
+        // POURQUOI 2 ÉTAPES ?
+        // La BDD exige que le programme existe AVANT l'objectif car la table
+        // "objectif" a une colonne "programme_id" qui est une clé étrangère
+        // vers la table "programme". On ne peut pas insérer l'objectif sans
+        // connaître l'ID du programme. Donc : programme d'abord, objectif ensuite.
+        // ════════════════════════════════════════════════════════════════════
+
         // ── ÉTAPE 1 : Créer le Programme ──────────────────────────────────────
         String reqProg = "INSERT INTO programme (titre, dategeneration, score_pourcentage, meilleure_medaille) VALUES (?,?,?,?)";
+
+        // Statement.RETURN_GENERATED_KEYS : demande à MySQL de nous retourner
+        // l'ID auto-incrémenté qui vient d'être généré après le INSERT
         PreparedStatement pstProg = cnx.prepareStatement(reqProg, Statement.RETURN_GENERATED_KEYS);
         pstProg.setString(1, "Programme — " + o.getTitre()); // Titre automatique
         pstProg.setDate(2, Date.valueOf(LocalDate.now()));    // Date du jour
@@ -75,10 +86,11 @@ public class ObjectifService implements IService<Objectif> {
         pstProg.setNull(4, Types.VARCHAR);                    // Pas encore de médaille
         pstProg.executeUpdate();
 
-        // Récupérer l'ID généré automatiquement par MySQL (AUTO_INCREMENT)
+        // getGeneratedKeys() récupère l'ID que MySQL vient de générer (AUTO_INCREMENT)
+        // rs.next() positionne le curseur sur la première (et unique) ligne de résultat
         ResultSet rsProg = pstProg.getGeneratedKeys();
         if (!rsProg.next()) throw new SQLException("Impossible de créer le programme.");
-        int programmeId = rsProg.getInt(1);
+        int programmeId = rsProg.getInt(1); // colonne 1 = l'ID généré
 
         // Créer l'objet Programme en mémoire et l'associer à l'objectif
         Programme prog = new Programme("Programme — " + o.getTitre(), LocalDate.now());
@@ -97,7 +109,7 @@ public class ObjectifService implements IService<Objectif> {
         pst.setInt(7, o.getUtilisateurId());
         pst.executeUpdate();
 
-        // Récupérer l'ID de l'objectif créé
+        // Récupérer l'ID de l'objectif créé (même technique que pour le programme)
         ResultSet rs = pst.getGeneratedKeys();
         if (rs.next()) o.setId(rs.getInt(1));
 
@@ -122,7 +134,28 @@ public class ObjectifService implements IService<Objectif> {
      */
     @Override
     public void deleteEntity(Objectif o) throws SQLException {
-        // Récupérer l'ID du programme lié avant de supprimer l'objectif
+
+        // ════════════════════════════════════════════════════════════════════
+        // POURQUOI CET ORDRE PRÉCIS ?
+        // MySQL refuse de supprimer un enregistrement si d'autres tables
+        // y font référence via une clé étrangère (FK = Foreign Key).
+        //
+        // Dépendances :
+        //   motivation.programme_id → programme.id  (dépend du programme)
+        //   tache.programme_id      → programme.id  (dépend du programme)
+        //   objectif.programme_id   → programme.id  (dépend du programme)
+        //
+        // Donc l'ordre OBLIGATOIRE est :
+        //   1. Supprimer motivations  (elles dépendent du programme)
+        //   2. Supprimer tâches       (elles dépendent du programme)
+        //   3. Supprimer l'objectif   (il dépend du programme)
+        //   4. Supprimer le programme (plus rien ne le référence)
+        //
+        // Si on supprime le programme en premier → MySQL lève une erreur FK.
+        // ════════════════════════════════════════════════════════════════════
+
+        // Récupérer l'ID du programme AVANT de supprimer l'objectif
+        // (après suppression de l'objectif, on ne pourrait plus retrouver le programme_id)
         int programmeId = getProgrammeId(o.getId());
 
         if (programmeId > 0) {
@@ -329,23 +362,32 @@ public class ObjectifService implements IService<Objectif> {
         o.setTitre(rs.getString("titre"));
         o.setDescription(rs.getString("description"));
 
-        // Conversion java.sql.Date → java.time.LocalDate
+        // java.sql.Date (type BDD) ≠ java.time.LocalDate (type Java moderne)
+        // On doit convertir avec .toLocalDate() — retourne null si la date est null en BDD
         Date dd = rs.getDate("datedebut");
         if (dd != null) o.setDatedebut(dd.toLocalDate());
         Date df = rs.getDate("datefin");
         if (df != null) o.setDatefin(df.toLocalDate());
 
-        // Conversion chaîne BDD → enum Statutobj (avec gestion d'erreur)
+        // fromValue() peut lever une exception si la valeur en BDD est corrompue
+        // → on attrape l'exception et on met EnCours par défaut pour ne pas planter
         try { o.setStatut(Statutobj.fromValue(rs.getString("statut"))); }
-        catch (Exception e) { o.setStatut(Statutobj.EnCours); } // Valeur par défaut si erreur
+        catch (Exception e) { o.setStatut(Statutobj.EnCours); }
 
         o.setUtilisateurId(rs.getInt("utilisateur_id"));
 
-        // Créer un Programme "léger" avec seulement l'ID (pour éviter N+1 queries)
+        // ════════════════════════════════════════════════════════════════════
+        // LAZY LOADING : on crée un Programme "léger" avec seulement l'ID.
+        // On ne charge PAS tous les détails du programme ici pour éviter
+        // le problème N+1 (si on a 50 objectifs, on ferait 50 requêtes
+        // supplémentaires pour charger les programmes).
+        // Les détails sont chargés séparément quand nécessaire via
+        // programmeService.getById(prog.getId()).
+        // ════════════════════════════════════════════════════════════════════
         int progId = rs.getInt("programme_id");
         if (progId > 0) {
             Programme p = new Programme();
-            p.setId(progId);
+            p.setId(progId); // seulement l'ID, pas les autres champs
             o.setProgramme(p);
         }
 

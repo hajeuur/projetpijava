@@ -276,4 +276,24 @@ public class ExportUtil {
     }
 
     private static String nvl(Object o) { return o != null ? o.toString() : "—"; }
+
+    /**
+     * Ouvre un fichier avec l'application par défaut du système (Excel, Word...).
+     * Utilise java.awt.Desktop qui délègue au système d'exploitation.
+     * Ne plante pas si l'ouverture échoue — affiche juste un message dans la console.
+     *
+     * @param filePath Le chemin absolu du fichier à ouvrir
+     */
+    public static void ouvrirFichier(String filePath) {
+        try {
+            java.io.File file = new java.io.File(filePath);
+            if (file.exists() && java.awt.Desktop.isDesktopSupported()) {
+                // Desktop.open() ouvre le fichier avec l'application par défaut du système
+                // Excel pour .xlsx, Word pour .docx
+                java.awt.Desktop.getDesktop().open(file);
+            }
+        } catch (Exception e) {
+            System.err.println("Impossible d'ouvrir le fichier automatiquement : " + e.getMessage());
+        }
+    }
 }

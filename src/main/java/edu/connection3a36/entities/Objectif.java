@@ -3,72 +3,47 @@ package edu.connection3a36.entities;
 import java.time.LocalDate;
 
 /**
- * ============================================================
- * ENTITÉ : Objectif
- * ============================================================
  * Représente un objectif personnel défini par un utilisateur.
+ * C'est le point de départ du module coaching.
+ * Chaque objectif est automatiquement lié à un Programme à sa création.
  *
- * Un objectif est le point de départ de tout le module coaching.
- * Quand un utilisateur crée un objectif, le système crée automatiquement
- * un Programme lié (qui contiendra les tâches et le score).
+ * Table BDD : "objectif"
+ * Colonnes  : id, titre, description, datedebut, datefin, statut, programme_id, utilisateur_id
  *
- * STRUCTURE EN BASE DE DONNÉES (table "objectif") :
- * ┌─────────────────┬──────────────────────────────────────────┐
- * │ Colonne         │ Description                              │
- * ├─────────────────┼──────────────────────────────────────────┤
- * │ id              │ Identifiant unique auto-incrémenté       │
- * │ titre           │ Nom de l'objectif (ex: "Apprendre Java") │
- * │ description     │ Détails de l'objectif (optionnel)        │
- * │ datedebut       │ Date de début                            │
- * │ datefin         │ Deadline (date limite)                   │
- * │ statut          │ EnCours / Atteint / Abandonner           │
- * │ programme_id    │ Clé étrangère → table programme          │
- * │ utilisateur_id  │ Clé étrangère → table utilisateur        │
- * └─────────────────┴──────────────────────────────────────────┘
- *
- * RELATION AVEC PROGRAMME :
- * Objectif (1) ──────────── (1) Programme
- *                                    │
- *                                    ├── (N) Tache
- *                                    └── (N) Motivation
- *
- * STATUT AUTOMATIQUE (géré par ScoreService) :
- * - Score = 0%   → Abandonner
- * - Score = 100% → Atteint
- * - Sinon        → EnCours
- * ============================================================
+ * Règle importante : le statut (EnCours/Atteint/Abandonner) est calculé
+ * automatiquement par ScoreService selon le % de tâches réalisées.
  */
 public class Objectif {
 
     // ── Attributs ─────────────────────────────────────────────────────────────
 
-    /** Identifiant unique en base de données */
+    /** Identifiant unique généré par la BDD (AUTO_INCREMENT) */
     private int id;
 
-    /** Titre de l'objectif (ex: "Apprendre le développement web") */
+    /** Nom de l'objectif, ex : "Apprendre le développement web" */
     private String titre;
 
-    /** Description détaillée de l'objectif (peut être null) */
+    /** Description détaillée (optionnelle) */
     private String description;
 
-    /** Date de début de l'objectif */
+    /** Date à laquelle l'utilisateur commence à travailler sur l'objectif */
     private LocalDate datedebut;
 
-    /** Date limite (deadline) pour atteindre l'objectif */
+    /** Date limite pour atteindre l'objectif (deadline) */
     private LocalDate datefin;
 
     /**
      * Statut actuel de l'objectif.
-     * IMPORTANT : ce statut est mis à jour AUTOMATIQUEMENT par ScoreService
-     * selon le pourcentage de tâches réalisées. Ne pas le modifier manuellement.
-     * Valeur par défaut : Atteint (sera écrasée à la création)
+     * NE PAS modifier manuellement — géré automatiquement par ScoreService :
+     *   score = 0%   → Abandonner
+     *   score = 100% → Atteint
+     *   sinon        → EnCours
      */
     private Statutobj statut = Statutobj.Atteint;
 
     /**
-     * Le programme lié à cet objectif.
-     * Contient les tâches, le score et la médaille.
-     * Créé automatiquement lors de la création de l'objectif.
+     * Le programme lié à cet objectif (contient les tâches, le score, la médaille).
+     * Créé automatiquement par ObjectifService.addEntity().
      */
     private Programme programme;
 
@@ -77,18 +52,12 @@ public class Objectif {
 
     // ── Constructeurs ─────────────────────────────────────────────────────────
 
-    /** Constructeur vide requis pour le mapping depuis la base de données */
+    /** Constructeur vide — requis pour lire les données depuis la BDD */
     public Objectif() {}
 
     /**
-     * Constructeur complet utilisé lors de la création d'un nouvel objectif.
-     * Le statut est initialisé à EnCours car aucune tâche n'est encore réalisée.
-     *
-     * @param titre         Nom de l'objectif
-     * @param description   Description détaillée
-     * @param datedebut     Date de début
-     * @param datefin       Date limite (deadline)
-     * @param utilisateurId ID de l'utilisateur propriétaire
+     * Constructeur utilisé lors de la création d'un nouvel objectif.
+     * Le statut est initialisé à EnCours (aucune tâche réalisée au départ).
      */
     public Objectif(String titre, String description, LocalDate datedebut,
                     LocalDate datefin, int utilisateurId) {
@@ -97,7 +66,7 @@ public class Objectif {
         this.datedebut = datedebut;
         this.datefin = datefin;
         this.utilisateurId = utilisateurId;
-        this.statut = Statutobj.EnCours; // Statut initial : en cours
+        this.statut = Statutobj.EnCours; // statut initial : en cours
     }
 
     // ── Getters et Setters ────────────────────────────────────────────────────
@@ -126,7 +95,7 @@ public class Objectif {
     public int getUtilisateurId() { return utilisateurId; }
     public void setUtilisateurId(int utilisateurId) { this.utilisateurId = utilisateurId; }
 
-    /** Utilisé par les ComboBox JavaFX pour afficher le titre de l'objectif */
+    /** Retourne le titre — utilisé par les ComboBox JavaFX */
     @Override
     public String toString() { return titre; }
 }

@@ -21,45 +21,55 @@ import java.util.List;
 
 public class DashboardObjectifsAdminController {
 
-    // ── Stats globales ────────────────────────────────────────────────────────
-    @FXML private Label totalObjectifsLabel;
-    @FXML private Label atteintsLabel;
-    @FXML private Label enCoursLabel;
-    @FXML private Label tauxLabel;
+    // ── Labels des statistiques globales (liés au FXML) ───────────────────────
+    @FXML private Label totalObjectifsLabel; // nombre total d'objectifs
+    @FXML private Label atteintsLabel;       // nombre d'objectifs atteints
+    @FXML private Label enCoursLabel;        // nombre d'objectifs en cours
+    @FXML private Label tauxLabel;           // taux de réussite en %
 
-    // ── Liste utilisateurs ────────────────────────────────────────────────────
-    @FXML private VBox vboxUtilisateurs;
-    @FXML private TextField tfRechercheUser;
+    // ── Composants de la liste des utilisateurs ───────────────────────────────
+    @FXML private VBox vboxUtilisateurs;     // conteneur des lignes utilisateurs
+    @FXML private TextField tfRechercheUser; // champ de recherche par nom/email
 
+    // ── Services utilisés ─────────────────────────────────────────────────────
     private final ObjectifService objectifService = new ObjectifService();
     private final ProgrammeService programmeService = new ProgrammeService();
     private final UtilisateurService utilisateurService = new UtilisateurService();
 
+    /** Liste complète des utilisateurs (conservée pour le filtrage) */
     private List<Utilisateur> tousUtilisateurs;
 
+    /** Appelé automatiquement par JavaFX au chargement du FXML */
     @FXML
     public void initialize() {
-        charger();
+        charger(); // charger les stats et la liste des utilisateurs
     }
 
+    /** Bouton "Rafraîchir" — recharge toutes les données depuis la BDD */
     @FXML
     void handleRefresh() { charger(); }
 
+    /**
+     * Charge les statistiques globales et la liste des utilisateurs.
+     * Calcule : total, atteints, en cours, taux de réussite.
+     */
     private void charger() {
         try {
-            // Stats globales
+            // Récupérer tous les objectifs (tous utilisateurs confondus)
             List<Objectif> tousObjectifs = objectifService.getData();
             long atteints = tousObjectifs.stream().filter(o -> o.getStatut() == Statutobj.Atteint).count();
             long encours  = tousObjectifs.stream().filter(o -> o.getStatut() == Statutobj.EnCours).count();
             int total = tousObjectifs.size();
+            // Taux = (atteints / total) × 100, ou 0 si aucun objectif
             double taux = total > 0 ? (double) atteints / total * 100 : 0;
 
+            // Mettre à jour les labels de statistiques
             totalObjectifsLabel.setText(String.valueOf(total));
             atteintsLabel.setText(String.valueOf(atteints));
             enCoursLabel.setText(String.valueOf(encours));
             tauxLabel.setText(String.format("%.0f%%", taux));
 
-            // Liste utilisateurs
+            // Charger et afficher la liste des utilisateurs
             tousUtilisateurs = utilisateurService.getData();
             afficherUtilisateurs(tousUtilisateurs);
 
@@ -68,6 +78,10 @@ public class DashboardObjectifsAdminController {
         }
     }
 
+    /**
+     * Filtre la liste des utilisateurs selon le texte saisi dans tfRechercheUser.
+     * Recherche sur le nom, prénom et email.
+     */
     @FXML
     void handleRechercheUser() {
         if (tousUtilisateurs == null) return;
@@ -81,6 +95,10 @@ public class DashboardObjectifsAdminController {
         afficherUtilisateurs(filtres);
     }
 
+    /**
+     * Vide le conteneur et reconstruit les lignes pour chaque utilisateur.
+     * Affiche un message si la liste est vide.
+     */
     private void afficherUtilisateurs(List<Utilisateur> utilisateurs) {
         vboxUtilisateurs.getChildren().clear();
         if (utilisateurs.isEmpty()) {
@@ -89,11 +107,16 @@ public class DashboardObjectifsAdminController {
             vboxUtilisateurs.getChildren().add(lbl);
             return;
         }
+        // Construire une ligne pour chaque utilisateur
         for (Utilisateur u : utilisateurs) {
             vboxUtilisateurs.getChildren().add(buildUserRow(u));
         }
     }
 
+    /**
+     * Construit dynamiquement une ligne HBox pour un utilisateur.
+     * Contient : avatar, nom/email/rôle, compteur d'objectifs, bouton "Voir".
+     */
     private HBox buildUserRow(Utilisateur u) {
         HBox row = new HBox(15);
         row.setAlignment(Pos.CENTER_LEFT);
@@ -101,13 +124,13 @@ public class DashboardObjectifsAdminController {
         row.setStyle("-fx-background-color: white; -fx-background-radius: 12; "
                 + "-fx-effect: dropshadow(gaussian, rgba(16,44,89,0.07), 8, 0, 0, 2);");
 
-        // Avatar
+        // Avatar : cercle avec la première lettre du prénom
         Label avatar = new Label(u.getPrenom().substring(0, 1).toUpperCase());
         avatar.setStyle("-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; "
                 + "-fx-font-size: 16px; -fx-min-width: 42; -fx-min-height: 42; "
                 + "-fx-background-radius: 21; -fx-alignment: CENTER;");
 
-        // Infos utilisateur
+        // Bloc d'informations : nom, email, rôle
         VBox infos = new VBox(3);
         Label lblNom = new Label(u.getPrenom() + " " + u.getNom());
         lblNom.setStyle("-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 14px;");
@@ -119,7 +142,7 @@ public class DashboardObjectifsAdminController {
         infos.getChildren().addAll(lblNom, lblEmail, lblRole);
         HBox.setHgrow(infos, Priority.ALWAYS);
 
-        // Compteur objectifs
+        // Bloc de statistiques : nombre d'objectifs et nombre atteints
         VBox stats = new VBox(3);
         stats.setAlignment(Pos.CENTER);
         try {
@@ -136,7 +159,7 @@ public class DashboardObjectifsAdminController {
             stats.getChildren().add(new Label("—"));
         }
 
-        // Bouton voir objectifs
+        // Bouton pour ouvrir la vue des objectifs de cet utilisateur
         Button btnVoir = new Button("Voir les objectifs");
         btnVoir.setStyle("-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold; "
                 + "-fx-background-radius: 50; -fx-padding: 9 20 9 20; -fx-cursor: hand;");
@@ -146,12 +169,16 @@ public class DashboardObjectifsAdminController {
         return row;
     }
 
+    /**
+     * Ouvre la vue AdminObjectifsUser pour voir les objectifs d'un utilisateur.
+     * Charge le FXML et passe l'utilisateur sélectionné au contrôleur.
+     */
     private void ouvrirObjectifsUtilisateur(Utilisateur u) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdminObjectifsUser.fxml"));
             Parent view = loader.load();
             AdminObjectifsUserController ctrl = loader.getController();
-            ctrl.setUtilisateur(u);
+            ctrl.setUtilisateur(u); // passer l'utilisateur sélectionné
             MainController.getInstance().loadInContentArea(view);
         } catch (Exception e) {
             AlertUtil.showError("Erreur ouverture objectifs : " + e.getMessage());

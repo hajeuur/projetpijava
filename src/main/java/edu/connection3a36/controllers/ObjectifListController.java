@@ -384,6 +384,7 @@ public class ObjectifListController {
                     }
                 }
                 ToastNotification.showSuccess("Export Excel réussi", file.getName() + " sauvegardé.");
+                ExportUtil.ouvrirFichier(file.getAbsolutePath()); // ouvrir automatiquement
             } catch (Exception e) { ToastNotification.showError("Erreur export Excel", e.getMessage()); }
         }
     }
@@ -405,6 +406,7 @@ public class ObjectifListController {
                     }
                 }
                 ToastNotification.showSuccess("Export Word réussi", file.getName() + " sauvegardé.");
+                ExportUtil.ouvrirFichier(file.getAbsolutePath()); // ouvrir automatiquement
             } catch (Exception e) { ToastNotification.showError("Erreur export Word", e.getMessage()); }
         }
     }

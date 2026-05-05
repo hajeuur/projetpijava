@@ -3,55 +3,31 @@ package edu.connection3a36.entities;
 import java.time.LocalDate;
 
 /**
- * ============================================================
- * ENTITÉ : Motivation
- * ============================================================
- * Représente un message de motivation généré par l'IA Ollama
- * pour encourager l'utilisateur dans la réalisation de son objectif.
+ * Représente un message de motivation généré par l'IA Ollama.
+ * Chaque message est lié à un programme et stocké en BDD.
  *
- * RELATION :
- * Programme (1) ──────────── (N) Motivation
+ * Relation : Programme (1) ←→ (N) Motivation
  *
- * STRUCTURE EN BASE DE DONNÉES (table "motivation") :
- * ┌──────────────────┬──────────────────────────────────────────────┐
- * │ Colonne          │ Description                                  │
- * ├──────────────────┼──────────────────────────────────────────────┤
- * │ id               │ Identifiant unique auto-incrémenté           │
- * │ dategeneratiomm  │ Date de génération du message (typo en BDD)  │
- * │ messagemotivant  │ Le texte du message généré par Ollama        │
- * │ programme_id     │ Clé étrangère → table programme              │
- * └──────────────────┴──────────────────────────────────────────────┘
+ * Table BDD : "motivation"
+ * Colonnes  : id, dategeneratiomm (typo BDD), messagemotivant, programme_id
  *
- * NOTE SUR LA TYPO :
- * La colonne s'appelle "dategeneratiomm" (avec deux 'm') dans la BDD.
- * C'est une erreur de frappe existante qui est conservée pour ne pas
- * casser la base de données. Le code s'adapte à ce nom.
+ * Note : la colonne date s'appelle "dategeneratiomm" (double 'm') dans la BDD.
+ * C'est une erreur de frappe conservée pour ne pas casser la base de données.
  *
- * GÉNÉRATION DU MESSAGE :
- * OllamaService.genererMessageMotivant() envoie à Ollama :
- * - Le titre de l'objectif
- * - Le score actuel (%)
- * - Le score précédent (pour calculer l'évolution)
- * - La deadline (pour contextualiser l'urgence)
- * Ollama retourne un message personnalisé de 2-3 phrases.
- *
- * UTILISATION :
- * - L'utilisateur clique sur "Rafraîchir le message" dans ProgrammeDetail
- * - Un nouveau message est généré et sauvegardé en BDD
- * - Le dernier message est affiché (getLatestByProgramme)
- * ============================================================
+ * Le message est généré par OllamaService.genererMessageMotivant() en tenant
+ * compte du score actuel, de l'évolution et de la deadline.
  */
 public class Motivation {
 
     // ── Attributs ─────────────────────────────────────────────────────────────
 
-    /** Identifiant unique en base de données */
+    /** Identifiant unique généré par la BDD */
     private int id;
 
-    /** Date à laquelle le message a été généré */
+    /** Date à laquelle le message a été généré par l'IA */
     private LocalDate dategeneration;
 
-    /** Le texte du message motivant généré par l'IA Ollama */
+    /** Texte du message motivant généré par Ollama (2-3 phrases) */
     private String messagemotivant;
 
     /** ID du programme auquel ce message est associé */
@@ -59,7 +35,7 @@ public class Motivation {
 
     // ── Constructeur ─────────────────────────────────────────────────────────
 
-    /** Constructeur vide requis pour le mapping depuis la base de données */
+    /** Constructeur vide — requis pour lire les données depuis la BDD */
     public Motivation() {}
 
     // ── Getters et Setters ────────────────────────────────────────────────────

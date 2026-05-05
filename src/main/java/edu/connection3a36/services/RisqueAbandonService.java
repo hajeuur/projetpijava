@@ -149,20 +149,35 @@ public class RisqueAbandonService {
     private RisqueResultat parseReponse(String response, List<Tache> abandonnees) {
         if (response == null || response.isBlank()) return fallback(abandonnees, 0, 0);
         try {
-            // Extraire le JSON de la réponse (Ollama peut ajouter du texte)
-            int start = response.indexOf('{');
-            int end   = response.lastIndexOf('}');
+            // ════════════════════════════════════════════════════════════════
+            // PROBLÈME : Ollama ne retourne pas toujours du JSON pur.
+            // Il peut répondre : "Voici mon analyse : {"risque": "Oui"} Bonne chance!"
+            // ou ajouter des explications avant/après le JSON.
+            //
+            // SOLUTION : on cherche manuellement le premier '{' et le dernier '}'
+            // pour extraire uniquement la partie JSON de la réponse.
+            //
+            // Exemple :
+            //   response = "Analyse : {"risque":"Oui","conseil":"..."} Fin."
+            //   start = 10 (position du '{')
+            //   end   = 42 (position du '}')
+            //   → on extrait response.substring(10, 43) = {"risque":"Oui",...}
+            //
+            // Si on ne trouve pas '{' ou '}' → indexOf retourne -1 → fallback
+            // ════════════════════════════════════════════════════════════════
+            int start = response.indexOf('{');      // position du premier '{'
+            int end   = response.lastIndexOf('}');  // position du dernier '}'
             if (start == -1 || end == -1) return fallback(abandonnees, 0, 0);
 
+            // Parser le JSON extrait
             JSONObject json = new JSONObject(response.substring(start, end + 1));
 
-            // Lire le champ "risque" (Oui/Non)
+            // optString() : lit le champ, retourne la valeur par défaut si absent
+            // (plus sûr que getString() qui lève une exception si le champ manque)
             boolean risque = "Oui".equalsIgnoreCase(json.optString("risque", "Non"));
-
-            // Lire le conseil
             String conseil = json.optString("conseil", "Relancez les taches abandonnees.");
 
-            // Lire la liste des tâches à relancer
+            // Lire le tableau JSON des tâches à relancer
             List<String> aRelancer = new ArrayList<>();
             JSONArray arr = json.optJSONArray("taches_a_relancer");
             if (arr != null) {
@@ -171,6 +186,7 @@ public class RisqueAbandonService {
 
             return new RisqueResultat(risque, aRelancer, conseil);
         } catch (Exception e) {
+            // Si le parsing échoue (JSON malformé, etc.) → utiliser le fallback
             return fallback(abandonnees, 0, 0);
         }
     }

@@ -124,32 +124,40 @@ public class ToastNotification {
      * @param duration Durée d'affichage en millisecondes
      */
     public static void show(Type type, String title, String message, int duration) {
-        // Toujours exécuter sur le thread JavaFX UI
+
+        // ════════════════════════════════════════════════════════════════════
+        // THREAD SAFETY : JavaFX interdit de modifier l'interface depuis
+        // un thread autre que le thread UI (JavaFX Application Thread).
+        // Si cette méthode est appelée depuis un Thread background (ex: après
+        // un appel Ollama), Platform.runLater() remet l'exécution sur le
+        // thread UI de façon asynchrone et sécurisée.
+        // ════════════════════════════════════════════════════════════════════
         if (!Platform.isFxApplicationThread()) {
             Platform.runLater(() -> show(type, title, message, duration));
             return;
         }
 
-        // Limiter le nombre de toasts simultanés
+        // Si on a déjà MAX_TOASTS toasts affichés, supprimer le plus ancien
         while (activeToasts.size() >= MAX_TOASTS) {
-            Stage oldest = activeToasts.pollFirst();
+            Stage oldest = activeToasts.pollFirst(); // retirer le premier (le plus ancien)
             if (oldest != null) oldest.close();
         }
 
-        // Créer et enregistrer le toast
+        // Créer et enregistrer le toast dans la file
         Stage toastStage = buildToastStage(type, title, message, duration);
-        activeToasts.addLast(toastStage);
+        activeToasts.addLast(toastStage); // ajouter à la fin de la file
 
-        // Repositionner les toasts existants
+        // Repositionner les toasts existants (pour faire de la place)
         repositionnerToasts();
 
-        // Afficher puis animer l'entrée
+        // Afficher puis animer l'entrée (slide depuis la droite)
         toastStage.show();
         animerEntree(toastStage);
 
-        // Fermeture automatique après la durée
+        // PauseTransition : timer JavaFX qui attend N ms puis exécute une action
+        // C'est l'équivalent de Thread.sleep() mais non-bloquant pour l'UI
         PauseTransition pause = new PauseTransition(Duration.millis(duration));
-        pause.setOnFinished(e -> fermerToast(toastStage));
+        pause.setOnFinished(e -> fermerToast(toastStage)); // fermer après la durée
         pause.play();
     }
 
@@ -298,19 +306,40 @@ public class ToastNotification {
     private static void animerEntree(Stage stage) {
         javafx.geometry.Rectangle2D screen = Screen.getPrimary().getVisualBounds();
         double targetX = screen.getMaxX() - TOAST_WIDTH - MARGIN_RIGHT;
-        double startX  = screen.getMaxX() + 10;
+        double startX  = screen.getMaxX() + 10; // départ hors écran à droite
 
         stage.setX(startX);
-        stage.setOpacity(0.0);
+        stage.setOpacity(0.0); // invisible au départ
 
-        // Propriétés intermédiaires animables
+        // ════════════════════════════════════════════════════════════════════
+        // PROBLÈME : Stage.xProperty() et Stage.opacityProperty() sont des
+        // ReadOnlyDoubleProperty → on NE PEUT PAS les passer à KeyValue
+        // car KeyValue exige une WritableValue (propriété modifiable).
+        //
+        // SOLUTION : on crée des SimpleDoubleProperty (qui sont modifiables),
+        // on les anime avec Timeline/KeyValue, et on les connecte au Stage
+        // via des listeners (addListener).
+        //
+        // Fonctionnement du listener :
+        //   Chaque fois que xProp change de valeur (à chaque frame d'animation),
+        //   le lambda (obs, oldV, newV) -> stage.setX(newV) est appelé
+        //   automatiquement, ce qui déplace le Stage.
+        // ════════════════════════════════════════════════════════════════════
+
+        // Propriétés intermédiaires animables (WritableDoubleProperty)
         DoubleProperty xProp       = new SimpleDoubleProperty(startX);
         DoubleProperty opacityProp = new SimpleDoubleProperty(0.0);
 
-        // Lier les propriétés au Stage
+        // Connecter les propriétés au Stage via des listeners
+        // Chaque changement de valeur → appel automatique de stage.setX() / stage.setOpacity()
         xProp.addListener((obs, oldV, newV)       -> stage.setX(newV.doubleValue()));
         opacityProp.addListener((obs, oldV, newV) -> stage.setOpacity(newV.doubleValue()));
 
+        // Timeline : définit l'animation image par image
+        // KeyFrame(Duration.ZERO)       → état au début (t=0ms)
+        // KeyFrame(Duration.millis(280)) → état à la fin (t=280ms)
+        // KeyValue : quelle propriété animer, vers quelle valeur, avec quelle courbe
+        // Interpolator.EASE_OUT : démarre vite, ralentit à la fin (effet naturel)
         Timeline slideIn = new Timeline(
                 new KeyFrame(Duration.ZERO,
                         new KeyValue(xProp,       startX,  Interpolator.EASE_IN),
@@ -319,7 +348,7 @@ public class ToastNotification {
                         new KeyValue(xProp,       targetX, Interpolator.EASE_OUT),
                         new KeyValue(opacityProp, 1.0,     Interpolator.EASE_OUT))
         );
-        slideIn.play();
+        slideIn.play(); // démarrer l'animation
     }
 
     /**

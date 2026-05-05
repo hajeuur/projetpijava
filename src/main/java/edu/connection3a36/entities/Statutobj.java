@@ -1,46 +1,30 @@
 package edu.connection3a36.entities;
 
 /**
- * ============================================================
- * ENUM : Statutobj
- * ============================================================
- * Représente le statut global d'un objectif.
+ * Enum représentant le statut global d'un objectif.
  *
- * IMPORTANT : Ce statut est calculé et mis à jour AUTOMATIQUEMENT
- * par ScoreService.calculerStatutObjectif() à chaque changement
- * d'état d'une tâche. L'utilisateur ne le modifie pas manuellement.
+ * Ce statut est calculé et mis à jour AUTOMATIQUEMENT par ScoreService
+ * à chaque changement d'état d'une tâche. L'utilisateur ne le modifie jamais.
  *
- * RÈGLES DE CALCUL AUTOMATIQUE :
- * ┌──────────────────────────────┬──────────────────┐
- * │ Condition                    │ Statut résultant │
- * ├──────────────────────────────┼──────────────────┤
- * │ Score = 0% (aucune tâche     │ Abandonner       │
- * │ réalisée)                    │                  │
- * ├──────────────────────────────┼──────────────────┤
- * │ Score = 100% (toutes les     │ Atteint          │
- * │ tâches réalisées)            │                  │
- * ├──────────────────────────────┼──────────────────┤
- * │ 0% < Score < 100%            │ EnCours          │
- * └──────────────────────────────┴──────────────────┘
+ * Règles de calcul :
+ *   score = 0%   → Abandonner  (aucune tâche réalisée)
+ *   score = 100% → Atteint     (toutes les tâches réalisées)
+ *   sinon        → EnCours     (en progression)
  *
- * AFFICHAGE DANS L'INTERFACE :
- * - EnCours    → badge orange
- * - Atteint    → badge vert
- * - Abandonner → badge rouge
- * ============================================================
+ * Affichage dans l'interface :
+ *   EnCours    → badge orange
+ *   Atteint    → badge vert
+ *   Abandonner → badge rouge
  */
 public enum Statutobj {
 
-    /** L'objectif est en cours de réalisation (score entre 1% et 99%) */
+    /** Objectif en cours de réalisation (score entre 1% et 99%) */
     EnCours("EnCours"),
 
-    /** L'objectif est complètement atteint (score = 100%) */
+    /** Objectif complètement atteint (score = 100%) */
     Atteint("Atteint"),
 
-    /**
-     * L'objectif est abandonné (score = 0%).
-     * Cela signifie qu'aucune tâche n'a été réalisée.
-     */
+    /** Objectif abandonné (score = 0%, aucune tâche réalisée) */
     Abandonner("Abandonner");
 
     /** Valeur stockée en base de données */
@@ -48,15 +32,13 @@ public enum Statutobj {
 
     Statutobj(String value) { this.value = value; }
 
-    /** Retourne la valeur telle qu'elle est stockée en base de données */
+    /** Retourne la valeur telle qu'elle est stockée en BDD */
     public String getValue() { return value; }
 
     /**
-     * Convertit une chaîne de la BDD en enum Statutobj.
-     * Utilisé lors du mapping ResultSet → objet Java.
+     * Convertit une chaîne lue depuis la BDD en enum Statutobj.
+     * Utilisé dans la méthode map() de ObjectifService.
      *
-     * @param value La valeur lue depuis la base de données
-     * @return L'enum correspondant
      * @throws IllegalArgumentException si la valeur est inconnue
      */
     public static Statutobj fromValue(String value) {

@@ -158,6 +158,20 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Crée une notification pour l'admin quand un enseignant soumet un feedback sur un plan d'action.
+     * Appelé par PlanActionsListController après soumission d'un feedback.
+     *
+     * @param planId    ID du plan d'action concerné
+     * @param planTitre Titre/décision du plan
+     * @param profName  Nom de l'enseignant qui a soumis le feedback
+     */
+    public void addFeedbackNotificationForAdmin(int planId, String planTitre, String profName) {
+        String titre = "Feedback enseignant sur Plan #" + planId;
+        String message = profName + " a soumis un feedback sur le plan : \"" + planTitre + "\"";
+        addSystemNotification(titre, message, "INFO");
+    }
+
     private Notification mapRow(ResultSet rs) throws SQLException {
         Notification n = new Notification();
         n.setId(rs.getInt("id"));

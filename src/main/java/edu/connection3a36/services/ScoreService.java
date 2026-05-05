@@ -64,23 +64,40 @@ public class ScoreService {
      * @throws Exception En cas d'erreur d'accès à la BDD
      */
     public int recalculerEtSauvegarder(int programmeId) throws Exception {
+
+        // ════════════════════════════════════════════════════════════════════
+        // CETTE MÉTHODE EST LE CŒUR DU SYSTÈME DE GAMIFICATION.
+        // Elle est appelée automatiquement à chaque fois qu'une tâche change
+        // d'état (encours → realisee, realisee → Abandonner, etc.).
+        //
+        // Elle déclenche une chaîne de 5 opérations dans l'ordre :
+        //   1. Charger les tâches
+        //   2. Calculer le score
+        //   3. Déterminer la médaille
+        //   4. Sauvegarder dans la table "programme"
+        //   5. Mettre à jour le statut dans la table "objectif"
+        //
+        // Résultat : l'interface se rafraîchit automatiquement avec le
+        // nouveau score, la nouvelle médaille et le nouveau statut.
+        // ════════════════════════════════════════════════════════════════════
+
         // 1. Récupérer toutes les tâches du programme
         List<Tache> taches = tacheService.getByProgramme(programmeId);
 
-        // 2. Calculer le score
+        // 2. Calculer le score : (nb realisee / nb total) × 100
         int score = calculerScore(taches);
 
-        // 3. Déterminer la médaille
+        // 3. Déterminer la médaille selon le score
         Medaille medaille = attribuerMedaille(score);
 
         // 4. Sauvegarder score + médaille dans la table programme
         programmeService.updateScore(programmeId, score,
                 medaille != null ? medaille.getValue() : null);
 
-        // 5. Mettre à jour le statut de l'objectif lié
+        // 5. Mettre à jour le statut de l'objectif lié (EnCours/Atteint/Abandonner)
         mettreAJourStatutObjectif(programmeId, taches, score);
 
-        return score;
+        return score; // retourner le nouveau score pour l'affichage
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -99,7 +116,7 @@ public class ScoreService {
      */
     private void mettreAJourStatutObjectif(int programmeId, List<Tache> taches, int score) {
         try {
-            // Trouver l'objectif lié à ce programme (relation inverse)
+            // Trouver l'objectif lié à ce programme (relation inverse programme → objectif)
             edu.connection3a36.entities.Objectif objectif =
                     objectifService.getByProgrammeId(programmeId);
             if (objectif == null) return; // Pas d'objectif lié → rien à faire
@@ -107,14 +124,21 @@ public class ScoreService {
             // Calculer le nouveau statut selon les règles métier
             Statutobj nouveauStatut = calculerStatutObjectif(taches, score);
 
-            // Mettre à jour SEULEMENT si le statut a changé (optimisation BDD)
+            // ════════════════════════════════════════════════════════════════
+            // OPTIMISATION : on compare l'ancien et le nouveau statut.
+            // Si le statut n'a pas changé, on n'exécute PAS de requête UPDATE.
+            // Cela évite des écritures inutiles en BDD à chaque changement de tâche.
+            // Exemple : si le score passe de 20% à 40%, le statut reste "EnCours"
+            // → pas de UPDATE nécessaire.
+            // ════════════════════════════════════════════════════════════════
             if (objectif.getStatut() != nouveauStatut) {
                 objectif.setStatut(nouveauStatut);
                 objectifService.updateEntity(objectif.getId(), objectif);
                 System.out.println("✅ Statut objectif mis à jour : " + nouveauStatut.getValue());
             }
         } catch (Exception e) {
-            // Ne pas bloquer l'application si la mise à jour du statut échoue
+            // On attrape l'exception pour ne pas bloquer l'application
+            // si la mise à jour du statut échoue (erreur BDD, etc.)
             System.err.println("⚠️ Erreur mise à jour statut objectif : " + e.getMessage());
         }
     }
@@ -160,12 +184,16 @@ public class ScoreService {
     public int calculerScore(List<Tache> taches) {
         if (taches == null || taches.isEmpty()) return 0;
 
-        // Compter uniquement les tâches avec l'état "realisee"
+        // Stream API Java : parcourt la liste et compte les éléments qui
+        // satisfont la condition (etat == realisee)
+        // C'est équivalent à une boucle for avec un compteur
         long realisees = taches.stream()
                 .filter(t -> t.getEtat() == Etat.realisee)
                 .count();
 
-        // Calcul du pourcentage avec arrondi
+        // (double) force la division décimale (ex: 1/5 = 0.2 et non 0)
+        // Math.round() arrondit au plus proche (ex: 33.33 → 33, 66.66 → 67)
+        // (int) convertit le long retourné par Math.round en int
         return (int) Math.round((double) realisees / taches.size() * 100);
     }
 

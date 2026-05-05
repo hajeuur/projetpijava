@@ -138,4 +138,12 @@ public class GroqService {
     public String sendSimpleMessage(String message, String roleContext) throws Exception {
         return sendMessage(message, new ArrayList<>(), roleContext);
     }
+
+    /**
+     * Version simplifiée avec schema JSON (le schema est ignoré, utilisé pour compatibilité).
+     * Appelé par AtRiskScenarioController et PlanActionsListController.
+     */
+    public String sendSimpleJsonMessage(String message, String roleContext, Object schema) throws Exception {
+        return sendMessage(message, new ArrayList<>(), roleContext);
+    }
 }
