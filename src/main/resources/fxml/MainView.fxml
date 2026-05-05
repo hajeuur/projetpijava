@@ -196,39 +196,6 @@
                     <Button fx:id="btnDashboardObjectifs" text="📊 Dashboard Objectifs"
                             onAction="#showDashboardObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"/>
 
-<<<<<<< HEAD
-            <!-- Section Back CRUD Admin -->
-            <VBox fx:id="boxBackAdmin" spacing="5">
-                <Separator/>
-                <Separator/>
-                <Label text="BACK CRUD" styleClass="sidebar-section"/>
-                <Button fx:id="btnIoT" text="IoT &amp; Présences" onAction="#showIoT"
-                        styleClass="sidebar-btn" maxWidth="Infinity"/>
-                <Button fx:id="btnAtRisk" text="🚨 Étudiant à Risque" onAction="#showAtRisk"
-                        styleClass="sidebar-btn" maxWidth="Infinity" style="-fx-text-fill:#dc2626;"/>
-                <Button text="Plans d'Actions" onAction="#showPlanActions"
-                        styleClass="sidebar-btn" maxWidth="Infinity"/>
-                <Button text="Articles" onAction="#showArticles"
-                        styleClass="sidebar-btn" maxWidth="Infinity"/>
-                <Button fx:id="btnCategories" text="Catégories d'Articles"
-                        onAction="#showCategories" styleClass="sidebar-btn" maxWidth="Infinity"/>
-                <Button fx:id="btnBackParcours" text="🎓 Gestion Parcours"
-                        onAction="#showBackParcours" styleClass="sidebar-btn" maxWidth="Infinity"
-                        visible="false" managed="false"/>
-                <Button fx:id="btnDashboardObjectifs" text="🎯 Objectifs Utilisateurs"
-                        onAction="#showDashboardObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"
-                        visible="false" managed="false"/>
-                <Button fx:id="btnBackProjets" text="📂 Gestion Projets"
-                        onAction="#showBackProjets" styleClass="sidebar-btn" maxWidth="Infinity"
-                        visible="false" managed="false"/>
-                <Button fx:id="btnBackFeedbacks" text="📝 Gestion Feedbacks"
-                        onAction="#showBackFeedbacks" styleClass="sidebar-btn" maxWidth="Infinity"
-                        visible="false" managed="false"/>
-                <Button fx:id="btnDashboardObjectifs" text="📊 Dashboard Objectifs"
-                        onAction="#showDashboardObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"
-                        visible="false" managed="false"/>
-            </VBox>
-
                     <Separator fx:id="sepIA" style="-fx-padding: 5 0;"/>
                     <Label fx:id="lblIASection" text="IA &amp; ANALYSES" styleClass="sidebar-section"/>
                     <Button fx:id="btnIoT" text="📡 IoT &amp; Présences" onAction="#showIoT"
