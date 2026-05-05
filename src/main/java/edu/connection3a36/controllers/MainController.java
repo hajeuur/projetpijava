@@ -130,7 +130,7 @@ public class MainController {
         Utilisateur user = SessionManager.getCurrentUser();
         if (user == null) return;
 
-        String displayName = user.getPrenom() + " (" + user.getRole() + ")";
+        String displayName = user.getPrenom() + " " + user.getNom();
         if (lblUser != null)     lblUser.setText(displayName);
         if (lblUserBack != null) lblUserBack.setText(displayName);
 
