@@ -182,20 +182,14 @@
                     <Label fx:id="lblAdminSection" text="ADMINISTRATION" styleClass="sidebar-section"/>
                     <Button fx:id="btnUtilisateurs" text="👥 Gestion des Users"
                             onAction="#showUtilisateurs" styleClass="sidebar-btn" maxWidth="Infinity"/>
-                    
-                    <Separator fx:id="sepPedago" style="-fx-padding: 5 0;"/>
-                    <Label fx:id="lblPedagoSection" text="GESTION PÉDAGOGIQUE" styleClass="sidebar-section"/>
-                    <Button fx:id="btnBackParcours" text="🎓 Gestion Parcours"
-                            onAction="#showBackParcours" styleClass="sidebar-btn" maxWidth="Infinity"/>
-                    <Button fx:id="btnBackProjets" text="📂 Gestion Projets"
-                            onAction="#showBackProjets" styleClass="sidebar-btn" maxWidth="Infinity"/>
-                    <Button fx:id="btnBackFeedbacks" text="📝 Gestion Feedbacks"
-                            onAction="#showBackFeedbacks" styleClass="sidebar-btn" maxWidth="Infinity"/>
-                    <Button fx:id="btnBackObjectifs" text="🎯 Gestion Objectifs"
-                            onAction="#showObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"/>
-                    <Button fx:id="btnDashboardObjectifs" text="📊 Dashboard Objectifs"
-                            onAction="#showDashboardObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"/>
 
+                    <!-- Objectifs étudiants — visible uniquement pour le SuperAdmin (admin@esprit.tn) -->
+                    <Separator fx:id="sepObjectifs" style="-fx-padding: 5 0;" visible="false" managed="false"/>
+                    <Label fx:id="lblObjectifsSection" text="OBJECTIFS" styleClass="sidebar-section" visible="false" managed="false"/>
+                    <Button fx:id="btnDashboardObjectifs" text="🎯 Objectifs Étudiants"
+                            onAction="#showDashboardObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"
+                            visible="false" managed="false"/>
+                    
                     <Separator fx:id="sepIA" style="-fx-padding: 5 0;"/>
                     <Label fx:id="lblIASection" text="IA &amp; ANALYSES" styleClass="sidebar-section"/>
                     <Button fx:id="btnIoT" text="📡 IoT &amp; Présences" onAction="#showIoT"

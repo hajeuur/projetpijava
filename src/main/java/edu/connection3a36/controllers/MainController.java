@@ -74,6 +74,8 @@ public class MainController {
     @FXML private Button btnBackFeedbacks;
     @FXML private Button btnBackObjectifs;
     @FXML private Button btnDashboardObjectifs;
+    @FXML private javafx.scene.control.Separator sepObjectifs;
+    @FXML private Label lblObjectifsSection;
     @FXML private Button btnPlanActionsBack;
     @FXML private Button btnArticlesBack;
     @FXML private Button btnIoT;
@@ -164,6 +166,17 @@ public class MainController {
                 show(boxGestions);
                 for (javafx.scene.Node n : boxGestions.getChildren()) show(n);
             }
+
+            // Masquer la section Objectifs étudiants pour le SuperAdmin
+            // (cette section est réservée à l'admin simple admin@gmail.com)
+            hide(btnDashboardObjectifs);
+            hide(btnBackParcours);
+            hide(btnBackProjets);
+            hide(btnBackFeedbacks);
+            hide(btnBackObjectifs);
+            if (sepObjectifs != null) hide(sepObjectifs);
+            if (lblObjectifsSection != null) hide(lblObjectifsSection);
+
             showCategories();
 
         } else if (isAdmin()) {
@@ -309,6 +322,14 @@ public class MainController {
                 show(boxGestions);
                 for (javafx.scene.Node n : boxGestions.getChildren()) show(n);
             }
+            // Masquer la section Objectifs étudiants pour le SuperAdmin
+            hide(btnDashboardObjectifs);
+            hide(btnBackParcours);
+            hide(btnBackProjets);
+            hide(btnBackFeedbacks);
+            hide(btnBackObjectifs);
+            if (sepObjectifs != null) hide(sepObjectifs);
+            if (lblObjectifsSection != null) hide(lblObjectifsSection);
         } else if (isAdmin()) {
             hide(boxSwitcher);
             hide(sepSwitcher);
