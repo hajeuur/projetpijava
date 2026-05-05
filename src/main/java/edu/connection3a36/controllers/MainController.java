@@ -164,7 +164,9 @@ public class MainController {
                 show(boxGestions);
                 for (javafx.scene.Node n : boxGestions.getChildren()) {
                     show(n);
-                    if (n == btnBackParcours || n == btnBackProjets || n == btnBackFeedbacks || n == btnBackObjectifs) {
+                    if (n == btnBackParcours || n == btnBackProjets || n == btnBackFeedbacks || n == btnBackObjectifs
+                        || n == btnDashboardObjectifs || n == btnHumeur || n == btnPlanning || n == btnCarnet
+                        || n == lblPedagoSection || n == lblMentorSection || n == sepPedago || n == sepMentor) {
                         hide(n);
                     }
                 }
@@ -312,7 +314,9 @@ public class MainController {
                 show(boxGestions);
                 for (javafx.scene.Node n : boxGestions.getChildren()) {
                     show(n);
-                    if (n == btnBackParcours || n == btnBackProjets || n == btnBackFeedbacks || n == btnBackObjectifs) {
+                    if (n == btnBackParcours || n == btnBackProjets || n == btnBackFeedbacks || n == btnBackObjectifs
+                        || n == btnDashboardObjectifs || n == btnHumeur || n == btnPlanning || n == btnCarnet
+                        || n == lblPedagoSection || n == lblMentorSection || n == sepPedago || n == sepMentor) {
                         hide(n);
                     }
                 }
