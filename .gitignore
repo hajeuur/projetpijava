@@ -39,4 +39,3 @@ build/
 .DS_Store
 
 ### Secrets ###
-config.properties
