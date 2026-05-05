@@ -162,7 +162,12 @@ public class MainController {
 
             if (boxGestions != null) {
                 show(boxGestions);
-                for (javafx.scene.Node n : boxGestions.getChildren()) show(n);
+                for (javafx.scene.Node n : boxGestions.getChildren()) {
+                    show(n);
+                    if (n == btnBackParcours || n == btnBackProjets || n == btnBackFeedbacks || n == btnBackObjectifs) {
+                        hide(n);
+                    }
+                }
             }
             showCategories();
 
@@ -305,7 +310,12 @@ public class MainController {
             show(sepSwitcher);
             if (boxGestions != null) {
                 show(boxGestions);
-                for (javafx.scene.Node n : boxGestions.getChildren()) show(n);
+                for (javafx.scene.Node n : boxGestions.getChildren()) {
+                    show(n);
+                    if (n == btnBackParcours || n == btnBackProjets || n == btnBackFeedbacks || n == btnBackObjectifs) {
+                        hide(n);
+                    }
+                }
             }
         } else if (isAdmin()) {
             hide(boxSwitcher);
