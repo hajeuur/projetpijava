@@ -167,36 +167,41 @@ public class MainController {
                 for (javafx.scene.Node n : boxGestions.getChildren()) show(n);
             }
 
-            // Masquer la section Objectifs étudiants pour le SuperAdmin
-            // (cette section est réservée à l'admin simple admin@gmail.com)
-            hide(btnDashboardObjectifs);
+            // Masquer les boutons pédagogiques — réservés à admin@gmail.com
             hide(btnBackParcours);
             hide(btnBackProjets);
             hide(btnBackFeedbacks);
             hide(btnBackObjectifs);
-            if (sepObjectifs != null) hide(sepObjectifs);
+            hide(btnDashboardObjectifs);
+            if (sepPedago != null)        hide(sepPedago);
+            if (lblPedagoSection != null) hide(lblPedagoSection);
+            if (sepObjectifs != null)     hide(sepObjectifs);
             if (lblObjectifsSection != null) hide(lblObjectifsSection);
 
             showCategories();
 
         } else if (isAdmin()) {
-            // admin@gmail.com
+            // admin@gmail.com — comportement original inchangé
             showBackMode();
             hide(boxSwitcher);
             hide(sepSwitcher);
 
-            // Cacher tout dans boxGestions sauf Parcours, Projets, Feedbacks et Dashboard Objectifs
             if (boxGestions != null) {
                 show(boxGestions);
                 for (javafx.scene.Node n : boxGestions.getChildren()) {
                     if (n instanceof Button b) {
                         if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks
-                                || b == btnDashboardObjectifs) show(b);
+                                || b == btnBackObjectifs || b == btnDashboardObjectifs) show(b);
                         else hide(b);
                     } else {
-                        hide(n); // Séparateurs, labels
+                        hide(n); // séparateurs et labels
                     }
                 }
+                // Afficher les séparateurs/labels de la section pédagogique
+                if (sepPedago != null)        show(sepPedago);
+                if (lblPedagoSection != null) show(lblPedagoSection);
+                if (sepObjectifs != null)     show(sepObjectifs);
+                if (lblObjectifsSection != null) show(lblObjectifsSection);
             }
             showBackParcours();
 
@@ -322,13 +327,15 @@ public class MainController {
                 show(boxGestions);
                 for (javafx.scene.Node n : boxGestions.getChildren()) show(n);
             }
-            // Masquer la section Objectifs étudiants pour le SuperAdmin
-            hide(btnDashboardObjectifs);
+            // Masquer les boutons pédagogiques — réservés à admin@gmail.com
             hide(btnBackParcours);
             hide(btnBackProjets);
             hide(btnBackFeedbacks);
             hide(btnBackObjectifs);
-            if (sepObjectifs != null) hide(sepObjectifs);
+            hide(btnDashboardObjectifs);
+            if (sepPedago != null)           hide(sepPedago);
+            if (lblPedagoSection != null)    hide(lblPedagoSection);
+            if (sepObjectifs != null)        hide(sepObjectifs);
             if (lblObjectifsSection != null) hide(lblObjectifsSection);
         } else if (isAdmin()) {
             hide(boxSwitcher);
@@ -337,10 +344,15 @@ public class MainController {
                 show(boxGestions);
                 for (javafx.scene.Node n : boxGestions.getChildren()) {
                     if (n instanceof Button b) {
-                        if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks || b == btnHumeur || b == btnPlanning || b == btnCarnet) show(b);
+                        if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks
+                                || b == btnBackObjectifs || b == btnDashboardObjectifs) show(b);
                         else hide(b);
                     } else hide(n);
                 }
+                if (sepPedago != null)           show(sepPedago);
+                if (lblPedagoSection != null)    show(lblPedagoSection);
+                if (sepObjectifs != null)        show(sepObjectifs);
+                if (lblObjectifsSection != null) show(lblObjectifsSection);
             }
         }
 

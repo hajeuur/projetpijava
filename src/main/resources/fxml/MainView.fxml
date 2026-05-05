@@ -189,6 +189,22 @@
                     <Button fx:id="btnDashboardObjectifs" text="🎯 Objectifs Étudiants"
                             onAction="#showDashboardObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"
                             visible="false" managed="false"/>
+
+                    <!-- Section Gestion Pédagogique — visible pour admin@gmail.com uniquement -->
+                    <Separator fx:id="sepPedago" style="-fx-padding: 5 0;" visible="false" managed="false"/>
+                    <Label fx:id="lblPedagoSection" text="GESTION PÉDAGOGIQUE" styleClass="sidebar-section" visible="false" managed="false"/>
+                    <Button fx:id="btnBackParcours" text="🎓 Gestion Parcours"
+                            onAction="#showBackParcours" styleClass="sidebar-btn" maxWidth="Infinity"
+                            visible="false" managed="false"/>
+                    <Button fx:id="btnBackProjets" text="📂 Gestion Projets"
+                            onAction="#showBackProjets" styleClass="sidebar-btn" maxWidth="Infinity"
+                            visible="false" managed="false"/>
+                    <Button fx:id="btnBackFeedbacks" text="📝 Gestion Feedbacks"
+                            onAction="#showBackFeedbacks" styleClass="sidebar-btn" maxWidth="Infinity"
+                            visible="false" managed="false"/>
+                    <Button fx:id="btnBackObjectifs" text="🎯 Gestion Objectifs"
+                            onAction="#showObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"
+                            visible="false" managed="false"/>
                     
                     <Separator fx:id="sepIA" style="-fx-padding: 5 0;"/>
                     <Label fx:id="lblIASection" text="IA &amp; ANALYSES" styleClass="sidebar-section"/>
