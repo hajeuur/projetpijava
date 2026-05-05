@@ -127,14 +127,29 @@ public class UtilisateurRepository implements IUtilisateur {
     @Override
     public Utilisateur login(String email, String mdp) {
         Connection cnx = DatabaseConnection.getInstance();
-        String mdpHache = hashPassword(mdp);
-        String sql = "SELECT * FROM utilisateur WHERE email=? AND mdp=?";
+        // Récupérer l'utilisateur par email uniquement
+        String sql = "SELECT * FROM utilisateur WHERE email=?";
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, email);
-            ps.setString(2, mdpHache);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) return mapRow(rs);
+            if (rs.next()) {
+                Utilisateur u = mapRow(rs);
+                String storedHash = u.getMdp();
+                boolean passwordOk;
+                if (storedHash != null && storedHash.startsWith("$2")) {
+                    // Hash bcrypt (format Symfony $2y$ ou $2a$)
+                    // BCrypt.checkpw attend $2a$ — on remplace $2y$ si nécessaire
+                    String bcryptHash = storedHash.startsWith("$2y$")
+                            ? "$2a$" + storedHash.substring(4)
+                            : storedHash;
+                    passwordOk = org.mindrot.jbcrypt.BCrypt.checkpw(mdp, bcryptHash);
+                } else {
+                    // Hash SHA-256 (format natif du module com.esprit)
+                    passwordOk = storedHash != null && storedHash.equals(hashPassword(mdp));
+                }
+                if (passwordOk) return u;
+            }
         } catch (SQLException e) {
             System.out.println("Erreur login : " + e.getMessage());
         }

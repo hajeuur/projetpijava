@@ -8,3 +8,4 @@ public class DatabaseConnection {
         return MyConnection.getInstance().getCnx();
     }
 }
+
