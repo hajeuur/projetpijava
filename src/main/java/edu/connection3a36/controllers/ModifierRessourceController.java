@@ -16,8 +16,9 @@ public class ModifierRessourceController implements Initializable {
     @FXML private TextField txtNom;
     @FXML private TextField txtUrl;
     @FXML private TextArea taDescription;
-    @FXML private ComboBox<String> cbType;
+    @FXML private ComboBox<String> cbTypeRessource;
     @FXML private Label lblErreur;
+    @FXML private Label lblProjetNom;
 
     private final RessourceService ressourceService = new RessourceService();
     private Ressource ressourceAModifier;
@@ -25,16 +26,17 @@ public class ModifierRessourceController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        cbType.setItems(FXCollections.observableArrayList("DOCUMENT", "VIDEO", "LIEN", "CODE"));
+        cbTypeRessource.setItems(FXCollections.observableArrayList("PDF", "VIDEO", "LIEN", "ARTICLE", "AUTRE"));
     }
 
     public void initData(Ressource r, Projet p) {
         this.ressourceAModifier = r;
         this.projetActuel = p;
+        if (lblProjetNom != null) lblProjetNom.setText("Projet : " + p.getTitre());
         txtNom.setText(r.getNom());
         txtUrl.setText(r.getUrlRessource());
         taDescription.setText(r.getDescription());
-        cbType.setValue(r.getTypeRessource());
+        cbTypeRessource.setValue(r.getTypeRessource());
     }
 
     @FXML
@@ -44,7 +46,7 @@ public class ModifierRessourceController implements Initializable {
         ressourceAModifier.setNom(txtNom.getText().trim());
         ressourceAModifier.setUrlRessource(txtUrl.getText().trim());
         ressourceAModifier.setDescription(taDescription.getText().trim());
-        ressourceAModifier.setTypeRessource(cbType.getValue());
+        ressourceAModifier.setTypeRessource(cbTypeRessource.getValue());
 
         try {
             ressourceService.updateEntity(ressourceAModifier.getId(), ressourceAModifier);

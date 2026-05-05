@@ -18,19 +18,21 @@ public class AjouterRessourceController implements Initializable {
     @FXML private TextField txtNom;
     @FXML private TextField txtUrl;
     @FXML private TextArea taDescription;
-    @FXML private ComboBox<String> cbType;
+    @FXML private ComboBox<String> cbTypeRessource;
     @FXML private Label lblErreur;
+    @FXML private Label lblProjetNom;
 
     private final RessourceService ressourceService = new RessourceService();
     private Projet projetActuel;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        cbType.setItems(FXCollections.observableArrayList("DOCUMENT", "VIDEO", "LIEN", "CODE"));
+        cbTypeRessource.setItems(FXCollections.observableArrayList("PDF", "VIDEO", "LIEN", "ARTICLE", "AUTRE"));
     }
 
     public void initData(Projet p) {
         this.projetActuel = p;
+        if (lblProjetNom != null) lblProjetNom.setText("Projet : " + p.getTitre());
     }
 
     @FXML
@@ -41,7 +43,7 @@ public class AjouterRessourceController implements Initializable {
         r.setNom(txtNom.getText().trim());
         r.setUrlRessource(txtUrl.getText().trim());
         r.setDescription(taDescription.getText().trim());
-        r.setTypeRessource(cbType.getValue());
+        r.setTypeRessource(cbTypeRessource.getValue());
         r.setProjetId(projetActuel.getId());
 
         try {
