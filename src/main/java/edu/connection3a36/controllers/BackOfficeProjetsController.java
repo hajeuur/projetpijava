@@ -105,6 +105,14 @@ public class BackOfficeProjetsController implements Initializable {
     }
 
     private void setupColumns() {
+        // Ajout de CellValueFactory pour forcer la création des cellules
+        colIndex.setCellValueFactory(p -> new javafx.beans.property.SimpleObjectProperty<>(1));
+        colTitre.setCellValueFactory(new PropertyValueFactory<>("titre"));
+        colUtilisateur.setCellValueFactory(param -> new SimpleStringProperty("admin admin\nadmin@mentor.ai"));
+        colType.setCellValueFactory(new PropertyValueFactory<>("type"));
+        colRessources.setCellValueFactory(param -> new SimpleStringProperty(""));
+        colAction.setCellValueFactory(p -> new javafx.beans.property.SimpleObjectProperty<>(null));
+
         colIndex.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(Integer item, boolean empty) {
@@ -267,10 +275,15 @@ public class BackOfficeProjetsController implements Initializable {
 
             Map<String, Long> typeDistribution = allProjets.stream()
                 .collect(Collectors.groupingBy(p -> (p.getType() != null && !p.getType().isEmpty()) ? p.getType() : "Autre", Collectors.counting()));
-            pieChartTypes.setData(FXCollections.observableArrayList());
+            ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList();
             for (Map.Entry<String, Long> entry : typeDistribution.entrySet()) {
-                pieChartTypes.getData().add(new PieChart.Data(entry.getKey() + " (" + entry.getValue() + ")", entry.getValue()));
+                String type = entry.getKey();
+                String label = type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase();
+                pieData.add(new PieChart.Data(label + " (" + entry.getValue() + ")", entry.getValue()));
             }
+            pieChartTypes.setData(pieData);
+            pieChartTypes.setLegendVisible(true);
+            pieChartTypes.setLabelsVisible(true);
 
             List<TopStat> topStats = new ArrayList<>();
             List<String> userKeys = new ArrayList<>(userCounts.keySet());

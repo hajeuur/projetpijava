@@ -12,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.chart.*;
 import javafx.scene.layout.*;
+import javafx.application.Platform;
 
 import java.io.IOException;
 import java.net.URL;
@@ -61,11 +62,18 @@ public class BackOfficeParcoursController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         setupColumns();
         setupFilters();
-        loadData();
+        Platform.runLater(this::loadData);
     }
 
     private void setupColumns() {
+        // Ajout de CellValueFactory pour forcer la création des cellules
         colIndex.setCellValueFactory(p -> new javafx.beans.property.SimpleObjectProperty<>(1));
+        colTitreInstitution.setCellValueFactory(p -> new javafx.beans.property.SimpleStringProperty(p.getValue().getTitre()));
+        colTypeDiplome.setCellValueFactory(p -> new javafx.beans.property.SimpleStringProperty(p.getValue().getTypeParcours()));
+        colPeriode.setCellValueFactory(p -> new javafx.beans.property.SimpleStringProperty(""));
+        colProjetsAssocies.setCellValueFactory(p -> new javafx.beans.property.SimpleStringProperty(""));
+        colAction.setCellValueFactory(p -> new javafx.beans.property.SimpleObjectProperty<>(null));
+
         colIndex.setCellFactory(c -> new TableCell<>() {
             @Override
             protected void updateItem(Integer i, boolean e) {
@@ -204,10 +212,15 @@ public class BackOfficeParcoursController implements Initializable {
 
     private void updateCharts() {
         Map<String, Long> counts = allData.stream()
-                .collect(Collectors.groupingBy(Parcours::getTypeParcours, Collectors.counting()));
+                .collect(Collectors.groupingBy(p -> p.getTypeParcours() != null ? p.getTypeParcours() : "Autre", Collectors.counting()));
         ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList();
-        counts.forEach((type, count) -> pieData.add(new PieChart.Data(type, count)));
+        counts.forEach((type, count) -> {
+            String label = type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase();
+            pieData.add(new PieChart.Data(label + " (" + count + ")", count));
+        });
         pieChartParcours.setData(pieData);
+        pieChartParcours.setLegendVisible(true);
+        pieChartParcours.setLabelsVisible(true);
 
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Projets");
@@ -228,7 +241,9 @@ public class BackOfficeParcoursController implements Initializable {
                     } catch (SQLException ignored) {}
                 });
 
-        barChartProjets.getData().setAll(series);
+        barChartProjets.getData().clear();
+        barChartProjets.getData().add(series);
+        barChartProjets.setLegendVisible(false);
     }
 
     private void updateTable() {

@@ -166,54 +166,52 @@
                 <Button text="Mode Back-Office" onAction="#switchToBack"
                         styleClass="switch-back-btn" maxWidth="Infinity"/>
             </VBox>
+            <Separator fx:id="sepSwitcher"/>
 
-            <!-- Section Administration -->
-            <VBox fx:id="boxAdmin" spacing="5">
-                <Label text="ADMINISTRATION" styleClass="sidebar-section"/>
-                <Button fx:id="btnUtilisateurs" text="Gestion des Users"
-                        onAction="#showUtilisateurs" styleClass="sidebar-btn" maxWidth="Infinity"/>
-            </VBox>
+            <!-- MENU DE GESTION CONSOLIDÉ -->
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                <VBox fx:id="boxGestions" spacing="2">
+                    
+                    <Label fx:id="lblAdminSection" text="ADMINISTRATION" styleClass="sidebar-section"/>
+                    <Button fx:id="btnUtilisateurs" text="👥 Gestion des Users"
+                            onAction="#showUtilisateurs" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                    
+                    <Separator fx:id="sepPedago" style="-fx-padding: 5 0;"/>
+                    <Label fx:id="lblPedagoSection" text="GESTION PÉDAGOGIQUE" styleClass="sidebar-section"/>
+                    <Button fx:id="btnBackParcours" text="🎓 Gestion Parcours"
+                            onAction="#showBackParcours" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                    <Button fx:id="btnBackProjets" text="📂 Gestion Projets"
+                            onAction="#showBackProjets" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                    <Button fx:id="btnBackFeedbacks" text="📝 Gestion Feedbacks"
+                            onAction="#showBackFeedbacks" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                    <Button fx:id="btnBackObjectifs" text="🎯 Gestion Objectifs"
+                            onAction="#showObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                    <Button fx:id="btnDashboardObjectifs" text="📊 Dashboard Objectifs"
+                            onAction="#showDashboardObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"/>
 
-            <!-- Section Back CRUD Admin -->
-            <VBox fx:id="boxBackAdmin" spacing="5">
-                <Separator/>
-                <Separator/>
-                <Label text="BACK CRUD" styleClass="sidebar-section"/>
-                <Button fx:id="btnIoT" text="IoT &amp; Présences" onAction="#showIoT"
-                        styleClass="sidebar-btn" maxWidth="Infinity"/>
-                <Button fx:id="btnAtRisk" text="🚨 Étudiant à Risque" onAction="#showAtRisk"
-                        styleClass="sidebar-btn" maxWidth="Infinity" style="-fx-text-fill:#dc2626;"/>
-                <Button text="Plans d'Actions" onAction="#showPlanActions"
-                        styleClass="sidebar-btn" maxWidth="Infinity"/>
-                <Button text="Articles" onAction="#showArticles"
-                        styleClass="sidebar-btn" maxWidth="Infinity"/>
-                <Button fx:id="btnCategories" text="Catégories d'Articles"
-                        onAction="#showCategories" styleClass="sidebar-btn" maxWidth="Infinity"/>
-                <Button fx:id="btnBackParcours" text="🎓 Gestion Parcours"
-                        onAction="#showBackParcours" styleClass="sidebar-btn" maxWidth="Infinity"
-                        visible="false" managed="false"/>
-                <Button fx:id="btnBackProjets" text="📂 Gestion Projets"
-                        onAction="#showBackProjets" styleClass="sidebar-btn" maxWidth="Infinity"
-                        visible="false" managed="false"/>
-                <Button fx:id="btnBackFeedbacks" text="📝 Gestion Feedbacks"
-                        onAction="#showBackFeedbacks" styleClass="sidebar-btn" maxWidth="Infinity"
-                        visible="false" managed="false"/>
-                <Button fx:id="btnDashboardObjectifs" text="📊 Dashboard Objectifs"
-                        onAction="#showDashboardObjectifs" styleClass="sidebar-btn" maxWidth="Infinity"
-                        visible="false" managed="false"/>
-            </VBox>
+                    <Separator fx:id="sepIA" style="-fx-padding: 5 0;"/>
+                    <Label fx:id="lblIASection" text="IA &amp; ANALYSES" styleClass="sidebar-section"/>
+                    <Button fx:id="btnIoT" text="📡 IoT &amp; Présences" onAction="#showIoT"
+                            styleClass="sidebar-btn" maxWidth="Infinity"/>
+                    <Button fx:id="btnAtRisk" text="🚨 Étudiant à Risque" onAction="#showAtRisk"
+                            styleClass="sidebar-btn" maxWidth="Infinity" style="-fx-text-fill:#dc2626;"/>
+                    <Button fx:id="btnPlanActionsBack" text="📋 Plans d'Actions" onAction="#showPlanActions"
+                            styleClass="sidebar-btn" maxWidth="Infinity"/>
+                    <Button fx:id="btnArticlesBack" text="📰 Articles" onAction="#showArticles"
+                            styleClass="sidebar-btn" maxWidth="Infinity"/>
+                    <Button fx:id="btnCategories" text="🗂️ Catégories d'Articles"
+                            onAction="#showCategories" styleClass="sidebar-btn" maxWidth="Infinity"/>
 
-            <!-- Section MentorAI (Sidebar BACK) -->
-            <VBox fx:id="boxMentorAI" spacing="5" visible="false" managed="false">
-                <Separator/>
-                <Label text="MENTORAI" styleClass="sidebar-section"/>
-                <Button fx:id="btnHumeur" text="😊 Humeur"
-                        onAction="#showHumeur" styleClass="sidebar-btn" maxWidth="Infinity"/>
-                <Button fx:id="btnPlanning" text="📅 Planning"
-                        onAction="#showPlanning" styleClass="sidebar-btn" maxWidth="Infinity"/>
-                <Button fx:id="btnCarnet" text="📓 Carnet"
-                        onAction="#showCarnet" styleClass="sidebar-btn" maxWidth="Infinity"/>
-            </VBox>
+                    <Separator fx:id="sepMentor" style="-fx-padding: 5 0;"/>
+                    <Label fx:id="lblMentorSection" text="BIEN-ÊTRE (MENTORAI)" styleClass="sidebar-section"/>
+                    <Button fx:id="btnHumeur" text="😊 Humeur"
+                            onAction="#showHumeur" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                    <Button fx:id="btnPlanning" text="📅 Planning"
+                            onAction="#showPlanning" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                    <Button fx:id="btnCarnet" text="📓 Carnet"
+                            onAction="#showCarnet" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                </VBox>
+            </ScrollPane>
 
             <!-- Spacer -->
             <Region VBox.vgrow="ALWAYS"/>
@@ -235,17 +233,19 @@
 
     <!-- ===== CONTENU PRINCIPAL (CENTER) ===== -->
     <center>
-        <StackPane fx:id="contentArea" styleClass="content-area">
-            <padding><Insets top="25" right="25" bottom="25" left="25"/></padding>
-
-            <!-- Vue de bienvenue par défaut -->
-            <VBox alignment="CENTER" spacing="18">
-                <Label text="🎓 Bienvenue sur MentorAI"
-                       style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
-                <Label text="Chargement de votre espace personnalisé..."
-                       style="-fx-font-size: 15px; -fx-text-fill: #8e92a9;"/>
-            </VBox>
-        </StackPane>
+        <ScrollPane fitToHeight="false" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" style="-fx-background-color: transparent; -fx-background: transparent;">
+            <StackPane fx:id="contentArea" styleClass="content-area">
+                <padding><Insets top="25" right="25" bottom="25" left="25"/></padding>
+    
+                <!-- Vue de bienvenue par défaut -->
+                <VBox alignment="CENTER" spacing="18">
+                    <Label text="🎓 Bienvenue sur MentorAI"
+                           style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
+                    <Label text="Chargement de votre espace personnalisé..."
+                           style="-fx-font-size: 15px; -fx-text-fill: #8e92a9;"/>
+                </VBox>
+            </StackPane>
+        </ScrollPane>
     </center>
 
 </BorderPane>
