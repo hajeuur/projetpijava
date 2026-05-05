@@ -183,7 +183,8 @@ public class MainController {
                 show(boxGestions);
                 for (javafx.scene.Node n : boxGestions.getChildren()) {
                     if (n instanceof Button b) {
-                        if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks || b == btnHumeur || b == btnPlanning || b == btnCarnet) show(b);
+                        if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks || b == btnHumeur || b == btnPlanning || b == btnCarnet
+                                || b == btnDashboardObjectifs) show(b);
                         else hide(b);
                     } else {
                         hide(n); // On cache labels et séparateurs pour un look épuré
@@ -328,7 +329,8 @@ public class MainController {
                 show(boxGestions);
                 for (javafx.scene.Node n : boxGestions.getChildren()) {
                     if (n instanceof Button b) {
-                        if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks || b == btnHumeur || b == btnPlanning || b == btnCarnet) show(b);
+                        if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks || b == btnHumeur || b == btnPlanning || b == btnCarnet
+                                || b == btnDashboardObjectifs) show(b);
                         else hide(b);
                     } else hide(n);
                 }
