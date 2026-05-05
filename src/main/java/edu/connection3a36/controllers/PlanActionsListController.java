@@ -449,7 +449,11 @@ public class PlanActionsListController {
                                 String profName = SessionManager.getCurrentUser() != null 
                                         ? (SessionManager.getCurrentUser().getPrenom() + " " + SessionManager.getCurrentUser().getNom()).trim()
                                         : "Un enseignant";
-                                ns.addFeedbackNotificationForAdmin(plan.getId(), plan.getDecision(), profName);
+                                ns.addSystemNotification(
+                                        "Feedback Plan #" + plan.getId(),
+                                        profName + " a soumis un feedback sur : \"" + plan.getDecision() + "\"",
+                                        "INFO"
+                                );
                                 // ── Email au superadmin ──────────────────────────────────────
                                 try {
                                     edu.connection3a36.services.UtilisateurService us =
@@ -508,10 +512,9 @@ public class PlanActionsListController {
                               + "Titre : " + plan.getDecision() + "\n"
                               + "Description : " + plan.getDescription();
                 
-                String raw = groq.sendSimpleJsonMessage(
+                String raw = groq.sendSimpleMessage(
                         prompt,
-                        "ADMIN",
-                        AIJsonSchemas.ARTICLE
+                        "ADMIN"
                 );
                 org.json.JSONObject json = AIJsonParser.extractFirstJsonObject(raw);
                 String contenu = AIJsonParser.extractMarkdownContent(raw);

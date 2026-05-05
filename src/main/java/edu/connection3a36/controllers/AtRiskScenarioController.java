@@ -92,7 +92,7 @@ public class AtRiskScenarioController {
                     + MockDataService.getEtudiants3A36Context()
                     + "\n\nContrainte scénario: Étudiant à risque → Analyse IA → Plan personnalisé → Suivi."
                     + "\nFournis :\n1. Diagnostic des causes probables\n2. Risques identifiés\n3. Recommandations pédagogiques immédiates\n4. Plan d'action suggéré (décision + description)\n5. KPIs de suivi hebdomadaire\nFormat Markdown.";
-                String raw = groq.sendSimpleJsonMessage(prompt, "ADMIN", AIJsonSchemas.ANALYSIS);
+                String raw = groq.sendSimpleMessage(prompt, "ADMIN");
                 org.json.JSONObject json = AIJsonParser.extractFirstJsonObject(raw);
                 lastAiAnalysis = json != null
                         ? "## Resume executif\n" + json.optString("resume_executif", "")

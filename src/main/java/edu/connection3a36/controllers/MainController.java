@@ -69,6 +69,8 @@ public class MainController {
     // ── Boutons Sidebar (BACK) ────────────────────────────────────────────────
     @FXML private Button btnUtilisateurs;
     @FXML private Button btnCategories;
+    @FXML private Button btnGestionUtilisateurs; // fx:id dans MainView.fxml
+    @FXML private Button btnMonProfil;
     @FXML private Button btnBackParcours;
     @FXML private Button btnBackProjets;
     @FXML private Button btnBackFeedbacks;
@@ -179,6 +181,7 @@ public class MainController {
                     if (n instanceof Button b) {
                         if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks
                                 || b == btnDashboardObjectifs) show(b);
+                        else if (b == btnGestionUtilisateurs) show(b);
                         else hide(b);
                     } else {
                         hide(n); // Séparateurs, labels
@@ -210,6 +213,7 @@ public class MainController {
             if (btnHeaderHumeur != null) hide(btnHeaderHumeur);
             if (btnHeaderPlanning != null) hide(btnHeaderPlanning);
             if (btnHeaderCarnet != null) hide(btnHeaderCarnet);
+            if (btnMonProfil != null) show(btnMonProfil);
 
             showDashboardEnseignant();
 
@@ -230,6 +234,7 @@ public class MainController {
             if (btnObjectifs != null) show(btnObjectifs);
             if (btnHeaderCarnet != null) show(btnHeaderCarnet);
             if (menuPlus != null) show(menuPlus);
+            if (btnMonProfil != null) show(btnMonProfil);
             
             showParcours();
 
@@ -484,6 +489,50 @@ public class MainController {
     }
 
     @FXML
+    public void handleGestionUtilisateursHejer() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/esprit/views/BackOffice.fxml"));
+            javafx.scene.layout.BorderPane bp = loader.load();
+            // Supprimer la sidebar bleue — redondante dans MainView
+            bp.setLeft(null);
+            contentArea.getChildren().setAll(bp);
+            setActiveBtn(btnGestionUtilisateurs);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void handleMonProfil() {
+        try {
+            Utilisateur session = SessionManager.getCurrentUser();
+            if (session == null) return;
+
+            // Convertir en com.esprit.models.Utilisateur
+            com.esprit.models.Utilisateur u = new com.esprit.models.Utilisateur();
+            u.setId(session.getId());
+            u.setNom(session.getNom());
+            u.setPrenom(session.getPrenom());
+            u.setEmail(session.getEmail());
+            u.setMdp(session.getMdp());
+            u.setRole(session.getRole());
+            u.setStatus(session.getStatus());
+
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/esprit/views/FrontOffice.fxml"));
+            javafx.scene.layout.BorderPane bp = loader.load();
+            com.esprit.controllers.FrontOfficeController ctrl = loader.getController();
+            ctrl.setUtilisateur(u);
+            // Supprimer la navbar — on est déjà dans MainView
+            bp.setTop(null);
+            contentArea.getChildren().setAll(bp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     void showAIPedagogique() {
         if (!acl.canAccess(AccessControlService.Module.IA_PEDAGOGIQUE)) return;
         loadView("/fxml/AIPedagogique.fxml");
@@ -643,7 +692,7 @@ public class MainController {
         try {
             SessionManager.logout();
             Stage stage = (Stage) contentArea.getScene().getWindow();
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/Login.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/com/esprit/views/Login.fxml"));
             Scene scene = new Scene(root, 1200, 750);
             scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
             stage.setScene(scene);

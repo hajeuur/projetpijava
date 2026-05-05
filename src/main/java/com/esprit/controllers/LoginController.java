@@ -194,17 +194,36 @@ public class LoginController {
         try {
             if (u == null) { errorLabel.setText("Erreur : utilisateur introuvable."); return; }
             String role = u.getRole();
-            String fxmlPath = role.equals("admin")
-                    ? "/com/esprit/views/BackOffice.fxml"
-                    : "/com/esprit/views/FrontOffice.fxml";
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-            if (!role.equals("admin")) {
-                FrontOfficeController controller = loader.getController();
-                controller.setUtilisateur(u);
+
+            // Alimenter le SessionManager de edu.connection3a36 pour MainController
+            edu.connection3a36.entities.Utilisateur sessionUser =
+                    new edu.connection3a36.entities.Utilisateur();
+            sessionUser.setId(u.getId());
+            sessionUser.setNom(u.getNom());
+            sessionUser.setPrenom(u.getPrenom());
+            sessionUser.setEmail(u.getEmail());
+            sessionUser.setMdp(u.getMdp());
+            sessionUser.setStatus(u.getStatus());
+
+            if (role.equals("admin")) {
+                sessionUser.setRole("ADMIN");
+                edu.connection3a36.tools.SessionManager.setFrontMode(false);
+            } else if (role.equals("enseignant")) {
+                sessionUser.setRole("ENSEIGNANT");
+                edu.connection3a36.tools.SessionManager.setFrontMode(true);
+            } else {
+                sessionUser.setRole("ETUDIANT");
+                edu.connection3a36.tools.SessionManager.setFrontMode(true);
             }
+            edu.connection3a36.tools.SessionManager.setCurrentUser(sessionUser);
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainView.fxml"));
+            Parent root = loader.load();
             Stage stage = (Stage) emailField.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            java.net.URL css = getClass().getResource("/css/styles.css");
+            if (css != null) scene.getStylesheets().add(css.toExternalForm());
+            stage.setScene(scene);
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();

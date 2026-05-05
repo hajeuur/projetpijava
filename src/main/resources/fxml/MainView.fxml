@@ -134,6 +134,10 @@
                         </StackPane>
                         <Label fx:id="lblUser" text="Utilisateur" styleClass="header-user-label" style="-fx-font-weight: bold; -fx-text-fill: white;"/>
                     </HBox>
+                    <Button fx:id="btnMonProfil" text="👤 Mon Profil"
+                            onAction="#handleMonProfil"
+                            styleClass="header-nav-btn"
+                            visible="false" managed="false"/>
                     <Button text="Déconnexion" onAction="#handleLogout"
                             styleClass="header-logout-btn"/>
                 </HBox>
@@ -182,6 +186,9 @@
                     <Label fx:id="lblAdminSection" text="ADMINISTRATION" styleClass="sidebar-section"/>
                     <Button fx:id="btnUtilisateurs" text="👥 Gestion des Users"
                             onAction="#showUtilisateurs" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                    <Button fx:id="btnGestionUtilisateurs" text="👥 Gestion Utilisateurs"
+                            onAction="#handleGestionUtilisateursHejer" styleClass="sidebar-btn" maxWidth="Infinity"
+                            visible="false" managed="false"/>
                     
                     <Separator fx:id="sepPedago" style="-fx-padding: 5 0;"/>
                     <Label fx:id="lblPedagoSection" text="GESTION PÉDAGOGIQUE" styleClass="sidebar-section"/>
