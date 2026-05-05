@@ -153,6 +153,12 @@ public class MainController {
 
             // Tous les boutons CRUD visibles
             for (javafx.scene.Node n : boxBackAdmin.getChildren()) show(n);
+            
+            // Masquer les éléments demandés pour le superadmin
+            hide(btnBackParcours);
+            hide(btnBackProjets);
+            hide(btnBackFeedbacks);
+            hide(btnDashboardObjectifs);
 
             showCategories();
 
@@ -199,9 +205,9 @@ public class MainController {
             show(btnArticles);
             
             // MentorAI dans le header FRONT
-            if (btnHeaderHumeur != null) show(btnHeaderHumeur);
-            if (btnHeaderPlanning != null) show(btnHeaderPlanning);
-            if (btnHeaderCarnet != null) show(btnHeaderCarnet);
+            if (btnHeaderHumeur != null) hide(btnHeaderHumeur);
+            if (btnHeaderPlanning != null) hide(btnHeaderPlanning);
+            if (btnHeaderCarnet != null) hide(btnHeaderCarnet);
 
             showDashboardEnseignant();
 
@@ -217,7 +223,7 @@ public class MainController {
             show(menuIA);
             show(newsBar);
             show(menuCarriere);
-            show(btnGamesHub);
+            hide(btnGamesHub);
             if (btnMesFeedbacks != null) show(btnMesFeedbacks);
             if (btnObjectifs != null) show(btnObjectifs);
             if (btnHeaderCarnet != null) show(btnHeaderCarnet);
@@ -281,7 +287,7 @@ public class MainController {
             show(menuCarriere);
             show(menuIA);
             show(newsBar);
-            show(btnGamesHub);
+            hide(btnGamesHub);
             showParcours(); // Vue par défaut
         }
     }
@@ -297,6 +303,11 @@ public class MainController {
             show(boxBackAdmin);
             show(boxSwitcher);
             for (javafx.scene.Node n : boxBackAdmin.getChildren()) show(n);
+            
+            hide(btnBackParcours);
+            hide(btnBackProjets);
+            hide(btnBackFeedbacks);
+            hide(btnDashboardObjectifs);
         } else if (isAdmin()) {
             hide(boxAdmin);
             show(boxBackAdmin);
