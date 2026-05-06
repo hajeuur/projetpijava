@@ -2,6 +2,7 @@
   <configuration default="false" name="MentorAI App" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="edu.connection3a36.tests.MainFx" />
     <module name="MentorAi" />
+    <option name="VM_PARAMETERS" value="--add-modules=javafx.controls,javafx.fxml,javafx.web --add-exports=javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

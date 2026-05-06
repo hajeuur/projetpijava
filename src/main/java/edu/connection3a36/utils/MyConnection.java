@@ -54,6 +54,7 @@ public class MyConnection {
      *
      * @deprecated Use getInstance() directly.
      */
+    @Deprecated
     public Connection getConnection() {
         return connection;
     }
