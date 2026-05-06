@@ -1,0 +1,179 @@
+/* =====================================================
+   personality.css  –  companion stylesheet for personality.fxml
+   Follows the MentorAI design system (planning.css conventions)
+   ===================================================== */
+
+/* ── Root ── */
+.root {
+    -color-deep-navy:  #102c59;
+    -color-steel-blue: #324b74;
+    -color-accent-red: #d52e28;
+
+    -fx-background-color: #324b74;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 13px;
+}
+
+.page-root {
+    -fx-background-color: linear-gradient(to bottom right, #102c59, #1a3c78, #324b74);
+    -fx-padding: 32;
+}
+
+/* ── Page title bar ── */
+.page-title {
+    -fx-background-color: linear-gradient(to right, #102c59, #1a3c78);
+    -fx-padding: 16 28 16 28;
+    -fx-background-radius: 16 16 0 0;
+}
+.page-title-label {
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+.breadcrumb-muted   { -fx-text-fill: rgba(255,255,255,0.55); -fx-font-size: 12px; }
+.breadcrumb-current { -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px; }
+
+/* ── Main panel ── */
+.planning-panel {
+    -fx-background-color: rgba(255,255,255,0.98);
+    -fx-background-radius: 0 0 16 16;
+    -fx-border-radius: 0 0 16 16;
+    -fx-border-color: rgba(50,75,116,0.1);
+    -fx-border-width: 0 1 1 1;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.22), 24, 0, 0, 8);
+}
+.panel-heading {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #102c59;
+}
+.planning-meta {
+    -fx-font-size: 12px;
+    -fx-text-fill: #475569;
+}
+
+/* ── Progress label ── */
+.progress-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #324b74;
+    -fx-background-color: #eef2ff;
+    -fx-background-radius: 999;
+    -fx-padding: 5 18 5 18;
+}
+
+/* ── Progress track ── */
+.progress-track {
+    -fx-background-color: #e2e8f0;
+    -fx-background-radius: 999;
+    -fx-min-height: 6;
+    -fx-max-height: 6;
+    -fx-pref-height: 6;
+    -fx-max-width: Infinity;
+}
+.progress-fill {
+    -fx-background-color: linear-gradient(to right, #102c59, #324b74);
+    -fx-background-radius: 999;
+    -fx-min-height: 6;
+    -fx-max-height: 6;
+    -fx-pref-height: 6;
+}
+
+/* ── Question text ── */
+.question-text {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-line-spacing: 4;
+    -fx-text-alignment: center;
+}
+
+/* ── Radio buttons (option cards) ── */
+.option-radio {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-border-width: 2;
+    -fx-padding: 16 20 16 20;
+    -fx-font-size: 14px;
+    -fx-text-fill: #1e293b;
+    -fx-cursor: hand;
+    -fx-max-width: Infinity;
+}
+.option-radio:hover {
+    -fx-background-color: #eef2ff;
+    -fx-border-color: #324b74;
+    -fx-effect: dropshadow(gaussian, rgba(50,75,116,0.12), 8, 0, 0, 2);
+}
+.option-radio:selected {
+    -fx-background-color: linear-gradient(to right, #eef2ff, #dbeafe);
+    -fx-border-color: #102c59;
+    -fx-text-fill: #102c59;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.18), 10, 0, 0, 3);
+}
+/* Hide the native radio dot – we style the whole row */
+.option-radio > .radio { -fx-opacity: 0; -fx-min-width: 0; -fx-pref-width: 0; -fx-max-width: 0; }
+.option-radio > .label { -fx-text-fill: inherit; }
+
+/* ── Primary button ── */
+.btn-primary {
+    -fx-background-color: #102c59;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 10 28 10 28;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.25), 8, 0, 0, 3);
+}
+.btn-primary:hover {
+    -fx-background-color: #1a3c78;
+    -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.35), 12, 0, 0, 4);
+}
+.btn-primary:disabled {
+    -fx-opacity: 0.45;
+    -fx-cursor: default;
+}
+
+/* ── Outline secondary button ── */
+.btn-outline-secondary {
+    -fx-background-color: transparent;
+    -fx-text-fill: #475569;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 10 28 10 28;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+.btn-outline-secondary:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #94a3b8;
+}
+.btn-outline-secondary:disabled {
+    -fx-opacity: 0.4;
+    -fx-cursor: default;
+}
+
+/* ── Result box ── */
+.result-box {
+    -fx-background-color: linear-gradient(to bottom right, #eef2ff, #dbeafe);
+    -fx-background-radius: 16;
+    -fx-border-color: #93c5fd;
+    -fx-border-radius: 16;
+    -fx-border-width: 2;
+    -fx-padding: 28 48 28 48;
+    -fx-effect: dropshadow(gaussian, rgba(50,75,116,0.15), 16, 0, 0, 4);
+}
+
+/* ── Result type label (the MBTI letters) ── */
+.result-type-label {
+    -fx-font-size: 52px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #102c59;
+    -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.2), 6, 0, 0, 2);
+    -fx-letter-spacing: 8;
+}

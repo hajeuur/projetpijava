@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.mentorai.controllers.PackEtudeController"
+            styleClass="root-pane"
+            stylesheets="@../css/pack_etude.css">
+
+    <top>
+        <VBox styleClass="header" spacing="10">
+            <padding><Insets top="30" right="40" bottom="20" left="40"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Button text="← Retour" onAction="#handleBack" styleClass="btn-back" />
+                <VBox>
+                    <Label text="Pack d'étude intelligent" styleClass="header-title" />
+                    <Label text="Générez un pack d'étude complet et personnalisé selon votre profil et votre humeur." styleClass="header-subtitle" />
+                </VBox>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <StackPane>
+            <padding><Insets top="20" right="40" bottom="40" left="40"/></padding>
+
+            <!-- FORM SECTION -->
+            <VBox fx:id="formSection" spacing="20" alignment="TOP_CENTER" maxWidth="600">
+                <VBox spacing="10" styleClass="form-group">
+                    <Label text="Quel sujet voulez-vous étudier ?" styleClass="form-label" />
+                    <TextField fx:id="topicField" promptText="Ex: La révolution française, Machine Learning..." styleClass="form-input" />
+                </VBox>
+
+                <VBox spacing="10" styleClass="form-group">
+                    <Label text="Langue du pack" styleClass="form-label" />
+                    <ComboBox fx:id="languageComboBox" styleClass="form-input" prefWidth="600">
+                        <items>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="Français" />
+                                <String fx:value="English" />
+                                <String fx:value="العربية" />
+                            </FXCollections>
+                        </items>
+                        <value>
+                            <String fx:value="Français" />
+                        </value>
+                    </ComboBox>
+                </VBox>
+
+                <VBox spacing="10" styleClass="form-group">
+                    <Label text="Ajouter vos notes ou documents (optionnel)" styleClass="form-label" />
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button text="Parcourir..." onAction="#handleFileUpload" styleClass="btn-upload" />
+                        <Label fx:id="fileNameLabel" text="Aucun fichier sélectionné" styleClass="file-name" />
+                    </HBox>
+                    <Label text="Formats acceptés : PDF, Images, Word (Max 5MB)" styleClass="form-hint" />
+                </VBox>
+
+                <Button text="Générer mon pack d'étude" onAction="#handleGenerate" styleClass="btn-primary" prefWidth="600" />
+                <Label fx:id="errorLabel" textFill="red" visible="false" managed="false" wrapText="true" />
+            </VBox>
+
+            <!-- LOADING SECTION -->
+            <VBox fx:id="loadingSection" spacing="30" alignment="CENTER" visible="false">
+                <ProgressIndicator progress="-1" styleClass="progress-spinner" />
+                <Label text="Nous analysons votre profil et générons votre pack personnalisé..." styleClass="loading-title" wrapText="true" textAlignment="CENTER" />
+                
+                <VBox spacing="15" alignment="CENTER_LEFT" maxWidth="400">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label fx:id="step1Icon" text="⏳" styleClass="step-icon" />
+                        <Label fx:id="step1Text" text="Analyse de votre humeur et profil" styleClass="step-text" />
+                    </HBox>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label fx:id="step2Icon" text="⏳" styleClass="step-icon" />
+                        <Label fx:id="step2Text" text="Génération du contenu de cours" styleClass="step-text" />
+                    </HBox>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label fx:id="step3Icon" text="⏳" styleClass="step-icon" />
+                        <Label fx:id="step3Text" text="Recherche de ressources et vidéos" styleClass="step-text" />
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- RESULTS SECTION -->
+            <VBox fx:id="resultsSection" spacing="20" visible="false">
+                <HBox styleClass="explanation-card" alignment="CENTER_LEFT" spacing="15">
+                    <Label text="💡" style="-fx-font-size: 24px;" />
+                    <Label fx:id="explanationLabel" text="Pourquoi ce niveau ? Nous avons choisi le niveau [LEVEL] car..." wrapText="true" HBox.hgrow="ALWAYS" styleClass="explanation-text" />
+                </HBox>
+
+                <TabPane fx:id="resultsTabPane" VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE" styleClass="custom-tab-pane">
+                    <Tab text="Résumé">
+                        <ScrollPane fitToWidth="true" styleClass="result-scroll">
+                            <VBox spacing="15" styleClass="tab-content">
+                                <Label fx:id="resumeContent" wrapText="true" styleClass="content-text" />
+                            </VBox>
+                        </ScrollPane>
+                    </Tab>
+                    <Tab text="Slides">
+                        <ScrollPane fitToWidth="true" styleClass="result-scroll">
+                            <VBox fx:id="slidesContainer" spacing="15" styleClass="tab-content" />
+                        </ScrollPane>
+                    </Tab>
+                    <Tab text="Vidéos">
+                        <ScrollPane fitToWidth="true" styleClass="result-scroll">
+                            <VBox fx:id="videosContainer" spacing="15" styleClass="tab-content" />
+                        </ScrollPane>
+                    </Tab>
+                    <Tab text="Articles">
+                        <ScrollPane fitToWidth="true" styleClass="result-scroll">
+                            <VBox fx:id="articlesContainer" spacing="15" styleClass="tab-content" />
+                        </ScrollPane>
+                    </Tab>
+                    <Tab text="Quiz">
+                        <VBox alignment="CENTER" spacing="20" styleClass="tab-content">
+                            <Label fx:id="quizQuestionLabel" wrapText="true" styleClass="quiz-question" />
+                            <Button fx:id="quizRevealBtn" text="Voir la réponse" onAction="#handleRevealQuiz" styleClass="btn-secondary" />
+                            <Label fx:id="quizAnswerLabel" wrapText="true" styleClass="quiz-answer" visible="false" />
+                            <HBox spacing="10" alignment="CENTER">
+                                <Button text="Précédent" onAction="#handlePrevQuiz" styleClass="btn-outline" />
+                                <Label fx:id="quizProgressLabel" text="1/5" styleClass="quiz-progress" />
+                                <Button text="Suivant" onAction="#handleNextQuiz" styleClass="btn-outline" />
+                            </HBox>
+                        </VBox>
+                    </Tab>
+                    <Tab text="Flashcards">
+                        <VBox alignment="CENTER" spacing="20" styleClass="tab-content">
+                            <StackPane fx:id="flashcardPane" styleClass="flashcard" onMouseClicked="#handleFlipCard" prefWidth="400" prefHeight="250">
+                                <Label fx:id="flashcardFront" text="Front" wrapText="true" styleClass="flashcard-text" />
+                                <Label fx:id="flashcardBack" text="Back" wrapText="true" styleClass="flashcard-text" visible="false" />
+                            </StackPane>
+                            <Label text="Cliquez sur la carte pour la retourner" styleClass="form-hint" />
+                            <HBox spacing="10" alignment="CENTER">
+                                <Button text="Précédente" onAction="#handlePrevCard" styleClass="btn-outline" />
+                                <Label fx:id="flashcardProgressLabel" text="1/10" styleClass="quiz-progress" />
+                                <Button text="Suivante" onAction="#handleNextCard" styleClass="btn-outline" />
+                            </HBox>
+                        </VBox>
+                    </Tab>
+                </TabPane>
+            </VBox>
+        </StackPane>
+    </center>
+
+</BorderPane>

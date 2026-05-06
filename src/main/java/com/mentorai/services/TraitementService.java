@@ -9,19 +9,14 @@ import java.util.List;
 
 public class TraitementService {
 
-    private Connection connection;
-
     public TraitementService() {
-        connection = MyConnection.getInstance();
     }
 
     // ============ CREATE ============
-
-
     public void add(Traitement t) {
         String query = "INSERT INTO traitement (typetraitement, description, datetraitement, decision) VALUES (?, ?, ?, ?)";
-        try {
-            PreparedStatement ps = connection.prepareStatement(query);
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, t.getTypetraitement());
             ps.setString(2, t.getDescription());
             ps.setDate(3, Date.valueOf(t.getDatetraitement()));
@@ -37,9 +32,9 @@ public class TraitementService {
     public List<Traitement> getAll() {
         List<Traitement> list = new ArrayList<>();
         String query = "SELECT * FROM traitement";
-        try {
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery(query);
+        try (Connection connection = MyConnection.getInstance();
+             Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(query)) {
             while (rs.next()) {
                 Traitement t = new Traitement(
                         rs.getInt("id"),
@@ -59,8 +54,8 @@ public class TraitementService {
     // ============ UPDATE ============
     public void update(Traitement t) {
         String query = "UPDATE traitement SET typetraitement=?, description=?, datetraitement=?, decision=? WHERE id=?";
-        try {
-            PreparedStatement ps = connection.prepareStatement(query);
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, t.getTypetraitement());
             ps.setString(2, t.getDescription());
             ps.setDate(3, Date.valueOf(t.getDatetraitement()));
@@ -76,8 +71,8 @@ public class TraitementService {
     // ============ DELETE ============
     public void delete(int id) {
         String query = "DELETE FROM traitement WHERE id=?";
-        try {
-            PreparedStatement ps = connection.prepareStatement(query);
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setInt(1, id);
             ps.executeUpdate();
             System.out.println("✅ Traitement supprimé !");
@@ -85,12 +80,13 @@ public class TraitementService {
             System.out.println("❌ Erreur : " + e.getMessage());
         }
     }
+
     // Récupère l'id du dernier traitement inséré
     public int getDernierIdInsere() {
         String query = "SELECT MAX(id) FROM traitement";
-        try {
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery(query);
+        try (Connection connection = MyConnection.getInstance();
+             Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(query)) {
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -99,21 +95,23 @@ public class TraitementService {
         }
         return -1;
     }
+
     // Récupérer un traitement par son id
     public Traitement getById(int id) {
         String query = "SELECT * FROM traitement WHERE id = ?";
-        try {
-            PreparedStatement ps = connection.prepareStatement(query);
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return new Traitement(
-                        rs.getInt("id"),
-                        rs.getString("typetraitement"),
-                        rs.getString("description"),
-                        rs.getDate("datetraitement").toLocalDate(),
-                        rs.getString("decision")
-                );
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Traitement(
+                            rs.getInt("id"),
+                            rs.getString("typetraitement"),
+                            rs.getString("description"),
+                            rs.getDate("datetraitement").toLocalDate(),
+                            rs.getString("decision")
+                    );
+                }
             }
         } catch (SQLException e) {
             System.out.println("❌ Erreur getById : " + e.getMessage());

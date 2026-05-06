@@ -1,7 +1,18 @@
 package com.mentorai.controllers;
 
+import com.mentorai.entities.Carnet;
 import com.mentorai.entities.PlanningEtude;
+import com.mentorai.services.CarnetService;
 import com.mentorai.services.PlanningService;
+import edu.connection3a36.controllers.MainController;
+import edu.connection3a36.entities.Utilisateur;
+import edu.connection3a36.tools.SessionManager;
+import com.mentorai.utils.MyConnection;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import java.sql.*;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -68,8 +79,11 @@ public class PlanningController implements Initializable {
     @FXML private Pane dayCol0, dayCol1, dayCol2, dayCol3,
             dayCol4, dayCol5, dayCol6;
 
+    @FXML private Button personalityTestBtn;
+
     // ── State ────────────────────────────────────────────────────────────
-    private final PlanningService service = new PlanningService();
+    private final PlanningService service    = new PlanningService();
+    private final CarnetService   carnetSvc  = new CarnetService();
     private LocalDate selectedDate = LocalDate.now();
     private String activeTypeFilter = "all";
     private List<PlanningEtude> cachedActivities = new ArrayList<>();
@@ -96,6 +110,7 @@ public class PlanningController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         updateAll();
         startReminderPoller();
+        refreshPersonalityStatus();
     }
 
     // ════════════════════════════════════════════════════════════════════
@@ -107,8 +122,7 @@ public class PlanningController implements Initializable {
     @FXML private void onCalPrevYear() { selectedDate = selectedDate.minusYears(1);  updateAll(); }
     @FXML private void onCalNextYear() { selectedDate = selectedDate.plusYears(1);   updateAll(); }
 
-    @FXML private void onPersonalityTest() { /* navigate to personality test */ }
-    @FXML private void onRefaireTest()     { /* navigate to personality test */ }
+
 
     private void renderCalendar() {
         LocalDate today = LocalDate.now();
@@ -461,6 +475,51 @@ public class PlanningController implements Initializable {
             openCreateDialog(col, e.getY());
         }
     }
+    @FXML
+    public void onRefaireTest() {
+        openPersonalityTest();
+    }
+
+    @FXML
+    private void onPersonalityTest() {
+        openPersonalityTest();
+    }
+
+    private void refreshPersonalityStatus() {
+        Utilisateur user = SessionManager.getCurrentUser();
+        if (user == null) return;
+
+        String typePers = null;
+        try (Connection conn = MyConnection.getInstance();
+             PreparedStatement ps = conn.prepareStatement("SELECT type_pers FROM profil_apprentissage WHERE utilisateur_id = ?")) {
+            ps.setInt(1, user.getId());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) typePers = rs.getString("type_pers");
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+
+        if (typePers != null && !typePers.isEmpty()) {
+            personalityTestBtn.setText(typePers);
+            personalityTestBtn.setStyle("-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold;");
+        } else {
+            personalityTestBtn.setText("Test de personnalité");
+            personalityTestBtn.setStyle("");
+        }
+    }
+
+    private void openPersonalityTest() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/personality.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("MentorAI - Test de Personnalité");
+            stage.setScene(new Scene(root));
+            stage.setOnHidden(e -> refreshPersonalityStatus());
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @FXML private void onDayColMousePressed(javafx.scene.input.MouseEvent e) {
         // Accept drag-over
@@ -549,26 +608,102 @@ public class PlanningController implements Initializable {
         });
     }
 
-    /** Opens the "edit / delete" dialog for an existing activity. */
+    /** Opens a unified info dialog on double-click: shows activity info + linked notes + actions. */
     private void openEditDialog(int activityId) {
         try {
             PlanningEtude existing = service.findById(activityId).orElse(null);
             if (existing == null) { showErrors("Activité introuvable."); return; }
 
-            // Action picker
-            ChoiceDialog<String> actionDlg = new ChoiceDialog<>("Modifier", "Modifier", "Supprimer");
-            actionDlg.setTitle("Activité : " + existing.getTitreP());
-            actionDlg.setHeaderText("Date : " + existing.getDateSeance() +
-                    " | Début : " + (existing.getHeureDebut() != null ?
-                    existing.getHeureDebut().toString().substring(0, 5) : "—"));
-            actionDlg.setContentText("Action :");
-            actionDlg.showAndWait().ifPresent(action -> {
-                if ("Supprimer".equals(action)) {
-                    confirmAndDelete(activityId);
-                } else {
-                    openUpdateDialog(existing);
+            // ── Build the unified dialog ───────────────────────────────
+            Dialog<Void> dlg = new Dialog<>();
+            dlg.setTitle(existing.getTitreP());
+            dlg.setHeaderText(null);
+
+            // Add stylesheet
+            try {
+                dlg.getDialogPane().getStylesheets().add(
+                    getClass().getResource("/css/planning.css").toExternalForm());
+            } catch (Exception ignored) {}
+
+            // Custom buttons
+            ButtonType modifierBtn  = new ButtonType("✏️ Modifier",  ButtonBar.ButtonData.LEFT);
+            ButtonType supprimerBtn = new ButtonType("🗑 Supprimer", ButtonBar.ButtonData.LEFT);
+            ButtonType fermerBtn    = new ButtonType("Fermer",       ButtonBar.ButtonData.CANCEL_CLOSE);
+            dlg.getDialogPane().getButtonTypes().setAll(modifierBtn, supprimerBtn, fermerBtn);
+
+            // ── Content ───────────────────────────────────────────────
+            VBox content = new VBox(12);
+            content.setPadding(new Insets(16));
+            content.setPrefWidth(420);
+
+            // Activity info header
+            String dateStr  = existing.getDateSeance() != null ? existing.getDateSeance().toString() : "—";
+            String heureStr = existing.getHeureDebut() != null
+                    ? existing.getHeureDebut().toString().substring(0, 5) : "—";
+            String dureeStr = existing.durationLabel();
+            Label infoLbl = new Label("📅 " + dateStr + "   🕐 " + heureStr
+                    + (dureeStr.isEmpty() ? "" : "   ⏱ " + dureeStr));
+            infoLbl.setStyle("-fx-font-size:13px; -fx-text-fill:#334155;");
+
+            // Linked notes section
+            Label notesHeader = new Label("📎 Notes liées");
+            notesHeader.setStyle("-fx-font-weight:bold; -fx-font-size:13px;");
+
+            ListView<Carnet> notesView = new ListView<>();
+            notesView.setPrefHeight(130);
+            notesView.getItems().setAll(carnetSvc.getNotesByPlanning(existing.getId()));
+            notesView.setCellFactory(lv -> new ListCell<>() {
+                @Override protected void updateItem(Carnet c, boolean empty) {
+                    super.updateItem(c, empty);
+                    if (empty || c == null) { setText(null); setStyle(""); }
+                    else {
+                        setText(c.getTitre());
+                        setStyle("-fx-cursor: hand;");
+                        // Single click on a note → navigate to Carnet
+                        setOnMouseClicked(ev -> {
+                            if (ev.getClickCount() == 1 && c != null) {
+                                dlg.close();
+                                MainController main = MainController.getInstance();
+                                if (main != null) {
+                                    main.openCarnetAndSelect(c);
+                                }
+                            }
+                        });
+                    }
                 }
             });
+
+            Label noNotes = new Label("(aucune note liée)");
+            noNotes.setStyle("-fx-text-fill:#94a3b8; -fx-font-style:italic;");
+            noNotes.setVisible(notesView.getItems().isEmpty());
+            noNotes.setManaged(notesView.getItems().isEmpty());
+            notesView.setVisible(!notesView.getItems().isEmpty());
+            notesView.setManaged(!notesView.getItems().isEmpty());
+
+            content.getChildren().addAll(infoLbl, notesHeader, notesView, noNotes);
+            dlg.getDialogPane().setContent(content);
+
+            // ── Handle button clicks ───────────────────────────────────
+            // We use the result converter to capture which button was pressed
+            dlg.setResultConverter(btn -> null); // we handle via button lookup
+
+            // Disable the default "consuming" of Modifier/Supprimer so the dialog closes first
+            javafx.scene.control.ButtonBase modNode =
+                (javafx.scene.control.ButtonBase) dlg.getDialogPane().lookupButton(modifierBtn);
+            javafx.scene.control.ButtonBase supNode =
+                (javafx.scene.control.ButtonBase) dlg.getDialogPane().lookupButton(supprimerBtn);
+
+            final boolean[] doModifier  = {false};
+            final boolean[] doSupprimer = {false};
+
+            if (modNode != null) modNode.setOnAction(e -> { doModifier[0]  = true; dlg.close(); });
+            if (supNode != null) supNode.setOnAction(e -> { doSupprimer[0] = true; dlg.close(); });
+
+            dlg.showAndWait();
+
+            if (doModifier[0])  openUpdateDialog(existing);
+            if (doSupprimer[0]) confirmAndDelete(activityId);
+
         } catch (SQLException ex) {
             showErrors("Erreur : " + ex.getMessage());
         }
@@ -590,12 +725,25 @@ public class PlanningController implements Initializable {
     }
 
     private void confirmAndDelete(int activityId) {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                "Êtes-vous sûr de vouloir supprimer cette activité ?",
-                ButtonType.YES, ButtonType.NO);
-        confirm.setTitle("Supprimer");
-        confirm.showAndWait().filter(r -> r == ButtonType.YES).ifPresent(r -> {
+        // Three-option dialog: delete notes / detach notes / cancel
+        ButtonType deleteNotes  = new ButtonType("Supprimer les notes",  ButtonBar.ButtonData.LEFT);
+        ButtonType detachNotes  = new ButtonType("Détacher les notes",   ButtonBar.ButtonData.LEFT);
+        ButtonType cancelDelete = new ButtonType("Annuler",              ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Supprimer l'activité");
+        confirm.setHeaderText("Que faire des notes liées ?");
+        confirm.setContentText("Cette activité peut avoir des notes associées.");
+        confirm.getButtonTypes().setAll(deleteNotes, detachNotes, cancelDelete);
+
+        confirm.showAndWait().ifPresent(choice -> {
+            if (choice == cancelDelete) return;
             try {
+                if (choice == deleteNotes) {
+                    carnetSvc.deleteNotesByPlanning(activityId);
+                } else {
+                    carnetSvc.detachNotesByPlanning(activityId);
+                }
                 service.delete(activityId);
                 refreshWeek();
             } catch (SQLException ex) {
@@ -822,7 +970,14 @@ public class PlanningController implements Initializable {
         form.add(new Label("Ou nouveau type"),          0, row); form.add(typeBox,        1, row++);
         form.add(new Label("Couleur"),                  0, row); form.add(colorPicker,    1, row++);
         form.add(new Label("Notes"),                    0, row); form.add(notesArea,      1, row++);
-        form.add(errLbl,                                0, row, 2, 1);
+        form.add(errLbl,                                0, row, 2, 1); row++;
+
+        // ── Notes liées (Planning ↔ Carnet) ─────────────────────────
+        if (existing != null) {
+            form.add(new Label(""), 0, row, 2, 1); row++; // spacer
+            VBox notesLieesBox = buildLinkedNotesSection(existing.getId());
+            form.add(notesLieesBox, 0, row, 2, 1);
+        }
 
         dlg.getDialogPane().setContent(form);
 
@@ -1088,5 +1243,111 @@ public class PlanningController implements Initializable {
         VBox section = new VBox(4, titleLabel, textLabel);
         section.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-padding: 10;");
         return section;
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // PLANNING ↔ CARNET  —  linked-notes helpers
+    // ════════════════════════════════════════════════════════════════════
+
+    private VBox buildLinkedNotesSection(int planningId) {
+        VBox box = new VBox(8);
+        box.setStyle("-fx-background-color:#f1f5f9; -fx-background-radius:8; -fx-border-color:#cbd5e1; -fx-border-width:1; -fx-border-radius:8; -fx-padding:10;");
+
+        Label header = new Label("📎 Notes liées");
+        header.setStyle("-fx-font-weight:bold; -fx-font-size:13px;");
+
+        ListView<com.mentorai.entities.Carnet> listView = new ListView<>();
+        listView.setPrefHeight(100);
+        listView.getItems().setAll(carnetSvc.getNotesByPlanning(planningId));
+        listView.setCellFactory(lv -> new ListCell<>() {
+            @Override protected void updateItem(com.mentorai.entities.Carnet c, boolean empty) {
+                super.updateItem(c, empty);
+                setText(empty || c == null ? null : c.getTitre());
+            }
+        });
+
+        Button detachBtn = new Button("↩ Détacher la note sélectionnée");
+        detachBtn.setStyle("-fx-font-size:11px;");
+        detachBtn.setOnAction(e -> {
+            com.mentorai.entities.Carnet sel = listView.getSelectionModel().getSelectedItem();
+            if (sel == null) return;
+            carnetSvc.unlinkNoteFromPlanning(sel.getId(), planningId);
+            listView.getItems().remove(sel);
+        });
+
+        Button attachBtn = new Button("➕ Ajouter une note existante");
+        attachBtn.setStyle("-fx-font-size:11px;");
+        attachBtn.setOnAction(e -> showAttachNoteDialog(planningId, listView));
+
+        Button createBtn = new Button("📝 Créer une nouvelle note");
+        createBtn.setStyle("-fx-font-size:11px;");
+        createBtn.setOnAction(e -> showCreateLinkedNoteDialog(planningId, listView));
+
+        HBox btnRow = new HBox(8, attachBtn, createBtn, detachBtn);
+        box.getChildren().addAll(header, listView, btnRow);
+        return box;
+    }
+
+    private void showAttachNoteDialog(int planningId,
+                                      ListView<com.mentorai.entities.Carnet> listView) {
+        // Notes already linked to this specific planning
+        List<Integer> alreadyLinked = carnetSvc.getNotesByPlanning(planningId)
+                .stream().map(com.mentorai.entities.Carnet::getId)
+                .collect(java.util.stream.Collectors.toList());
+        List<com.mentorai.entities.Carnet> free = carnetSvc.findAll().stream()
+                .filter(n -> !alreadyLinked.contains(n.getId()))
+                .collect(java.util.stream.Collectors.toList());
+
+        if (free.isEmpty()) {
+            new Alert(Alert.AlertType.INFORMATION,
+                    "Aucune note disponible (toutes déjà liées).").showAndWait();
+            return;
+        }
+
+        ChoiceDialog<com.mentorai.entities.Carnet> pick =
+                new ChoiceDialog<>(free.get(0), free);
+        pick.setTitle("Lier une note");
+        pick.setHeaderText("Choisissez une note à lier à cette activité :");
+        pick.showAndWait().ifPresent(chosen -> {
+            carnetSvc.linkNoteToPlanning(chosen.getId(), planningId);
+            if (!listView.getItems().contains(chosen)) listView.getItems().add(chosen);
+        });
+    }
+
+    private void showCreateLinkedNoteDialog(int planningId,
+                                            ListView<com.mentorai.entities.Carnet> listView) {
+        Dialog<com.mentorai.entities.Carnet> dlg2 = new Dialog<>();
+        dlg2.setTitle("Créer une note liée");
+        dlg2.setHeaderText("Nouvelle note pour cette activité");
+
+        ButtonType saveBtn = new ButtonType("Créer", ButtonBar.ButtonData.OK_DONE);
+        dlg2.getDialogPane().getButtonTypes().addAll(saveBtn, ButtonType.CANCEL);
+
+        TextField titreF  = new TextField();
+        titreF.setPromptText("Titre de la note *");
+        TextArea contenuA = new TextArea();
+        contenuA.setPromptText("Contenu…");
+        contenuA.setPrefRowCount(4);
+
+        VBox form2 = new VBox(8, new Label("Titre :"), titreF,
+                              new Label("Contenu :"), contenuA);
+        form2.setPadding(new Insets(12));
+        dlg2.getDialogPane().setContent(form2);
+
+        dlg2.setResultConverter(bt -> {
+            if (bt != saveBtn) return null;
+            String t = titreF.getText().trim();
+            String c = contenuA.getText().trim();
+            if (t.isEmpty() || c.length() < 5) return null;
+            com.mentorai.entities.Carnet note = new com.mentorai.entities.Carnet(t, c);
+            return note;
+        });
+
+        dlg2.showAndWait().ifPresent(note -> {
+            if (carnetSvc.create(note)) {
+                carnetSvc.linkNoteToPlanning(note.getId(), planningId);
+                listView.getItems().add(note);
+            }
+        });
     }
 }

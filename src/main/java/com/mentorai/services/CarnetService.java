@@ -1,6 +1,7 @@
 package com.mentorai.services;
 
 import com.mentorai.entities.Carnet;
+import com.mentorai.entities.PlanningEtude;
 import com.mentorai.utils.MyConnection;
 
 import java.sql.*;
@@ -10,16 +11,14 @@ import java.util.List;
 
 public class CarnetService {
 
-    private final Connection connection;
-
     public CarnetService() {
-        this.connection = MyConnection.getInstance();
         checkDatabaseStructure(); // 🔥 ONLY CHECK (no creation)
     }
 
     // 🔥 VERIFY DB STRUCTURE (NO CREATION)
     private void checkDatabaseStructure() {
-        try (Statement stmt = connection.createStatement();
+        try (Connection connection = MyConnection.getInstance();
+             Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery("SHOW COLUMNS FROM carnet")) {
 
             boolean hasCouleur = false;
@@ -31,171 +30,128 @@ public class CarnetService {
                 if ("visibilite".equalsIgnoreCase(col)) hasVisibilite = true;
             }
 
-            if (!hasCouleur || !hasVisibilite) {
-                System.err.println("❌ DATABASE ERROR:");
-                System.err.println("Missing columns:");
-                if (!hasCouleur) System.err.println(" - couleur");
-                if (!hasVisibilite) System.err.println(" - visibilite");
-                System.err.println("👉 Fix manually in phpMyAdmin.");
-            } else {
-                System.out.println("✅ DB structure OK");
-            }
+            if (!hasCouleur) System.err.println("⚠️ Column 'couleur' missing in carnet table!");
+            if (!hasVisibilite) System.err.println("⚠️ Column 'visibilite' missing in carnet table!");
 
         } catch (SQLException e) {
-            System.err.println("❌ Structure check failed: " + e.getMessage());
+            System.err.println("❌ Erreur checkDatabaseStructure : " + e.getMessage());
         }
     }
 
-    // ─── CREATE ────────────────────────────────────────────────────────────────
-
-    public boolean create(Carnet carnet) {
-        String sql = "INSERT INTO carnet (titre, contenu, date_creation, date_modification, couleur, visibilite) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            ps.setString(1, carnet.getTitre());
-            ps.setString(2, carnet.getContenu());
-
-            LocalDateTime now = LocalDateTime.now();
-            ps.setTimestamp(3, Timestamp.valueOf(now));
-            ps.setTimestamp(4, Timestamp.valueOf(now));
-
-            ps.setString(5, carnet.getCouleur() != null ? carnet.getCouleur() : "#ffffff");
-            ps.setString(6, carnet.getVisibilite() != null ? carnet.getVisibilite() : "visible");
-
-            int rows = ps.executeUpdate();
-
-            if (rows > 0) {
-                try (ResultSet keys = ps.getGeneratedKeys()) {
-                    if (keys.next()) {
-                        carnet.setId(keys.getInt(1));
-                        carnet.setDateCreation(now);
-                        carnet.setDateModification(now);
-                    }
-                }
-                return true;
-            }
-
-        } catch (SQLException e) {
-            System.err.println("❌ Erreur create : " + e.getMessage());
-        }
-        return false;
-    }
-
-    // ─── READ ALL ───────────────────────────────────────────────────────────────
+    // ===================== CRUD =====================
 
     public List<Carnet> findAll() {
         List<Carnet> list = new ArrayList<>();
-        String sql = "SELECT * FROM carnet ORDER BY date_modification DESC";
-
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                list.add(mapRow(rs));
-            }
-
+        // Specify columns explicitly to avoid reading removed columns like planning_id
+        String sql = "SELECT id, titre, contenu, date_creation, date_modification, couleur, visibilite FROM carnet ORDER BY date_modification DESC";
+        try (Connection connection = MyConnection.getInstance();
+             Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) list.add(mapRow(rs));
         } catch (SQLException e) {
             System.err.println("❌ Erreur findAll : " + e.getMessage());
         }
-
         return list;
     }
 
-    // ─── UPDATE ─────────────────────────────────────────────────────────────────
-
-    public boolean update(Carnet carnet) {
-        String sql = "UPDATE carnet SET titre = ?, contenu = ?, date_modification = ?, couleur = ?, visibilite = ? WHERE id = ?";
-
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-
-            LocalDateTime now = LocalDateTime.now();
-
-            ps.setString(1, carnet.getTitre());
-            ps.setString(2, carnet.getContenu());
-            ps.setTimestamp(3, Timestamp.valueOf(now));
-            ps.setString(4, carnet.getCouleur());
-            ps.setString(5, carnet.getVisibilite());
-            ps.setInt(6, carnet.getId());
-
-            boolean ok = ps.executeUpdate() > 0;
-
-            if (ok) carnet.setDateModification(now);
-
-            return ok;
-
-        } catch (SQLException e) {
-            System.err.println("❌ Erreur update : " + e.getMessage());
-        }
-
-        return false;
-    }
-
-    // ─── DELETE ─────────────────────────────────────────────────────────────────
-
-    public boolean delete(int id) {
-        String sql = "DELETE FROM carnet WHERE id = ?";
-
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            System.err.println("❌ Erreur delete : " + e.getMessage());
-        }
-
-        return false;
-    }
-
-    // ─── SEARCH ─────────────────────────────────────────────────────────────────
-
-    public List<Carnet> search(String keyword) {
+    public List<Carnet> search(String query) {
         List<Carnet> list = new ArrayList<>();
-
-        String sql = "SELECT * FROM carnet WHERE titre LIKE ? OR contenu LIKE ? ORDER BY date_modification DESC";
-
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-
-            String like = "%" + keyword + "%";
-            ps.setString(1, like);
-            ps.setString(2, like);
-
+        String sql = "SELECT id, titre, contenu, date_creation, date_modification, couleur, visibilite FROM carnet " +
+                     "WHERE titre LIKE ? OR contenu LIKE ? ORDER BY date_modification DESC";
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, "%" + query + "%");
+            ps.setString(2, "%" + query + "%");
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(mapRow(rs));
-                }
+                while (rs.next()) list.add(mapRow(rs));
             }
-
         } catch (SQLException e) {
             System.err.println("❌ Erreur search : " + e.getMessage());
         }
-
         return list;
     }
 
-    // ─── EXISTS BY TITRE ────────────────────────────────────────────────────────
+    public void save(Carnet c) {
+        if (c.getId() == 0) create(c);
+        else update(c);
+    }
 
-    /**
-     * Returns true if any row in carnet has the given titre (case-insensitive),
-     * excluding the row with the given id (pass 0 when creating a new note).
-     */
-    public boolean existsByTitre(String titre, int excludeId) {
-        String sql = "SELECT COUNT(*) FROM carnet WHERE LOWER(titre) = LOWER(?) AND id != ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, titre);
+    public boolean create(Carnet c) {
+        String sql = "INSERT INTO carnet (titre, contenu, couleur, visibilite, date_creation, date_modification) VALUES (?,?,?,?,?,?)";
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, c.getTitre());
+            ps.setString(2, c.getContenu());
+            ps.setString(3, c.getCouleur());
+            ps.setString(4, c.getVisibilite());
+            ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) c.setId(keys.getInt(1));
+            }
+            return true;
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur create : " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean update(Carnet c) {
+        String sql = "UPDATE carnet SET titre=?, contenu=?, couleur=?, visibilite=?, date_modification=? WHERE id=?";
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, c.getTitre());
+            ps.setString(2, c.getContenu());
+            ps.setString(3, c.getCouleur());
+            ps.setString(4, c.getVisibilite());
+            ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(6, c.getId());
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur update : " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean delete(int id) {
+        try (Connection connection = MyConnection.getInstance()) {
+            // First detach from all plannings
+            detachNotesByPlanning(id); 
+            
+            String sql = "DELETE FROM carnet WHERE id = ?";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, id);
+                ps.executeUpdate();
+            }
+            return true;
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur delete : " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean existsByTitre(String title, int excludeId) {
+        String sql = "SELECT id FROM carnet WHERE LOWER(titre) = LOWER(?) AND id <> ?";
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, title);
             ps.setInt(2, excludeId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt(1) > 0;
+                return rs.next();
             }
         } catch (SQLException e) {
             System.err.println("❌ Erreur existsByTitre : " + e.getMessage());
+            return false;
         }
-        return false;
     }
 
-    // ─── MAPPER ─────────────────────────────────────────────────────────────────
-
+    /**
+     * Maps a ResultSet row from the 'carnet' table to a Carnet object.
+     */
     private Carnet mapRow(ResultSet rs) throws SQLException {
         Carnet c = new Carnet();
-
         c.setId(rs.getInt("id"));
         c.setTitre(rs.getString("titre"));
         c.setContenu(rs.getString("contenu"));
@@ -209,5 +165,140 @@ public class CarnetService {
         if (modified != null) c.setDateModification(modified.toLocalDateTime());
 
         return c;
+    }
+
+    // ════════ Planning ↔ Carnet link methods (via carnet_planning_etude) ════════
+
+    public boolean linkNoteToPlanning(int noteId, int planningId) {
+        String sql = "INSERT IGNORE INTO carnet_planning_etude (carnet_id, planning_etude_id) VALUES (?, ?)";
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, noteId);
+            ps.setInt(2, planningId);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur linkNoteToPlanning : " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean unlinkNote(int noteId) {
+        String sql = "DELETE FROM carnet_planning_etude WHERE carnet_id = ?";
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, noteId);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur unlinkNote : " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean unlinkNoteFromPlanning(int noteId, int planningId) {
+        String sql = "DELETE FROM carnet_planning_etude WHERE carnet_id = ? AND planning_etude_id = ?";
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, noteId);
+            ps.setInt(2, planningId);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur unlinkNoteFromPlanning : " + e.getMessage());
+            return false;
+        }
+    }
+
+    public List<Carnet> getNotesByPlanning(int planningId) {
+        List<Carnet> list = new ArrayList<>();
+        String sql = "SELECT c.id, c.titre, c.contenu, c.date_creation, c.date_modification, c.couleur, c.visibilite FROM carnet c "
+                   + "INNER JOIN carnet_planning_etude cpe ON cpe.carnet_id = c.id "
+                   + "WHERE cpe.planning_etude_id = ? "
+                   + "ORDER BY c.date_modification DESC";
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, planningId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur getNotesByPlanning : " + e.getMessage());
+        }
+        return list;
+    }
+
+    public List<Integer> getLinkedPlanningIds(int noteId) {
+        List<Integer> ids = new ArrayList<>();
+        String sql = "SELECT planning_etude_id FROM carnet_planning_etude WHERE carnet_id = ?";
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, noteId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) ids.add(rs.getInt("planning_etude_id"));
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur getLinkedPlanningIds : " + e.getMessage());
+        }
+        return ids;
+    }
+
+    public PlanningEtude getPlanningByNote(int noteId) {
+        String sql = "SELECT pe.* FROM planning_etude pe "
+                   + "INNER JOIN carnet_planning_etude cpe ON cpe.planning_etude_id = pe.id "
+                   + "WHERE cpe.carnet_id = ? "
+                   + "ORDER BY pe.date_seance DESC LIMIT 1";
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, noteId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    PlanningEtude p = new PlanningEtude();
+                    p.setId(rs.getInt("id"));
+                    p.setTitreP(rs.getString("titre_p"));
+                    java.sql.Date ds = rs.getDate("date_seance");
+                    if (ds != null) p.setDateSeance(ds.toLocalDate());
+                    java.sql.Time hd = rs.getTime("heure_debut");
+                    if (hd != null) p.setHeureDebut(hd.toLocalTime());
+                    int dp = rs.getInt("duree_prevue");
+                    if (!rs.wasNull()) p.setDureePrevue(dp);
+                    p.setTypeActivite(rs.getString("type_activite"));
+                    return p;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur getPlanningByNote : " + e.getMessage());
+        }
+        return null;
+    }
+
+    public void deleteNotesByPlanning(int planningId) {
+        String delNotes = "DELETE c FROM carnet c "
+                        + "INNER JOIN carnet_planning_etude cpe ON cpe.carnet_id = c.id "
+                        + "WHERE cpe.planning_etude_id = ?";
+        String delJunction = "DELETE FROM carnet_planning_etude WHERE planning_etude_id = ?";
+        try (Connection connection = MyConnection.getInstance()) {
+            try (PreparedStatement ps = connection.prepareStatement(delNotes)) {
+                ps.setInt(1, planningId);
+                ps.executeUpdate();
+            }
+            try (PreparedStatement ps = connection.prepareStatement(delJunction)) {
+                ps.setInt(1, planningId);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur deleteNotesByPlanning : " + e.getMessage());
+        }
+    }
+
+    public void detachNotesByPlanning(int planningId) {
+        String sql = "DELETE FROM carnet_planning_etude WHERE planning_etude_id = ?";
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, planningId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur detachNotesByPlanning : " + e.getMessage());
+        }
     }
 }

@@ -1,0 +1,68 @@
+.analysis-container {
+    -fx-background-color: linear-gradient(to bottom right, #0f172a, #1e293b);
+}
+
+.card {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 15;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 15;
+}
+
+.title-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.subtitle-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #94a3b8;
+}
+
+.stat-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2dd4bf; /* Teal */
+}
+
+.stat-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+    -fx-text-transform: uppercase;
+}
+
+.loading-spinner {
+    -fx-border-color: #2dd4bf;
+    -fx-border-width: 3;
+    -fx-border-radius: 50;
+    -fx-max-width: 50;
+    -fx-max-height: 50;
+}
+
+.btn-primary {
+    -fx-background-color: #2dd4bf;
+    -fx-text-fill: #0f172a;
+    -fx-font-weight: bold;
+    -fx-padding: 10 25;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #5eead4;
+}
+
+.badge-weak {
+    -fx-background-color: rgba(239, 68, 68, 0.2);
+    -fx-text-fill: #fca5a5;
+    -fx-padding: 2 8;
+    -fx-background-radius: 4;
+}
+
+.badge-strong {
+    -fx-background-color: rgba(34, 197, 94, 0.2);
+    -fx-text-fill: #86efac;
+    -fx-padding: 2 8;
+    -fx-background-radius: 4;
+}

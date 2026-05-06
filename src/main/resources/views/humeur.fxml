@@ -19,115 +19,102 @@
     </top>
 
     <!-- ================= CENTER (SCROLLABLE) ================= -->
+    <!-- ================= CENTER (STACKPANE FOR VIEW SWITCHING) ================= -->
     <center>
-        <ScrollPane styleClass="main-scroll" fitToWidth="true">
-            <HBox styleClass="main-hbox" spacing="24" alignment="TOP_LEFT">
+        <StackPane>
+            <!-- ========= DASHBOARD VIEW ========= -->
+            <ScrollPane fx:id="dashboardView" styleClass="main-scroll" fitToWidth="true">
+                <VBox spacing="24">
+                    <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
 
-                <!-- ========= SIDEBAR (statistiques) ========= -->
-                <VBox styleClass="sidebar" spacing="20" prefWidth="260">
-
-                    <!-- Carte Humeur moyenne 7j -->
-                    <VBox styleClass="stat-card">
-                        <Label styleClass="stat-title" text="HUMEUR MOYENNE (7J)" />
-                        <Label fx:id="moyenne7Label" styleClass="stat-value" text="—" />
-                    </VBox>
-
-                    <!-- Carte Meilleure série -->
-                    <VBox styleClass="stat-card">
-                        <Label styleClass="stat-title" text="MEILLEURE SÉRIE" />
-                        <Label fx:id="streakLabel" styleClass="stat-value" text="🔥 0 jour" />
-                    </VBox>
-
-                    <!-- Carte Humeur du jour (statique) -->
-                    <VBox styleClass="stat-card mood-today-card">
-                        <Label styleClass="stat-title" text="HUMEUR DU JOUR" />
-                        <Label fx:id="emojiLabel" styleClass="emoji-big" text="❓" />
-                        <Label fx:id="moodLabelToday" styleClass="mood-label-today" text="Non renseignée" />
-                    </VBox>
-
-                    <!-- Carte Niveau de risque -->
-                    <VBox styleClass="stat-card">
-                        <Label styleClass="stat-title" text="NIVEAU DE RISQUE" />
-                        <Label fx:id="risqueLabel" styleClass="stat-value" text="—" />
-                    </VBox>
-
-                </VBox>
-
-                <!-- ========= MAIN AREA (contenu dynamique) ========= -->
-                <VBox spacing="24" HBox.hgrow="ALWAYS">
-
-                    <!-- Bannière "Aujourd'hui" -->
-                    <HBox styleClass="today-banner" alignment="CENTER_LEFT" spacing="20">
-                        <VBox HBox.hgrow="ALWAYS" spacing="8">
-                            <Label fx:id="todaySummaryLabel" styleClass="today-summary-main" text="Aucune humeur enregistrée" />
-                            <Label fx:id="todayTagsLabel" styleClass="today-summary-tags" text="" />
-                            <Label fx:id="todayJournalLabel" styleClass="today-summary-journal" text="" wrapText="true" />
-                        </VBox>
-                        <Label fx:id="todayEmojiLarge" styleClass="today-emoji-large" text="🌤️" />
+                    <HBox alignment="CENTER_LEFT" spacing="20">
+                        <Label styleClass="section-title" text="Tableau de bord de bien-être" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="mainActionButton" styleClass="btn-primary" text="➕ Ajouter humeur" onAction="#handleMainAction" />
                     </HBox>
 
-                    <!-- Graphique d'évolution -->
-                    <VBox styleClass="chart-card" spacing="12">
-                        <Label styleClass="section-title" text="ÉVOLUTION DE L'HUMEUR (14 derniers jours)" />
-                        <LineChart fx:id="moodChart" styleClass="mood-line-chart" animated="false" createSymbols="true" legendVisible="false">
-                            <xAxis>
-                                <CategoryAxis fx:id="chartXAxis" label="Date" />
-                            </xAxis>
-                            <yAxis>
-                                <NumberAxis fx:id="chartYAxis" label="Humeur (1-5)" tickUnit="1" lowerBound="1" upperBound="5" />
-                            </yAxis>
-                        </LineChart>
-                    </VBox>
+                    <HBox styleClass="main-hbox" spacing="24" alignment="TOP_LEFT">
+                        <VBox styleClass="sidebar" spacing="20" prefWidth="260">
+                            <VBox styleClass="stat-card">
+                                <Label styleClass="stat-title" text="HUMEUR MOYENNE (7J)" />
+                                <Label fx:id="moyenne7Label" styleClass="stat-value" text="—" />
+                            </VBox>
+                            <VBox styleClass="stat-card">
+                                <Label styleClass="stat-title" text="MEILLEURE SÉRIE" />
+                                <Label fx:id="streakLabel" styleClass="stat-value" text="🔥 0 jour" />
+                            </VBox>
+                            <VBox styleClass="stat-card">
+                                <Label styleClass="stat-title" text="NIVEAU DE RISQUE" />
+                                <Label fx:id="risqueLabel" styleClass="stat-value" text="—" />
+                            </VBox>
+                        </VBox>
 
-                    <!-- Formulaire d'ajout / modification -->
-                    <VBox styleClass="form-card" spacing="16">
-                        <Label styleClass="section-title" text="AJOUTER / MODIFIER L'HUMEUR" />
-
-                        <!-- Slider avec valeur et emoji en direct -->
-                        <VBox spacing="6">
-                            <Label styleClass="form-label" text="Votre humeur (1 = très mal → 5 = très bien)" />
-                            <HBox spacing="15" alignment="CENTER_LEFT">
-                                <Slider fx:id="humeurSlider" styleClass="mood-slider" min="1" max="5" majorTickUnit="1" minorTickCount="0" snapToTicks="true" showTickLabels="true" blockIncrement="1" HBox.hgrow="ALWAYS" />
-                                <Label fx:id="sliderValueLabel" styleClass="slider-live-value" text="3" />
-                                <Label fx:id="sliderEmojiInline" styleClass="slider-live-emoji" text="😐" />
+                        <VBox spacing="24" HBox.hgrow="ALWAYS">
+                            <HBox styleClass="today-banner" alignment="CENTER_LEFT" spacing="20">
+                                <VBox HBox.hgrow="ALWAYS" spacing="8">
+                                    <Label fx:id="todaySummaryLabel" styleClass="today-summary-main" text="Aucune humeur enregistrée" />
+                                    <Label fx:id="todayTagsLabel" styleClass="today-summary-tags" text="" />
+                                    <Label fx:id="todayJournalLabel" styleClass="today-summary-journal" text="" wrapText="true" />
+                                </VBox>
+                                <Label fx:id="todayEmojiLarge" styleClass="today-emoji-large" text="🌤️" />
                             </HBox>
+
+                            <VBox styleClass="chart-card" spacing="12">
+                                <Label styleClass="section-title" text="ÉVOLUTION DE L'HUMEUR (14 derniers jours)" />
+                                <LineChart fx:id="moodChart" styleClass="mood-line-chart" animated="false" createSymbols="true" legendVisible="false">
+                                    <xAxis><CategoryAxis fx:id="chartXAxis" /></xAxis>
+                                    <yAxis><NumberAxis fx:id="chartYAxis" lowerBound="1" upperBound="5" tickUnit="1" /></yAxis>
+                                </LineChart>
+                            </VBox>
                         </VBox>
-
-                        <!-- Facteur principal (journal) -->
-                        <VBox spacing="6">
-                            <Label styleClass="form-label" text="Facteur principal / journal (max 150 caractères)" />
-                            <TextArea fx:id="facteurField" styleClass="form-textarea" prefRowCount="3" wrapText="true" />
-                            <Label fx:id="facteurCountLabel" styleClass="char-counter" text="0 / 150" alignment="TOP_RIGHT" />
-                        </VBox>
-
-                        <!-- Tags (CheckBox, max 3 sélectionnables) -->
-                        <VBox spacing="6">
-                            <Label styleClass="form-label" text="Tags (max 3)" />
-                            <FlowPane hgap="12" vgap="8">
-                                <CheckBox fx:id="tagStress" styleClass="tag-check" text="Stress" />
-                                <CheckBox fx:id="tagSommeil" styleClass="tag-check" text="Sommeil" />
-                                <CheckBox fx:id="tagTravail" styleClass="tag-check" text="Travail" />
-                                <CheckBox fx:id="tagSocial" styleClass="tag-check" text="Social" />
-                                <CheckBox fx:id="tagSanté" styleClass="tag-check" text="Santé" />
-                                <CheckBox fx:id="tagSport" styleClass="tag-check" text="Sport" />
-                                <CheckBox fx:id="tagAlimentation" styleClass="tag-check" text="Alimentation" />
-                                <CheckBox fx:id="tagFocus" styleClass="tag-check" text="Focus" />
-                            </FlowPane>
-                        </VBox>
-
-                        <!-- Boutons d'action -->
-                        <HBox spacing="12" alignment="CENTER_RIGHT">
-                            <Button fx:id="ajouterBtn" styleClass="btn-primary" text="Enregistrer l'humeur" onAction="#ajouterHumeur" />
-                            <Button fx:id="updateBtn" styleClass="btn-secondary" text="Modifier l'humeur" onAction="#updateHumeur" visible="false" />
-                            <Button styleClass="btn-ghost" text="Rafraîchir" onAction="#loadStats" />
-                        </HBox>
-
-                        <!-- Zone d'affichage des erreurs -->
-                        <Label fx:id="errorLabel" styleClass="error-label" wrapText="true" visible="false" />
-                    </VBox>
+                    </HBox>
                 </VBox>
-            </HBox>
-        </ScrollPane>
+            </ScrollPane>
+
+            <!-- ========= GUIDED FLOW VIEW ========= -->
+            <VBox fx:id="guidedFlowView" visible="false" managed="false" alignment="CENTER" spacing="30" style="-fx-background-color: #f8fafc;">
+                <padding><Insets top="40" right="40" bottom="40" left="40"/></padding>
+
+                <VBox alignment="CENTER" spacing="10">
+                    <Label fx:id="stepIndicatorLabel" styleClass="step-indicator" text="Étape 1 sur 2" />
+                    <Label fx:id="stepTitleLabel" styleClass="step-title" text="Comment vous sentez-vous ?" />
+                </VBox>
+
+                <StackPane fx:id="stepsContainer" VBox.vgrow="ALWAYS" maxWidth="600">
+                    <VBox fx:id="step1" spacing="40" alignment="CENTER">
+                        <VBox alignment="CENTER" spacing="20">
+                            <Label fx:id="sliderEmojiInline" style="-fx-font-size: 80px;" text="😐" />
+                            <Label fx:id="sliderValueLabel" styleClass="slider-big-value" text="3" />
+                        </VBox>
+                        <Slider fx:id="humeurSlider" min="1" max="5" majorTickUnit="1" minorTickCount="0" snapToTicks="true" showTickLabels="true" blockIncrement="1" maxWidth="400" />
+                    </VBox>
+
+                    <!-- Step 2: Tags (Replaces the old Factor text step) -->
+                    <VBox fx:id="step2" visible="false" managed="false" spacing="20" alignment="CENTER">
+                        <Label styleClass="form-label" text="Quels sont les facteurs principaux ? (max 3)" />
+                        <FlowPane hgap="15" vgap="15" alignment="CENTER" maxWidth="500">
+                            <CheckBox fx:id="tagStress" styleClass="tag-check" text="Stress" />
+                            <CheckBox fx:id="tagSommeil" styleClass="tag-check" text="Sommeil" />
+                            <CheckBox fx:id="tagTravail" styleClass="tag-check" text="Travail" />
+                            <CheckBox fx:id="tagSocial" styleClass="tag-check" text="Social" />
+                            <CheckBox fx:id="tagSanté" styleClass="tag-check" text="Santé" />
+                            <CheckBox fx:id="tagSport" styleClass="tag-check" text="Sport" />
+                            <CheckBox fx:id="tagAlimentation" styleClass="tag-check" text="Alimentation" />
+                            <CheckBox fx:id="tagFocus" styleClass="tag-check" text="Focus" />
+                        </FlowPane>
+                    </VBox>
+                </StackPane>
+
+                <HBox spacing="20" alignment="CENTER">
+                    <Button fx:id="btnPrev" text="Précédent" onAction="#prevStep" styleClass="btn-secondary" />
+                    <Button fx:id="btnNext" text="Suivant" onAction="#nextStep" styleClass="btn-primary" />
+                    <Button fx:id="btnSubmit" text="Terminer" onAction="#ajouterHumeur" styleClass="btn-primary" visible="false" managed="false" />
+                    <Button text="Annuler" onAction="#showDashboard" styleClass="btn-ghost" />
+                </HBox>
+
+                <Label fx:id="errorLabel" styleClass="error-label" visible="false" />
+            </VBox>
+        </StackPane>
     </center>
 
     <!-- ================= STATUS BAR ================= -->

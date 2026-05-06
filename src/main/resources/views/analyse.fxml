@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" 
+      fx:controller="com.mentorai.controllers.AnalyseController"
+      spacing="30" alignment="CENTER" styleClass="analysis-container"
+      stylesheets="@../css/analyse.css" prefWidth="800" prefHeight="600">
+    
+    <padding><Insets top="40" right="40" bottom="40" left="40"/></padding>
+
+    <!-- Header -->
+    <VBox alignment="CENTER" spacing="5">
+        <Label text="Analyseur MentorAI" styleClass="title-label"/>
+        <Label text="Génération de votre rapport de coaching personnalisé" styleClass="subtitle-label"/>
+    </VBox>
+
+    <!-- Content Area (Switchable) -->
+    <StackPane VBox.vgrow="ALWAYS">
+        
+        <!-- Loading State -->
+        <VBox fx:id="loadingBox" alignment="CENTER" spacing="20">
+            <ProgressIndicator prefWidth="60" prefHeight="60" />
+            <Label fx:id="statusLabel" text="Initialisation de l'analyse..." styleClass="subtitle-label"/>
+            <VBox fx:id="stepsBox" alignment="CENTER_LEFT" maxWidth="300" spacing="10">
+                <Label text="○ Lecture de l'historique d'études" styleClass="subtitle-label" fx:id="step1"/>
+                <Label text="○ Analyse de l'état mental" styleClass="subtitle-label" fx:id="step2"/>
+                <Label text="○ Identification des forces et faiblesses" styleClass="subtitle-label" fx:id="step3"/>
+                <Label text="○ Génération des conseils IA" styleClass="subtitle-label" fx:id="step4"/>
+            </VBox>
+        </VBox>
+
+        <!-- Result Preview (Hidden by default) -->
+        <VBox fx:id="resultBox" visible="false" spacing="25" alignment="CENTER">
+            <HBox spacing="20" alignment="CENTER">
+                <!-- Mood Card -->
+                <VBox styleClass="card" prefWidth="200" alignment="CENTER" spacing="10">
+                    <padding><Insets top="20" bottom="20"/></padding>
+                    <Label text="ÉTAT MENTAL" styleClass="stat-label"/>
+                    <Label fx:id="moodVal" text="--" styleClass="stat-value"/>
+                    <Label fx:id="moodLabel" text="Stable" styleClass="subtitle-label"/>
+                </VBox>
+                <!-- Performance Card -->
+                <VBox styleClass="card" prefWidth="200" alignment="CENTER" spacing="10">
+                    <padding><Insets top="20" bottom="20"/></padding>
+                    <Label text="COMPLÉTION" styleClass="stat-label"/>
+                    <Label fx:id="perfVal" text="0%" styleClass="stat-value"/>
+                    <Label fx:id="perfLabel" text="Régulier" styleClass="subtitle-label"/>
+                </VBox>
+            </HBox>
+
+            <VBox styleClass="card" spacing="15">
+                <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                <Label text="SÉLECTION DU COACH" styleClass="stat-label"/>
+                <Label fx:id="coachSummary" text="..." styleClass="subtitle-label" wrapText="true" textAlignment="CENTER"/>
+            </VBox>
+
+            <Button fx:id="downloadBtn" text="Télécharger mon rapport PDF" styleClass="btn-primary" onAction="#handleDownload"/>
+            <Hyperlink text="Retour au centre d'apprentissage" onAction="#handleBack" style="-fx-text-fill: #94a3b8;"/>
+        </VBox>
+    </StackPane>
+
+</VBox>

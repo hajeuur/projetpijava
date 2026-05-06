@@ -12,6 +12,8 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import edu.connection3a36.tools.SessionManager;
+import edu.connection3a36.entities.Utilisateur;
 
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
@@ -38,9 +40,10 @@ public class HumeurController implements Initializable {
     /**
      * Currently authenticated profil_apprentissage id.
      * In a real app this would come from a session / auth context.
-     * For now it is hard-coded to 1.  Change via setProfilId().
-     */
-    private int profilId = 1;
+    /** Currently authenticated utilisateur_id. */
+    private int utilisateurId = 1;
+    /** Resolved profil_apprentissage_id. */
+    private int resolvedProfilId = -1;
 
     /** Id of the current day's mood entry (0 = none yet). */
     private int todayMoodId = 0;
@@ -52,8 +55,6 @@ public class HumeurController implements Initializable {
     @FXML private Label moyenne7Label;
     @FXML private Label streakLabel;
     @FXML private Label risqueLabel;
-    @FXML private Label emojiLabel;
-    @FXML private Label moodLabelToday;
 
     // ── FXML – today banner ───────────────────────────────────────────────────
     @FXML private Label todaySummaryLabel;
@@ -70,8 +71,6 @@ public class HumeurController implements Initializable {
     @FXML private Slider   humeurSlider;
     @FXML private Label    sliderValueLabel;
     @FXML private Label    sliderEmojiInline;
-    @FXML private TextArea facteurField;
-    @FXML private Label    facteurCountLabel;
 
     // Tags checkboxes
     @FXML private CheckBox tagStress;
@@ -83,11 +82,18 @@ public class HumeurController implements Initializable {
     @FXML private CheckBox tagAlimentation;
     @FXML private CheckBox tagFocus;
 
-    // ── FXML – buttons / feedback ─────────────────────────────────────────────
-    @FXML private Button ajouterBtn;
-    @FXML private Button updateBtn;
+    // ── FXML – navigation ──
+    @FXML private ScrollPane dashboardView;
+    @FXML private VBox       guidedFlowView;
+    @FXML private VBox       step1, step2;
+    @FXML private Label      stepIndicatorLabel, stepTitleLabel;
+    @FXML private Button     btnPrev, btnNext, btnSubmit;
+
     @FXML private Label  errorLabel;
     @FXML private Label  statusLabel;
+    @FXML private Button mainActionButton;
+
+    private int currentStep = 1;
 
     // ═════════════════════════════════════════════════════════════════════════
     //  Initialisation
@@ -96,17 +102,39 @@ public class HumeurController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         configureSliderListener();
-        configureFacteurCounter();
         configureTagLimiter();
-        loadStats();
-        loadChart();
+        showDashboard();
     }
 
     /** Called externally (e.g. from the main application) to set the user. */
     public void setProfilId(int id) {
-        this.profilId = id;
+        this.utilisateurId = id;
+        try {
+            this.resolvedProfilId = humeurService.getOrCreateProfilId(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         loadStats();
         loadChart();
+    }
+
+    private int getSafeProfilId() {
+        if (resolvedProfilId == -1) {
+            try {
+                // Try to get current user from session
+                Utilisateur currentUser = SessionManager.getCurrentUser();
+                if (currentUser != null) {
+                    this.utilisateurId = currentUser.getId();
+                    this.resolvedProfilId = humeurService.getOrCreateProfilId(this.utilisateurId);
+                } else {
+                    // Fallback to default if no session (for dev/testing)
+                    this.resolvedProfilId = humeurService.getOrCreateProfilId(utilisateurId);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return resolvedProfilId;
     }
 
     // ═════════════════════════════════════════════════════════════════════════
@@ -122,18 +150,7 @@ public class HumeurController implements Initializable {
         });
     }
 
-    /** Counts characters in the facteur TextArea in real time. */
-    private void configureFacteurCounter() {
-        facteurField.textProperty().addListener((obs, oldVal, newVal) -> {
-            int len = newVal.length();
-            facteurCountLabel.setText(len + " / 150");
-            if (len > 150) {
-                facteurCountLabel.setStyle("-fx-text-fill: #dc2626;");
-            } else {
-                facteurCountLabel.setStyle("");
-            }
-        });
-    }
+
 
     /**
      * Prevents selecting more than 3 tag checkboxes.
@@ -160,69 +177,126 @@ public class HumeurController implements Initializable {
     // ═════════════════════════════════════════════════════════════════════════
 
     /**
-     * Handles the "Enregistrer" button.
-     * Mirrors Symfony's POST /mood-tracker/log route.
+     * Handles the final submission.
      */
     @FXML
     public void ajouterHumeur() {
         clearError();
         Humeur h = buildHumeurFromForm();
-
-        // Quick UI-level validation before hitting the service
-        if (h == null) return;   // error already shown
+        if (h == null) return;
 
         try {
-            humeurService.ajouterHumeur(h);
-            todayMoodId = h.getId();
+            if (todayMoodId == 0) {
+                humeurService.ajouterHumeur(h);
+            } else {
+                humeurService.updateHumeur(todayMoodId, h);
+            }
+            showDashboard();
             setStatus("✅  Humeur enregistrée avec succès !");
-            resetForm();
-            loadStats();
-            loadChart();
-            updateBtn.setVisible(true);
-        } catch (IllegalStateException e) {
-            // Already logged today → switch to update mode
-            showError(e.getMessage());
-            updateBtn.setVisible(true);
-        } catch (IllegalArgumentException e) {
-            showError(e.getMessage());
         } catch (Exception e) {
-            showError("Erreur inattendue : " + e.getMessage());
+            showError("Erreur : " + e.getMessage());
         }
     }
 
     /**
-     * Handles the "Modifier" button.
-     * Mirrors Symfony's POST /mood-tracker/update/{id} route.
+     * Opens the guided flow to either add or update today's mood.
      */
     @FXML
-    public void updateHumeur() {
-        clearError();
+    public void handleMainAction() {
+        showGuidedFlow();
+    }
 
-        if (todayMoodId == 0) {
-            // Try to find today's existing entry
-            Humeur today = humeurService.getTodayMood(profilId);
-            if (today == null) {
-                showError("Aucune humeur trouvée pour aujourd'hui. Ajoutez-en une d'abord.");
-                return;
-            }
+    // ═════════════════════════════════════════════════════════════════════════
+    //  Guided Flow Navigation
+    // ═════════════════════════════════════════════════════════════════════════
+
+    @FXML
+    public void showDashboard() {
+        guidedFlowView.setVisible(false);
+        guidedFlowView.setManaged(false);
+        dashboardView.setVisible(true);
+        dashboardView.setManaged(true);
+        loadStats();
+        loadChart();
+    }
+
+    @FXML
+    public void showGuidedFlow() {
+        dashboardView.setVisible(false);
+        dashboardView.setManaged(false);
+        guidedFlowView.setVisible(true);
+        guidedFlowView.setManaged(true);
+        
+        int pid = getSafeProfilId();
+        Humeur today = humeurService.getTodayMood(pid);
+        if (today != null) {
+            prePopulateForm(today);
             todayMoodId = today.getId();
+        } else {
+            resetForm();
+            todayMoodId = 0;
         }
 
-        Humeur h = buildHumeurFromForm();
-        if (h == null) return;
+        currentStep = 1;
+        updateStepVisibility();
+    }
 
-        try {
-            humeurService.updateHumeur(todayMoodId, h);
-            setStatus("✏️  Humeur mise à jour avec succès !");
-            resetForm();
-            loadStats();
-            loadChart();
-        } catch (IllegalArgumentException e) {
-            showError(e.getMessage());
-        } catch (Exception e) {
-            showError("Erreur inattendue : " + e.getMessage());
+    private void prePopulateForm(Humeur h) {
+        humeurSlider.setValue(h.getValeurHumeur());
+        
+        // Reset all tags first
+        getAllTagBoxes().forEach(cb -> cb.setSelected(false));
+        
+        // Select tags from facteur_principal (which stores our tags now)
+        if (h.getFacteurPrincipal() != null) {
+            String[] tags = h.getFacteurPrincipal().split(",");
+            for (String tag : tags) {
+                String cleanTag = tag.trim().toLowerCase();
+                getAllTagBoxes().stream()
+                    .filter(cb -> cb.getText().trim().toLowerCase().equals(cleanTag))
+                    .findFirst()
+                    .ifPresent(cb -> cb.setSelected(true));
+            }
         }
     }
+
+    @FXML
+    private void nextStep() {
+        if (currentStep < 2) {
+            currentStep++;
+            updateStepVisibility();
+        }
+    }
+
+    @FXML
+    private void prevStep() {
+        if (currentStep > 1) {
+            currentStep--;
+            updateStepVisibility();
+        }
+    }
+
+    private void updateStepVisibility() {
+        step1.setVisible(currentStep == 1);
+        step1.setManaged(currentStep == 1);
+        step2.setVisible(currentStep == 2);
+        step2.setManaged(currentStep == 2);
+
+        stepIndicatorLabel.setText("Étape " + currentStep + " sur 2");
+        
+        switch (currentStep) {
+            case 1 -> stepTitleLabel.setText("Comment vous sentez-vous ?");
+            case 2 -> stepTitleLabel.setText("Quels sont les facteurs principaux ?");
+        }
+
+        btnPrev.setDisable(currentStep == 1);
+        btnNext.setVisible(currentStep < 2);
+        btnNext.setManaged(currentStep < 2);
+        btnSubmit.setVisible(currentStep == 2);
+        btnSubmit.setManaged(currentStep == 2);
+    }
+
+
 
     /**
      * Refreshes the statistics sidebar.
@@ -230,13 +304,12 @@ public class HumeurController implements Initializable {
      */
     @FXML
     public void loadStats() {
+        int pid = getSafeProfilId();
         try {
             // Today's mood
-            Humeur today = humeurService.getTodayMood(profilId);
+            Humeur today = humeurService.getTodayMood(pid);
             if (today != null) {
                 todayMoodId = today.getId();
-                emojiLabel.setText(today.getEmoji());
-                moodLabelToday.setText(today.getLabel());
                 todaySummaryLabel.setText("Je me sens " + today.getLabel().toLowerCase());
                 todayTagsLabel.setText(formatTags(today.getTendance()));
                 todayJournalLabel.setText(today.getFacteurPrincipal() != null
@@ -248,25 +321,21 @@ public class HumeurController implements Initializable {
                 risqueLabel.setText(risk);
                 risqueLabel.setStyle(risqueStyle(risk));
 
-                // Show update button, hide add button if already logged
-                ajouterBtn.setDisable(true);
-                updateBtn.setVisible(true);
+                mainActionButton.setText("✏️ Modifier l'humeur");
             } else {
                 todayMoodId = 0;
-                emojiLabel.setText("❓");
-                moodLabelToday.setText("Pas encore enregistrée");
                 todaySummaryLabel.setText("Aucune humeur enregistrée pour aujourd'hui");
                 todayTagsLabel.setText("");
                 todayJournalLabel.setText("");
                 todayEmojiLarge.setText("🌤️");
                 risqueLabel.setText("—");
                 risqueLabel.setStyle("");
-                ajouterBtn.setDisable(false);
-                updateBtn.setVisible(false);
+
+                mainActionButton.setText("➕ Ajouter humeur");
             }
 
             // 7-day average
-            Integer avg = humeurService.getAverageMood(profilId, 7);
+            Integer avg = humeurService.getAverageMood(pid, 7);
             if (avg != null) {
                 moyenne7Label.setText(emojiForValue(avg) + "  " + avg + " / 5");
             } else {
@@ -274,7 +343,7 @@ public class HumeurController implements Initializable {
             }
 
             // Streak
-            int streak = humeurService.getLongestStreak(profilId);
+            int streak = humeurService.getLongestStreak(pid);
             streakLabel.setText("🔥 " + streak + " jour" + (streak != 1 ? "s" : ""));
 
             setStatus("Dernière actualisation : " +
@@ -297,8 +366,9 @@ public class HumeurController implements Initializable {
      */
     @FXML
     public void loadChart() {
+        int pid = getSafeProfilId();
         try {
-            List<Humeur> history = humeurService.getMoodTrend(profilId, 14);
+            List<Humeur> history = humeurService.getMoodTrend(pid, 14);
 
             // Build ordered category list for the X axis
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM/dd");
@@ -347,18 +417,11 @@ public class HumeurController implements Initializable {
      */
     private Humeur buildHumeurFromForm() {
         int val = (int) Math.round(humeurSlider.getValue());
-
-        String facteur = facteurField.getText() != null
-                ? facteurField.getText().trim() : "";
-
-        if (facteur.length() > 150) {
-            showError("Le facteur principal ne peut pas dépasser 150 caractères.");
-            return null;
-        }
-
         String tags = getSelectedTags();
 
-        Humeur h = new Humeur(val, facteur, tags, profilId);
+        // The user requested to store selected tags in "facteur_principal" instead of text.
+        // We'll map the tags to both columns to ensure consistency with current logic.
+        Humeur h = new Humeur(val, tags, tags, utilisateurId);
         return h;
     }
 
@@ -379,7 +442,6 @@ public class HumeurController implements Initializable {
     /** Clears all form inputs back to defaults. */
     private void resetForm() {
         humeurSlider.setValue(3);
-        facteurField.clear();
         getAllTagBoxes().forEach(cb -> cb.setSelected(false));
     }
 
@@ -456,7 +518,6 @@ public class HumeurController implements Initializable {
         return Arrays.stream(parts)
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
-                .map(s -> "#" + s)
                 .collect(Collectors.joining("  "));
     }
 }

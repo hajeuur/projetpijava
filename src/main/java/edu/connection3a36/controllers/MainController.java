@@ -1,5 +1,7 @@
 package edu.connection3a36.controllers;
 
+import com.mentorai.controllers.CarnetController;
+import com.mentorai.entities.Carnet;
 import edu.connection3a36.entities.Utilisateur;
 import edu.connection3a36.tools.SessionManager;
 import javafx.fxml.FXML;
@@ -56,11 +58,13 @@ public class MainController {
     @FXML private Button  btnHumeur;
     @FXML private Button  btnPlanning;
     @FXML private Button  btnCarnet;
+    @FXML private Button  btnApprentissage;
 
     // ── MentorAI features (header FRONT) ─────────────────────────────────────
     @FXML private Button  btnHeaderHumeur;
     @FXML private Button  btnHeaderPlanning;
     @FXML private Button  btnHeaderCarnet;
+    @FXML private Button  btnHeaderApprentissage;
 
     // ── Sidebar (BACK) ────────────────────────────────────────────────────────
     @FXML private VBox backSidebar;
@@ -159,6 +163,7 @@ public class MainController {
             show(btnHeaderHumeur);
             show(btnHeaderPlanning);
             show(btnHeaderCarnet);
+            show(btnHeaderApprentissage);
 
             showDashboardEnseignant();
 
@@ -179,6 +184,7 @@ public class MainController {
             show(btnHeaderHumeur);
             show(btnHeaderPlanning);
             show(btnHeaderCarnet);
+            show(btnHeaderApprentissage);
 
             showParcours();
 
@@ -405,6 +411,32 @@ public class MainController {
     void openCarnet() {
         loadView("/views/carnet.fxml");
         setActiveBtn(btnCarnet != null && backSidebar.isVisible() ? btnCarnet : btnHeaderCarnet);
+    }
+
+    @FXML
+    void openApprentissage() {
+        loadView("/views/Apprentissage.fxml");
+        setActiveBtn(btnApprentissage != null && backSidebar.isVisible() ? btnApprentissage : btnHeaderApprentissage);
+    }
+
+    /**
+     * Navigates to the Carnet view and pre-selects the given note in read mode.
+     * Called from PlanningController when the user clicks a linked note.
+     */
+    public void openCarnetAndSelect(Carnet note) {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/views/carnet.fxml"));
+            javafx.scene.Parent view = loader.load();
+            CarnetController carnetCtrl = loader.getController();
+            contentArea.getChildren().setAll(view);
+            setActiveBtn(btnCarnet != null && backSidebar.isVisible() ? btnCarnet : btnHeaderCarnet);
+            // Select the note after the view is fully laid out
+            javafx.application.Platform.runLater(() -> carnetCtrl.selectNote(note));
+        } catch (Exception e) {
+            System.err.println("❌ Erreur openCarnetAndSelect: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────

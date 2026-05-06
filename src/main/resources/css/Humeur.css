@@ -306,6 +306,33 @@
     -fx-font-size: 11px;
 }
 
-/* ── Mood colour helpers (set via setStyle in controller) ── */
-/* mood-1: #FF6B6B  mood-2: #9B59B6  mood-3: #3498DB       */
-/* mood-4: #2ECC71  mood-5: #F1C40F                          */
+/* ── Guided Flow Steps ────────────────────────────────────── */
+.step-indicator {
+    -fx-text-fill: #2a5298;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 1.5px;
+    -fx-text-transform: uppercase;
+}
+.step-title {
+    -fx-text-fill: #0f2849;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+.slider-big-value {
+    -fx-text-fill: #2a5298;
+    -fx-font-size: 48px;
+    -fx-font-weight: bold;
+}
+.form-textarea {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-padding: 15;
+    -fx-font-size: 15px;
+}
+.form-textarea:focused {
+    -fx-border-color: #2a5298;
+    -fx-effect: dropshadow(gaussian, rgba(42,82,152,0.15), 10, 0, 0, 0);
+}

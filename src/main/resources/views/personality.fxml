@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.mentorai.controllers.PersonalityController"
+           stylesheets="@/css/personality.css"
+           styleClass="page-root">
+
+    <VBox alignment="CENTER" spacing="0" maxWidth="680" StackPane.alignment="CENTER">
+
+        <!-- ── Title bar ── -->
+        <HBox styleClass="page-title" alignment="CENTER_LEFT" spacing="12">
+            <Label text="🧠" style="-fx-font-size:22px;"/>
+            <VBox spacing="2">
+                <Label text="Personality Test" styleClass="page-title-label"/>
+                <HBox spacing="6">
+                    <Label text="MentorAI" styleClass="breadcrumb-muted"/>
+                    <Label text="›"        styleClass="breadcrumb-muted"/>
+                    <Label text="Personality" styleClass="breadcrumb-current"/>
+                </HBox>
+            </VBox>
+        </HBox>
+
+        <!-- ── Main white card ── -->
+        <VBox styleClass="planning-panel" spacing="0" VBox.vgrow="ALWAYS">
+            <padding><Insets top="44" right="52" bottom="44" left="52"/></padding>
+
+            <!-- ══════════════════════════════════
+                 QUESTION CARD
+            ══════════════════════════════════ -->
+            <VBox fx:id="questionCard" spacing="28" alignment="CENTER">
+
+                <!-- Progress pill -->
+                <HBox alignment="CENTER">
+                    <Label fx:id="progressLabel"
+                           text="Question 1 / 12"
+                           styleClass="progress-label"/>
+                </HBox>
+
+                <!-- Progress bar track -->
+                <StackPane styleClass="progress-track" maxWidth="Infinity">
+                    <StackPane fx:id="progressFill"
+                               styleClass="progress-fill"
+                               StackPane.alignment="CENTER_LEFT"/>
+                </StackPane>
+
+                <!-- Question text -->
+                <Label fx:id="questionLabel"
+                       text="Question text here"
+                       styleClass="question-text"
+                       wrapText="true"
+                       alignment="CENTER"
+                       maxWidth="Infinity"/>
+
+                <!-- Option radio buttons (styled as full-width cards) -->
+                <VBox spacing="14" maxWidth="Infinity">
+                    <RadioButton fx:id="optionA"
+                                 text="Option A"
+                                 styleClass="option-radio"
+                                 maxWidth="Infinity"/>
+                    <RadioButton fx:id="optionB"
+                                 text="Option B"
+                                 styleClass="option-radio"
+                                 maxWidth="Infinity"/>
+                </VBox>
+
+                <!-- Navigation buttons -->
+                <HBox spacing="14" alignment="CENTER">
+                    <padding><Insets top="8"/></padding>
+                    <Button fx:id="btnPrevious"
+                            text="← Previous"
+                            styleClass="btn-outline-secondary"
+                            onAction="#handlePrevious"
+                            minWidth="140"/>
+                    <Button fx:id="btnNext"
+                            text="Next →"
+                            styleClass="btn-primary"
+                            onAction="#handleNext"
+                            minWidth="140"/>
+                    <Button fx:id="btnSubmit"
+                            text="Submit ✓"
+                            styleClass="btn-primary"
+                            onAction="#handleSubmit"
+                            minWidth="140"
+                            visible="false"
+                            managed="false"/>
+                </HBox>
+
+            </VBox>
+
+            <!-- ══════════════════════════════════
+                 RESULT CARD
+            ══════════════════════════════════ -->
+            <VBox fx:id="resultCard"
+                  spacing="24"
+                  alignment="CENTER"
+                  visible="false"
+                  managed="false">
+
+                <Label text="🎉" style="-fx-font-size:56px;"/>
+
+                <Label text="Test Complete!"
+                       styleClass="panel-heading"
+                       style="-fx-font-size:22px;"/>
+
+                <!-- Result type box -->
+                <VBox styleClass="result-box" alignment="CENTER" spacing="10">
+                    <Label text="Your personality type:"
+                           styleClass="planning-meta"
+                           style="-fx-font-size:14px;"/>
+                    <Label fx:id="resultLabel"
+                           text="----"
+                           styleClass="result-type-label"/>
+                </VBox>
+
+                <Label text="Discover your strengths, preferred work style, and how you connect with others."
+                       styleClass="planning-meta"
+                       wrapText="true"
+                       alignment="CENTER"
+                       maxWidth="420"
+                       style="-fx-text-alignment:center;"/>
+
+                <Button text="↩  Retake Test"
+                        styleClass="btn-outline-secondary"
+                        onAction="#handleRetake"
+                        minWidth="180"/>
+
+            </VBox>
+
+        </VBox>
+    </VBox>
+</StackPane>

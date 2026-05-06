@@ -11,6 +11,7 @@ public class Carnet {
     private LocalDateTime dateModification;
     private String couleur = "#ffffff";
     private String visibilite = "visible";
+    // NOTE: no planning_id field — links are stored in carnet_planning_etude (many-to-many)
 
     public Carnet() {}
 

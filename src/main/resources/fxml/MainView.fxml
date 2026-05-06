@@ -80,6 +80,8 @@
                             onAction="#openPlanning" styleClass="header-nav-btn" visible="false" managed="false"/>
                     <Button fx:id="btnHeaderCarnet" text="📓 Carnet"
                             onAction="#openCarnet" styleClass="header-nav-btn" visible="false" managed="false"/>
+                    <Button fx:id="btnHeaderApprentissage" text="🧠 Apprentissage"
+                            onAction="#openApprentissage" styleClass="header-nav-btn" visible="false" managed="false"/>
 
                     <!-- Preferences -->
                     <Button fx:id="btnPreferences" text="Préférences"
@@ -181,6 +183,8 @@
                         onAction="#openPlanning" styleClass="sidebar-btn" maxWidth="Infinity"/>
                 <Button fx:id="btnCarnet" text="📓 Carnet"
                         onAction="#openCarnet" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                <Button fx:id="btnApprentissage" text="🧠 Apprentissage"
+                        onAction="#openApprentissage" styleClass="sidebar-btn" maxWidth="Infinity"/>
             </VBox>
 
             <!-- Spacer -->

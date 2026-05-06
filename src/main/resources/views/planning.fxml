@@ -54,7 +54,7 @@
             <HBox fx:id="personalityTestBar" styleClass="alert-test-bar" alignment="CENTER_RIGHT"
                   managed="true" visible="true">
                 <padding><Insets top="10" right="20" bottom="10" left="20"/></padding>
-                <Button text="Test de personnalité" styleClass="btn-primary"
+                <Button fx:id="personalityTestBtn" text="Test de personnalité" styleClass="btn-primary"
                         onAction="#onPersonalityTest"/>
             </HBox>
 

@@ -114,6 +114,13 @@
                         styleClass="btn-outline"
                         visible="false"
                         managed="false"/>
+
+                <Button fx:id="btnLierPlanning"
+                        text="📅 Lier à un planning"
+                        onAction="#handleLierPlanning"
+                        styleClass="btn-outline"
+                        visible="false"
+                        managed="false"/>
             </HBox>
 
             <Label fx:id="editorStatusLabel"/>

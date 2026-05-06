@@ -1,0 +1,109 @@
+/* ═══════════════════════════════════════════════════════════
+   apprentissage.css – Service Center UI
+   ═══════════════════════════════════════════════════════════ */
+
+.root-pane {
+    -fx-background-color: linear-gradient(to bottom, #0f2849, #1e3a5f);
+    -fx-font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.main-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.main-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ── Search Bar ── */
+.search-container {
+    -fx-padding: 20 0 10 0;
+}
+
+.search-field {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 20;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: rgba(255, 255, 255, 0.5);
+    -fx-padding: 10 20;
+    -fx-font-size: 14px;
+}
+
+.search-field:focused {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-border-color: #2a5298;
+}
+
+/* ── Section Titles ── */
+.section-title {
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 30 0 15 0;
+}
+
+.category-title {
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 20 0 10 0;
+}
+
+/* ── Service Card ── */
+.service-card {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 15;
+    -fx-padding: 20;
+    -fx-spacing: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 4);
+    -fx-transition: all 0.3s ease;
+}
+
+.service-card:hover {
+    -fx-background-color: white;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 6);
+}
+
+.card-title {
+    -fx-text-fill: #0f2849;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.card-description {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 13px;
+    -fx-line-spacing: 2;
+}
+
+/* ── Buttons ── */
+.btn-open {
+    -fx-background-color: #2a5298;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-background-radius: 8;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.btn-open:hover {
+    -fx-background-color: #1e3d7a;
+}
+
+/* ── Grid/Container Spacing ── */
+.horizontal-container {
+    -fx-spacing: 20;
+    -fx-padding: 5 5 15 5;
+}
+
+.grid-container {
+    -fx-hgap: 20;
+    -fx-vgap: 20;
+    -fx-padding: 5;
+}

@@ -1,7 +1,12 @@
 import com.mentorai.utils.MyConnection;
+import java.sql.SQLException;
 
 public class TestDB {
     public static void main(String[] args) {
-        MyConnection.getInstance();
+        try {
+            MyConnection.getInstance();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

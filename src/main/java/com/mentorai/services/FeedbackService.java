@@ -9,17 +9,14 @@ import java.util.List;
 
 public class FeedbackService {
 
-    private Connection connection;
-
     public FeedbackService() {
-        connection = MyConnection.getInstance();
     }
 
     // ===================== CREATE =====================
     public void add(Feedback feedback) {
         String query = "INSERT INTO feedback (contenu, note, datefeedback, typefeedback, etatfeedback, traitement_id, utilisateur_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try {
-            PreparedStatement ps = connection.prepareStatement(query);
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, feedback.getContenu());
             ps.setInt(2, feedback.getNote());
             ps.setDate(3, Date.valueOf(feedback.getDatefeedback()));
@@ -45,12 +42,13 @@ public class FeedbackService {
     // ✅ Vérifie si l'utilisateur a déjà envoyé exactement le même message
     public boolean existe(int utilisateurId, String contenu) {
         String query = "SELECT * FROM feedback WHERE utilisateur_id = ? AND contenu = ?";
-        try {
-            PreparedStatement ps = connection.prepareStatement(query);
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setInt(1, utilisateurId);
             ps.setString(2, contenu);
-            ResultSet rs = ps.executeQuery();
-            return rs.next(); // true = existe déjà, false = n'existe pas
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next(); // true = existe déjà, false = n'existe pas
+            }
         } catch (SQLException e) {
             System.out.println("❌ Erreur contrôle unicité : " + e.getMessage());
         }
@@ -61,9 +59,9 @@ public class FeedbackService {
     public List<Feedback> getAll() {
         List<Feedback> feedbacks = new ArrayList<>();
         String query = "SELECT * FROM feedback";
-        try {
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery(query);
+        try (Connection connection = MyConnection.getInstance();
+             Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(query)) {
             while (rs.next()) {
                 Feedback f = new Feedback(
                         rs.getInt("id"),
@@ -87,22 +85,23 @@ public class FeedbackService {
     public List<Feedback> getByUtilisateur(int utilisateurId) {
         List<Feedback> feedbacks = new ArrayList<>();
         String query = "SELECT * FROM feedback WHERE utilisateur_id = ? ORDER BY datefeedback DESC";
-        try {
-            PreparedStatement ps = connection.prepareStatement(query);
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setInt(1, utilisateurId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Feedback f = new Feedback(
-                        rs.getInt("id"),
-                        rs.getString("contenu"),
-                        rs.getInt("note"),
-                        rs.getDate("datefeedback").toLocalDate(),
-                        rs.getString("typefeedback"),
-                        rs.getString("etatfeedback"),
-                        rs.getInt("traitement_id"),
-                        rs.getInt("utilisateur_id")
-                );
-                feedbacks.add(f);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Feedback f = new Feedback(
+                            rs.getInt("id"),
+                            rs.getString("contenu"),
+                            rs.getInt("note"),
+                            rs.getDate("datefeedback").toLocalDate(),
+                            rs.getString("typefeedback"),
+                            rs.getString("etatfeedback"),
+                            rs.getInt("traitement_id"),
+                            rs.getInt("utilisateur_id")
+                    );
+                    feedbacks.add(f);
+                }
             }
         } catch (SQLException e) {
             System.out.println("❌ Erreur getByUtilisateur : " + e.getMessage());
@@ -113,8 +112,8 @@ public class FeedbackService {
     // ===================== UPDATE =====================
     public void update(Feedback feedback) {
         String query = "UPDATE feedback SET contenu=?, note=?, datefeedback=?, typefeedback=?, etatfeedback=?, traitement_id=? WHERE id=?";
-        try {
-            PreparedStatement ps = connection.prepareStatement(query);
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, feedback.getContenu());
             ps.setInt(2, feedback.getNote());
             ps.setDate(3, Date.valueOf(feedback.getDatefeedback()));
@@ -138,8 +137,8 @@ public class FeedbackService {
     // ===================== DELETE =====================
     public void delete(int id) {
         String query = "DELETE FROM feedback WHERE id=?";
-        try {
-            PreparedStatement ps = connection.prepareStatement(query);
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setInt(1, id);
             ps.executeUpdate();
             System.out.println("✅ Feedback supprimé avec succès !");

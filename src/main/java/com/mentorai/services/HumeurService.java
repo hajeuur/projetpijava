@@ -10,10 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HumeurService {
-    private final Connection connection;
 
     public HumeurService() {
-        connection = MyConnection.getInstance();
     }
 
     public List<String> validateMoodData(Humeur humeur) {
@@ -38,45 +36,92 @@ public class HumeurService {
     }
 
     public void ajouter(Humeur humeur) throws Exception {
-        // PREVENT DUPLICATE
-        if (getTodayMood(humeur.getProfilApprentissageId()) != null) {
-            throw new Exception("Mood already logged for today.");
-        }
+        try (Connection connection = MyConnection.getInstance()) {
+            // Resolve profile ID from user ID
+            int utilisateurId = humeur.getProfilApprentissageId();
+            int realProfilId = getOrCreateProfilId(connection, utilisateurId);
+            humeur.setProfilApprentissageId(realProfilId);
 
-        calculateAveragesAndRisk(humeur);
-        
-        if (humeur.getCreeLe() == null) {
-            humeur.setCreeLe(LocalDateTime.now());
-        }
+            // PREVENT DUPLICATE
+            if (getTodayMood(connection, realProfilId) != null) {
+                throw new Exception("L'humeur a déjà été enregistrée pour aujourd'hui.");
+            }
 
-        String sql = "INSERT INTO humeur (valeur_humeur, facteur_principal, tendance, moyenne7j, moyenne30j, niveau_risque, cree_le, profil_apprentissage_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement pst = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pst.setInt(1, humeur.getValeurHumeur());
-            pst.setString(2, humeur.getFacteurPrincipal());
-            pst.setString(3, humeur.getTendance());
-            pst.setInt(4, humeur.getMoyenne7j());
-            pst.setInt(5, humeur.getMoyenne30j());
-            pst.setString(6, humeur.getNiveauRisque());
-            pst.setTimestamp(7, Timestamp.valueOf(humeur.getCreeLe()));
-            pst.setInt(8, humeur.getProfilApprentissageId());
+            // Calculate stats before insert
+            calculateAveragesAndRisk(connection, humeur);
 
-            pst.executeUpdate();
+            String sql = "INSERT INTO humeur (valeur_humeur, facteur_principal, tendance, moyenne7j, moyenne30j, niveau_risque, cree_le, profil_apprentissage_id) " +
+                         "VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)";
             
-            try (ResultSet generatedKeys = pst.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    humeur.setId(generatedKeys.getInt(1));
+            try (PreparedStatement pst = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                pst.setInt(1, humeur.getValeurHumeur());
+                pst.setString(2, humeur.getFacteurPrincipal());
+                pst.setString(3, humeur.getTendance());
+                pst.setInt(4, humeur.getMoyenne7j());
+                pst.setInt(5, humeur.getMoyenne30j());
+                pst.setString(6, humeur.getNiveauRisque());
+                pst.setInt(7, realProfilId);
+
+                int affectedRows = pst.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new SQLException("Échec de l'insertion : aucune ligne affectée.");
+                }
+
+                try (ResultSet generatedKeys = pst.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        humeur.setId(generatedKeys.getInt(1));
+                    }
                 }
             }
         } catch (SQLException e) {
-            throw new Exception("Error during insertion in database: " + e.getMessage(), e);
+            e.printStackTrace(); // Log to console for the developer
+            throw new Exception("Erreur base de données : " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Helper to resolve profile using an existing connection.
+     */
+    public int getOrCreateProfilId(Connection conn, int utilisateurId) throws SQLException {
+        String selectSql = "SELECT id FROM profil_apprentissage WHERE utilisateur_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(selectSql)) {
+            ps.setInt(1, utilisateurId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("id");
+            }
+        }
+
+        String insertSql = "INSERT INTO profil_apprentissage (utilisateur_id) VALUES (?)";
+        try (PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, utilisateurId);
+            ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        }
+        throw new SQLException("Profil non trouvé.");
+    }
+
+    /**
+     * Overload for other methods if needed.
+     */
+    public int getOrCreateProfilId(int utilisateurId) throws SQLException {
+        try (Connection conn = MyConnection.getInstance()) {
+            return getOrCreateProfilId(conn, utilisateurId);
         }
     }
 
     public void update(Humeur humeur) throws Exception {
+        // Resolve profile ID from user ID (humeur.profilApprentissageId is currently utilisateur_id)
+        int utilisateurId = humeur.getProfilApprentissageId();
+        int realProfilId = getOrCreateProfilId(utilisateurId);
+        humeur.setProfilApprentissageId(realProfilId);
+
         calculateAveragesAndRisk(humeur);
 
         String sql = "UPDATE humeur SET valeur_humeur=?, facteur_principal=?, tendance=?, moyenne7j=?, moyenne30j=?, niveau_risque=? WHERE id=? AND profil_apprentissage_id=?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, humeur.getValeurHumeur());
             pst.setString(2, humeur.getFacteurPrincipal());
             pst.setString(3, humeur.getTendance());
@@ -95,51 +140,48 @@ public class HumeurService {
         }
     }
 
-    // ── Alias methods called by HumeurController ──────────────────────────
-
-    /** Called by HumeurController#ajouterHumeur(). Delegates to {@link #ajouter(Humeur)}. */
     public void ajouterHumeur(Humeur humeur) throws Exception {
         ajouter(humeur);
     }
 
-    /**
-     * Called by HumeurController#updateHumeur().
-     * Sets the id on the supplied humeur then delegates to {@link #update(Humeur)}.
-     */
     public void updateHumeur(int id, Humeur humeur) throws Exception {
         humeur.setId(id);
         update(humeur);
     }
 
-    /**
-     * Called by HumeurController#loadChart().
-     * Returns the mood entries for the last {@code days} days, ordered ascending.
-     * Delegates to {@link #getLastNDays(int, int)}.
-     */
     public List<Humeur> getMoodTrend(int profilId, int days) {
         return getLastNDays(profilId, days);
     }
 
     public Humeur getTodayMood(int profilId) {
-        String sql = "SELECT * FROM humeur WHERE profil_apprentissage_id = ? AND DATE(cree_le) = CURDATE() LIMIT 1";
-   try (PreparedStatement pst = connection.prepareStatement(sql)) {
-        pst.setInt(1, profilId);
-
-        try (ResultSet rs = pst.executeQuery()) {
-            if (rs.next()) {
-                return extractHumeurFromResultSet(rs);
-            }
+        try (Connection conn = MyConnection.getInstance()) {
+            return getTodayMood(conn, profilId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
     }
+
+    public Humeur getTodayMood(Connection connection, int profilId) {
+        String sql = "SELECT * FROM humeur WHERE profil_apprentissage_id = ? AND DATE(cree_le) = CURDATE() LIMIT 1";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, profilId);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return extractHumeurFromResultSet(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     public List<Humeur> getLastNDays(int profilId, int days) {
         List<Humeur> moods = new ArrayList<>();
         String sql = "SELECT * FROM humeur WHERE profil_apprentissage_id = ? AND DATE(cree_le) >= DATE_SUB(CURDATE(), INTERVAL ? DAY) ORDER BY cree_le ASC";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, profilId);
             pst.setInt(2, days);
             try (ResultSet rs = pst.executeQuery()) {
@@ -154,6 +196,15 @@ public class HumeurService {
     }
 
     public int getAverageMood(int profilId, int days) {
+        try (Connection conn = MyConnection.getInstance()) {
+            return getAverageMood(conn, profilId, days);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    public int getAverageMood(Connection connection, int profilId, int days) {
         String sql = "SELECT AVG(valeur_humeur) as avg_mood FROM humeur WHERE profil_apprentissage_id = ? AND DATE(cree_le) >= DATE_SUB(CURDATE(), INTERVAL ? DAY)";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, profilId);
@@ -175,7 +226,8 @@ public class HumeurService {
         int longestStreak = 0;
         int currentStreak = 0;
         
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+        try (Connection connection = MyConnection.getInstance();
+             PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, profilId);
             try (ResultSet rs = pst.executeQuery()) {
                 LocalDate previousDate = null;
@@ -184,18 +236,15 @@ public class HumeurService {
                     LocalDate currentDate = rs.getDate("log_date").toLocalDate();
                     
                     if (previousDate == null) {
-                        // First record
                         currentStreak = 1;
                         longestStreak = 1;
                     } else {
-                        // Check if it's strictly one day before the previous date we processed
                         if (currentDate.plusDays(1).equals(previousDate)) {
                             currentStreak++;
                             if (currentStreak > longestStreak) {
                                 longestStreak = currentStreak;
                             }
                         } else if (!currentDate.equals(previousDate)) {
-                            // If gap found and it's not the same day, reset streak
                             currentStreak = 1;
                         }
                     }
@@ -209,8 +258,16 @@ public class HumeurService {
     }
 
     private void calculateAveragesAndRisk(Humeur humeur) {
-        int avg7 = getAverageMood(humeur.getProfilApprentissageId(), 7);
-        int avg30 = getAverageMood(humeur.getProfilApprentissageId(), 30);
+        try (Connection conn = MyConnection.getInstance()) {
+            calculateAveragesAndRisk(conn, humeur);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void calculateAveragesAndRisk(Connection connection, Humeur humeur) {
+        int avg7 = getAverageMood(connection, humeur.getProfilApprentissageId(), 7);
+        int avg30 = getAverageMood(connection, humeur.getProfilApprentissageId(), 30);
         
         humeur.setMoyenne7j(avg7);
         humeur.setMoyenne30j(avg30);
