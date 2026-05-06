@@ -13,37 +13,87 @@
         </VBox>
     </HBox>
 
-    <VBox styleClass="card" spacing="12">
-        <CheckBox fx:id="chkDarkMode" text="Activer le mode sombre global" onAction="#handlePreviewChange"/>
-        <CheckBox fx:id="chkDyslexic" text="Activer le mode dyslexie global" onAction="#handlePreviewChange"/>
+    <VBox styleClass="card" spacing="25" VBox.vgrow="ALWAYS">
+        <padding><Insets top="30" right="40" bottom="30" left="40"/></padding>
 
-        <HBox spacing="12" alignment="CENTER_LEFT">
-            <Label text="Taille globale du texte"/>
-            <Slider fx:id="sliderUiScale" min="0.9" max="1.5" value="1.0" blockIncrement="0.05"
-                    prefWidth="250" onMouseReleased="#handlePreviewChange"/>
-            <Label fx:id="lblScaleValue" text="100%"/>
-        </HBox>
+        <VBox spacing="20">
+            <!-- ── Mode Sombre ── -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="🌙" style="-fx-font-size: 20px;"/>
+                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                    <Label text="Mode Sombre" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 14px;"/>
+                    <Label text="Optimise le confort visuel en environnement sombre" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                </VBox>
+                <CheckBox fx:id="chkDarkMode" onAction="#handlePreviewChange" style="-fx-cursor: hand;"/>
+            </HBox>
 
-        <HBox spacing="12" alignment="CENTER_LEFT">
-            <Label text="Espacement des lettres"/>
-            <Slider fx:id="sliderLetterSpacing" min="0.0" max="3.0" value="0.0" blockIncrement="0.1"
-                    prefWidth="250" onMouseReleased="#handlePreviewChange"/>
-            <Label fx:id="lblSpacingValue" text="0.0"/>
-        </HBox>
+            <Separator/>
 
-        <HBox spacing="12" alignment="CENTER_LEFT">
-            <Label text="Fond de lecture"/>
-            <ComboBox fx:id="comboReadingBg" prefWidth="180" onAction="#handlePreviewChange"/>
-        </HBox>
+            <!-- ── Mode Dyslexie ── -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="🅰️" style="-fx-font-size: 20px;"/>
+                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                    <Label text="Mode Dyslexie" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 14px;"/>
+                    <Label text="Utilise une police adaptée pour faciliter la lecture" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                </VBox>
+                <CheckBox fx:id="chkDyslexic" onAction="#handlePreviewChange" style="-fx-cursor: hand;"/>
+            </HBox>
 
-        <VBox fx:id="previewBox" spacing="6">
-            <Label text="Aperçu" style="-fx-font-weight:bold;"/>
+            <Separator/>
+
+            <!-- ── Taille du texte ── -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="🔍" style="-fx-font-size: 20px;"/>
+                <VBox spacing="2" prefWidth="200">
+                    <Label text="Taille du texte" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 14px;"/>
+                    <Label text="Agrandit l'ensemble de l'interface" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                </VBox>
+                <Slider fx:id="sliderUiScale" min="0.9" max="1.5" value="1.0" blockIncrement="0.05"
+                        HBox.hgrow="ALWAYS" onMouseReleased="#handlePreviewChange" style="-fx-cursor: hand;"/>
+                <Label fx:id="lblScaleValue" text="100%" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-min-width: 45;"/>
+            </HBox>
+
+            <Separator/>
+
+            <!-- ── Espacement ── -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="↔️" style="-fx-font-size: 20px;"/>
+                <VBox spacing="2" prefWidth="200">
+                    <Label text="Espacement des lettres" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 14px;"/>
+                    <Label text="Augmente la clarté des mots" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                </VBox>
+                <Slider fx:id="sliderLetterSpacing" min="0.0" max="3.0" value="0.0" blockIncrement="0.1"
+                        HBox.hgrow="ALWAYS" onMouseReleased="#handlePreviewChange" style="-fx-cursor: hand;"/>
+                <Label fx:id="lblSpacingValue" text="0.0" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-min-width: 45;"/>
+            </HBox>
+
+            <Separator/>
+
+            <!-- ── Fond de lecture ── -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="🎨" style="-fx-font-size: 20px;"/>
+                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                    <Label text="Thème de lecture" style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 14px;"/>
+                    <Label text="Change la couleur de fond pour réduire la fatigue" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                </VBox>
+                <ComboBox fx:id="comboReadingBg" prefWidth="180" onAction="#handlePreviewChange" style="-fx-cursor: hand;"/>
+            </HBox>
+        </VBox>
+
+        <!-- ── Preview Area ── -->
+        <VBox fx:id="previewBox" spacing="12" style="-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 12; -fx-padding: 20;">
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="👁️" style="-fx-font-size: 16px;"/>
+                <Label text="Aperçu en temps réel" style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 13px;"/>
+            </HBox>
             <Label fx:id="previewText" wrapText="true"
-                   text="Ce réglage sera appliqué à toutes les pages et conservé pour ce même utilisateur après déconnexion/reconnexion."/>
+                   text="Ce réglage sera appliqué à toutes les pages et conservé pour ce même utilisateur après déconnexion/reconnexion."
+                   style="-fx-text-fill: #64748b; -fx-font-size: 13px; -fx-line-spacing: 1.4;"/>
         </VBox>
 
         <HBox alignment="CENTER_RIGHT">
-            <Button text="💾 Enregistrer et appliquer" onAction="#handleSavePreferences" styleClass="btn-primary"/>
+            <Button text="Enregistrer les préférences" onAction="#handleSavePreferences" styleClass="btn-primary"
+                    style="-fx-padding: 12 35; -fx-font-size: 14px;"/>
         </HBox>
     </VBox>
 </VBox>

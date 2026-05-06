@@ -22,30 +22,30 @@
 
     <!-- ===== CARTES STATISTIQUES ===== -->
     <HBox spacing="15">
-        <VBox styleClass="stat-card-blue" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="5">
+        <VBox styleClass="stat-card-blue" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="5" onMouseClicked="#handleGoToPlans" style="-fx-cursor: hand;">
             <Label fx:id="lblTotalPlans" text="0" styleClass="stat-number"/>
             <Label text="Plans d'Actions" styleClass="stat-label"/>
-            <Label text="📋" style="-fx-font-size: 20px; -fx-opacity: 0.5;"/>
+            <Label text="📋" style="-fx-font-size: 36px; -fx-text-fill: #102c59;"/>
         </VBox>
-        <VBox styleClass="stat-card-green" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="5">
+        <VBox styleClass="stat-card-green" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="5" onMouseClicked="#handleGoToArticles" style="-fx-cursor: hand;">
             <Label fx:id="lblTotalArticles" text="0" styleClass="stat-number"/>
             <Label text="Articles Publiés" styleClass="stat-label"/>
-            <Label text="📝" style="-fx-font-size: 20px; -fx-opacity: 0.5;"/>
+            <Label text="📝" style="-fx-font-size: 36px; -fx-text-fill: #102c59;"/>
         </VBox>
-        <VBox styleClass="stat-card-blue" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="5">
+        <VBox styleClass="stat-card-blue" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="5" onMouseClicked="#handleGoToCategories" style="-fx-cursor: hand;">
             <Label fx:id="lblTotalCategories" text="0" styleClass="stat-number"/>
             <Label text="Catégories" styleClass="stat-label"/>
-            <Label text="📁" style="-fx-font-size: 20px; -fx-opacity: 0.5;"/>
+            <Label text="📁" style="-fx-font-size: 36px; -fx-text-fill: #102c59;"/>
         </VBox>
-        <VBox styleClass="stat-card-red" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="5">
+        <VBox styleClass="stat-card-red" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="5" onMouseClicked="#handleGoToArticles" style="-fx-cursor: hand;">
             <Label fx:id="lblRecentArticles" text="0" styleClass="stat-number"/>
             <Label text="Articles (7j)" styleClass="stat-label"/>
-            <Label text="🆕" style="-fx-font-size: 20px; -fx-opacity: 0.5;"/>
+            <Label text="🆕" style="-fx-font-size: 36px; -fx-text-fill: #102c59;"/>
         </VBox>
-        <VBox styleClass="stat-card-steel" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="5">
+        <VBox styleClass="stat-card-steel" alignment="CENTER" HBox.hgrow="ALWAYS" spacing="5" onMouseClicked="#handleGoToPlans" style="-fx-cursor: hand;">
             <Label fx:id="lblFeedbackCoverage" text="0%" styleClass="stat-number"/>
             <Label text="Plans avec feedback" styleClass="stat-label"/>
-            <Label text="💬" style="-fx-font-size: 20px; -fx-opacity: 0.5;"/>
+            <Label text="💬" style="-fx-font-size: 36px; -fx-text-fill: #102c59;"/>
         </VBox>
     </HBox>
 

@@ -12,6 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -358,28 +359,82 @@ public class ArticleListController {
     }
 
     void showArticleDetail(ReferenceArticle article) {
-        String details = String.format(
-                "📝 Article #%d\n\nTitre: %s\n\nContenu:\n%s\n\nCatégorie: %s\nStatut: %s\nCréé le: %s",
-                article.getId(), article.getTitre(),
-                article.getContenu() != null ? article.getContenu() : "",
-                article.getCategorieNom() != null ? article.getCategorieNom() : "N/A",
-                article.isPublished() ? "Publié" : "Brouillon",
-                article.getCreatedAt() != null ? article.getCreatedAt().format(DATE_FMT) : "N/A"
-        );
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Détails de l'Article");
-        alert.setHeaderText(article.getTitre());
-        alert.setContentText(details);
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Détails de l'Article");
+        dialog.setHeaderText(null);
+        dialog.getDialogPane().setStyle("-fx-background-color: white;");
 
-        // Rendre l'alerte scrollable
-        TextArea area = new TextArea(details);
-        area.setWrapText(true);
-        area.setEditable(false);
-        area.setPrefSize(600, 400);
-        alert.getDialogPane().setContent(area);
-        alert.getDialogPane().setMinWidth(650);
+        VBox content = new VBox(20);
+        content.setPadding(new Insets(25));
+        content.setPrefWidth(600);
+        content.setPrefHeight(500);
 
-        alert.showAndWait();
+        // ── Custom Header ──
+        HBox header = new HBox(15);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setStyle("-fx-padding: 0 0 15 0; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;");
+        
+        Label icon = new Label("📖");
+        icon.setStyle("-fx-font-size: 32px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
+        
+        VBox titleBox = new VBox(4);
+        Label title = new Label("Article #" + article.getId());
+        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+        Label subtitle = new Label(article.getTitre().length() > 80 ? article.getTitre().substring(0, 80) + "..." : article.getTitre());
+        subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b;");
+        titleBox.getChildren().addAll(title, subtitle);
+        
+        header.getChildren().addAll(icon, titleBox);
+
+        // ── Tags (Statut, Catégorie, Date) ──
+        HBox tagsBox = new HBox(10);
+        
+        Label lblStatut = new Label("Statut : " + (article.isPublished() ? "Publié" : "Brouillon"));
+        lblStatut.setStyle("-fx-background-color: " + (article.isPublished() ? "#f0fdf4" : "#f1f5f9") + "; -fx-text-fill: " + (article.isPublished() ? "#166534" : "#475569") + "; -fx-padding: 6 12; -fx-background-radius: 12; -fx-font-size: 12px; -fx-font-weight: bold;");
+        
+        Label lblCat = new Label("Catégorie : " + (article.getCategorieNom() != null ? article.getCategorieNom() : "Sans catégorie"));
+        lblCat.setStyle("-fx-background-color: #eff6ff; -fx-text-fill: #1d4ed8; -fx-padding: 6 12; -fx-background-radius: 12; -fx-font-size: 12px; -fx-font-weight: bold;");
+        
+        Label lblDate = new Label("📅 " + (article.getCreatedAt() != null ? article.getCreatedAt().format(DATE_FMT) : "N/A"));
+        lblDate.setStyle("-fx-background-color: #f8fafc; -fx-text-fill: #94a3b8; -fx-padding: 6 12; -fx-background-radius: 12; -fx-font-size: 12px; -fx-border-color: #e2e8f0; -fx-border-radius: 12;");
+        
+        tagsBox.getChildren().addAll(lblStatut, lblCat, lblDate);
+
+        // ── Body (Contenu Markdown) ──
+        Label descTitle = new Label("Contenu de l'article :");
+        descTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #334155; -fx-font-size: 14px;");
+        
+        ScrollPane scrollDesc = new ScrollPane();
+        scrollDesc.setFitToWidth(true);
+        scrollDesc.setStyle("-fx-background-color: transparent; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-padding: 15;");
+        
+        VBox descBox = new VBox(10);
+        descBox.setStyle("-fx-background-color: white;");
+        
+        // Rendu Markdown pour éliminer les astérisques et styliser !
+        if (article.getContenu() != null && !article.getContenu().isBlank()) {
+            edu.connection3a36.tools.MarkdownRenderer.render(article.getContenu(), descBox);
+        } else {
+            Label noDesc = new Label("Aucun contenu.");
+            noDesc.setStyle("-fx-text-fill: #94a3b8; -fx-font-style: italic;");
+            descBox.getChildren().add(noDesc);
+        }
+        scrollDesc.setContent(descBox);
+
+        content.getChildren().addAll(header, tagsBox, descTitle, scrollDesc);
+        VBox.setVgrow(scrollDesc, Priority.ALWAYS);
+        
+        dialog.getDialogPane().setContent(content);
+        
+        ButtonType btnClose = new ButtonType("Fermer la lecture", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(btnClose);
+        
+        javafx.scene.Node closeBtn = dialog.getDialogPane().lookupButton(btnClose);
+        if (closeBtn != null) {
+            closeBtn.setStyle("-fx-background-color: #475569; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 24; -fx-background-radius: 6; -fx-cursor: hand;");
+        }
+
+        dialog.showAndWait();
     }
 
     private void openForm(ReferenceArticle articleToEdit) {

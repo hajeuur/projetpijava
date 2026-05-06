@@ -128,6 +128,7 @@ public class IoTClusteringController {
         btnCluster.setDisable(true);
         btnCluster.setText("🔄 Analyse IA en cours...");
         clusterContainer.setVisible(true);
+        clusterContainer.setManaged(true);
         boxCluster1.setVisible(false); boxCluster2.setVisible(false); boxCluster3.setVisible(false);
 
         new Thread(() -> {
@@ -135,11 +136,8 @@ public class IoTClusteringController {
                 edu.connection3a36.services.GroqService groq = new edu.connection3a36.services.GroqService();
                 String prompt = "Tu es MentorAI. Voici la liste des étudiants présents: " + String.join(", ", presentsList) + ".\n"
                               + "Crée 2 ou 3 groupes de travail avec eux.\n"
-                              + "Tu DOIS formater ta réponse EXACTEMENT ligne par ligne comme ceci (remplace les noms par les étudiants présents) :\n"
-                              + "GROUPE 1: Les Analystes | Amine, Sarah - Focus sur la réflexion.\n"
-                              + "GROUPE 2: Les Créatifs | Youssef, Mariem - Focus sur le design.\n"
-                              + "N'ajoute AUCUN texte avant ou après, pas de markdown, pas de tirets.";
-                String response = groq.sendSimpleMessage(prompt, "ENSEIGNANT");
+                              + "Pour chaque groupe, définis un nom créatif, la liste de ses étudiants, son objectif pédagogique, et une action à réaliser.";
+                String response = groq.sendSimpleJsonMessage(prompt, "ENSEIGNANT", edu.connection3a36.tools.AIJsonSchemas.CLUSTERS);
                 
                 Platform.runLater(() -> {
                     parseAndDisplayClusters(response);
@@ -156,43 +154,46 @@ public class IoTClusteringController {
         }).start();
     }
 
-    private void parseAndDisplayClusters(String text) {
-        String[] lines = text.split("\n");
-        int gIdx = 1;
-        
+    private void parseAndDisplayClusters(String jsonText) {
         boxCluster1.setVisible(false); boxCluster1.setManaged(false);
         boxCluster2.setVisible(false); boxCluster2.setManaged(false);
         boxCluster3.setVisible(false); boxCluster3.setManaged(false);
         
-        for (String l : lines) {
-            if (l.toUpperCase().contains("GROUPE")) {
-                try {
-                    String[] parts = l.split(":", 2);
-                    String[] subParts = parts[1].split("\\|", 2);
-                    String title = subParts[0].trim();
-                    String desc = subParts.length > 1 ? subParts[1].trim() : "";
-                    
-                    if (title.isEmpty() && desc.isEmpty()) continue;
-                    
-                    if (gIdx == 1) {
-                        lblGroup1Title.setText("Groupe 1 : " + title); lblGroup1Desc.setText(desc);
-                        boxCluster1.setVisible(true); boxCluster1.setManaged(true);
-                    } else if (gIdx == 2) {
-                        lblGroup2Title.setText("Groupe 2 : " + title); lblGroup2Desc.setText(desc);
-                        boxCluster2.setVisible(true); boxCluster2.setManaged(true);
-                    } else if (gIdx == 3) {
-                        lblGroup3Title.setText("Groupe 3 : " + title); lblGroup3Desc.setText(desc);
-                        boxCluster3.setVisible(true); boxCluster3.setManaged(true);
+        org.json.JSONObject json = edu.connection3a36.tools.AIJsonParser.extractFirstJsonObject(jsonText);
+        if (json != null && json.has("groupes")) {
+            org.json.JSONArray groupes = json.optJSONArray("groupes");
+            if (groupes != null) {
+                for (int i = 0; i < groupes.length() && i < 3; i++) {
+                    org.json.JSONObject g = groupes.optJSONObject(i);
+                    if (g != null) {
+                        String nom = g.optString("nom", "Groupe " + (i+1));
+                        String etudiants = g.optString("etudiants", "");
+                        String obj = g.optString("objectif", "");
+                        String action = g.optString("action", "");
+                        
+                        String desc = "👥 Membres : " + etudiants;
+                        if (!obj.isEmpty()) desc += "\n🎯 Objectif : " + obj;
+                        if (!action.isEmpty()) desc += "\n🚀 Action : " + action;
+                        
+                        if (i == 0) {
+                            lblGroup1Title.setText(nom); lblGroup1Desc.setText(desc);
+                            boxCluster1.setVisible(true); boxCluster1.setManaged(true);
+                        } else if (i == 1) {
+                            lblGroup2Title.setText(nom); lblGroup2Desc.setText(desc);
+                            boxCluster2.setVisible(true); boxCluster2.setManaged(true);
+                        } else if (i == 2) {
+                            lblGroup3Title.setText(nom); lblGroup3Desc.setText(desc);
+                            boxCluster3.setVisible(true); boxCluster3.setManaged(true);
+                        }
                     }
-                    gIdx++;
-                } catch (Exception ignored) {}
+                }
+                return;
             }
         }
-        if (gIdx == 1) {
-            // Fallback si l'IA n'a pas respecté le format
-            lblGroup1Title.setText("Groupes Suggérés");
-            lblGroup1Desc.setText(text.length() > 200 ? text.substring(0, 200) + "..." : text);
-            boxCluster1.setVisible(true); boxCluster1.setManaged(true);
-        }
+        
+        // Fallback si l'IA n'a pas respecté le JSON
+        lblGroup1Title.setText("Groupes Suggérés");
+        lblGroup1Desc.setText(jsonText.length() > 200 ? jsonText.substring(0, 200) + "..." : jsonText);
+        boxCluster1.setVisible(true); boxCluster1.setManaged(true);
     }
 }

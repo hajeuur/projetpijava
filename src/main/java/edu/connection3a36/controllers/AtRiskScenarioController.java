@@ -8,8 +8,6 @@ import edu.connection3a36.services.MockDataService;
 import edu.connection3a36.services.NotificationService;
 import edu.connection3a36.services.PlanActionsService;
 import edu.connection3a36.tools.AlertUtil;
-import edu.connection3a36.tools.AIJsonParser;
-import edu.connection3a36.tools.AIJsonSchemas;
 import edu.connection3a36.tools.MarkdownRenderer;
 import edu.connection3a36.tools.SessionManager;
 import javafx.application.Platform;
@@ -91,14 +89,13 @@ public class AtRiskScenarioController {
                     + selectedStudentKey + "\n"
                     + MockDataService.getEtudiants3A36Context()
                     + "\n\nContrainte scénario: Étudiant à risque → Analyse IA → Plan personnalisé → Suivi."
-                    + "\nFournis :\n1. Diagnostic des causes probables\n2. Risques identifiés\n3. Recommandations pédagogiques immédiates\n4. Plan d'action suggéré (décision + description)\n5. KPIs de suivi hebdomadaire\nFormat Markdown.";
-                String raw = groq.sendSimpleJsonMessage(prompt, "ADMIN", AIJsonSchemas.ANALYSIS);
-                org.json.JSONObject json = AIJsonParser.extractFirstJsonObject(raw);
-                lastAiAnalysis = json != null
-                        ? "## Resume executif\n" + json.optString("resume_executif", "")
-                        + "\n\n## Points forts\n" + json.optString("points_forts", "")
-                        + "\n\n## Axes d'amelioration\n" + json.optString("axes_amelioration", "")
-                        : raw;
+                    + "\nFournis :\n1. Diagnostic des causes probables\n2. Risques identifiés\n3. Recommandations pédagogiques immédiates\n4. Plan d'action suggéré (décision + description)\n5. KPIs de suivi hebdomadaire\nFormat : Markdown structuré avec des titres, sous-titres, listes à puces et texte enrichi. Ne renvoie AUCUN format JSON, uniquement du texte Markdown clair et lisible.";
+                
+                String raw = groq.sendSimpleMessage(prompt, "ADMIN");
+                
+                // On s'assure d'utiliser le contenu brut Markdown retourné
+                lastAiAnalysis = raw.trim();
+                
                 Platform.runLater(() -> {
                     boxAnalysis.getChildren().clear();
                     MarkdownRenderer.render(lastAiAnalysis, boxAnalysis);

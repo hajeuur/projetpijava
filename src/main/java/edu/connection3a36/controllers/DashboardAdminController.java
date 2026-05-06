@@ -132,4 +132,25 @@ public class DashboardAdminController {
             System.err.println("Erreur load feedbacks: " + e.getMessage());
         }
     }
+
+    @FXML
+    void handleGoToPlans() {
+        if (MainController.getInstance() != null) {
+            MainController.getInstance().showPlanActions();
+        }
+    }
+
+    @FXML
+    void handleGoToArticles() {
+        if (MainController.getInstance() != null) {
+            MainController.getInstance().showArticles();
+        }
+    }
+
+    @FXML
+    void handleGoToCategories() {
+        if (MainController.getInstance() != null) {
+            MainController.getInstance().showCategories();
+        }
+    }
 }

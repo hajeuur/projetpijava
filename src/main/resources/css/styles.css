@@ -665,8 +665,10 @@
 .chart { -fx-background-color: transparent; }
 .chart-plot-background { -fx-background-color: #f8fbfd; -fx-background-radius: 8; }
 .chart-legend { -fx-background-color: transparent; }
-.axis { -fx-tick-label-font-size: 11px; }
+.axis { -fx-tick-label-font-size: 11px; -fx-tick-label-fill: #102c59; }
 .axis-label { -fx-font-size: 11px; -fx-text-fill: #7a8fa5; }
+.chart-legend-item { -fx-text-fill: #102c59; -fx-font-size: 12px; }
+.axis-tick-mark-text { -fx-fill: #102c59; -fx-font-size: 11px; }
 
 /* Couleurs PieChart — charte */
 .default-color0.chart-pie { -fx-pie-color: #102c59; }
@@ -805,5 +807,13 @@
 /* ============================================================
    TABLE HEADERS helpers
    ============================================================ */
-.risk-table-header     { -fx-font-weight: bold; -fx-text-fill: #d52e28; -fx-font-size: 13px; }
-.feedback-table-header { -fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px; }
+.risk-table-header     { -fx-font-weight: bold; -fx-text-fill: #d52e28; -fx-font-size: 14px; }
+.feedback-table-header { -fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 14px; }
+
+/* Dashboard Tables Specifics */
+.risk-table .column-header-background { -fx-background-color: #fff5f5; }
+.feedback-table .column-header-background { -fx-background-color: #f0f7ff; }
+
+.table-view.risk-table .table-row-cell:hover { -fx-background-color: #fff1f2; }
+.table-view.feedback-table .table-row-cell:hover { -fx-background-color: #f1f7ff; }
+
