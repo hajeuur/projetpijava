@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<div class="h-captcha"
+     data-sitekey="bf566c22-68d4-43b8-9a42-02347c9e4200"
+     data-callback="onCaptchaSuccess"
+     data-expired-callback="onCaptchaExpired"
+     data-theme="light"
+     data-size="normal">
+</div>
+
+<script>
+    function onCaptchaSuccess(token) {
+        console.log("hCaptcha success!");
+        if (window.javabridge) {
+            window.javabridge.captchaVerified(token);
+        }
+    }
+
+    function onCaptchaExpired() {
+        console.log("hCaptcha expired!");
+        if (window.javabridge) {
+            window.javabridge.captchaExpired();
+        }
+    }
+</script>
+</body>
+</html>

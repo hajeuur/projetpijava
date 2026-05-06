@@ -96,6 +96,10 @@
                     <!-- Preferences -->
                     <Button fx:id="btnPreferences" text="Préférences"
                             onAction="#showPreferences" styleClass="header-nav-btn"/>
+
+                    <Button fx:id="btnMonProfil" text="Mon Profil"
+                            onAction="#showMonProfil" styleClass="header-nav-btn"/>
+
                     
                     <MenuButton fx:id="menuPlus" text="➕ Plus" styleClass="header-nav-btn">
                         <items>
@@ -180,8 +184,8 @@
                 <VBox fx:id="boxGestions" spacing="2">
                     
                     <Label fx:id="lblAdminSection" text="ADMINISTRATION" styleClass="sidebar-section"/>
-                    <Button fx:id="btnUtilisateurs" text="👥 Gestion des Users"
-                            onAction="#showUtilisateurs" styleClass="sidebar-btn" maxWidth="Infinity"/>
+                    <Button fx:id="btnGestionUtilisateurs" text="👥 Gestion Utilisateurs"
+                            onAction="#showGestionUtilisateurs" styleClass="sidebar-btn" maxWidth="Infinity"/>
                     
                     <Separator fx:id="sepPedago" style="-fx-padding: 5 0;"/>
                     <Label fx:id="lblPedagoSection" text="GESTION PÉDAGOGIQUE" styleClass="sidebar-section"/>

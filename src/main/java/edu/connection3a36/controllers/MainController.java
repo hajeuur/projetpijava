@@ -67,7 +67,7 @@ public class MainController {
     @FXML private VBox boxGestions;
 
     // ── Boutons Sidebar (BACK) ────────────────────────────────────────────────
-    @FXML private Button btnUtilisateurs;
+    @FXML private Button btnGestionUtilisateurs;
     @FXML private Button btnCategories;
     @FXML private Button btnBackParcours;
     @FXML private Button btnBackProjets;
@@ -100,6 +100,7 @@ public class MainController {
     @FXML private Button  btnHeaderCarnet;
     @FXML private Button  btnMesFeedbacks;
     @FXML private Button  btnObjectifs;
+    @FXML private Button  btnMonProfil;
     @FXML private MenuButton menuCarriere;
     @FXML private MenuButton menuIA;
     @FXML private HBox newsBar;
@@ -270,7 +271,7 @@ public class MainController {
         hide(btnPlanActions); hide(btnArticles);
         hide(btnAIPedagogique); hide(btnAIDecisionnel);
         hide(btnParcours); hide(btnProjets); hide(menuCarriere); hide(menuIA); hide(newsBar); hide(btnGamesHub);
-        hide(btnSwitchBack); hide(btnNotifications);
+        hide(btnSwitchBack); hide(btnNotifications); hide(btnMonProfil);
 
         if (isSuperAdmin()) {
             // ADMINM front : Dashboard Stratégique + Plans + Articles + IA Décisionnelle + switcher back
@@ -280,6 +281,7 @@ public class MainController {
             show(btnAIDecisionnel);
             show(btnSwitchBack);
             show(btnNotifications);
+            show(btnMonProfil);
             hide(btnGamesHub); // Cacher Hub Intervention pour ADMINM
             showDashboardAdmin();
         } else if (isEnseignant()) {
@@ -289,6 +291,7 @@ public class MainController {
             show(btnAIPedagogique);
             show(menuIA);
             show(newsBar);
+            show(btnMonProfil);
             hide(btnGamesHub); 
             showDashboardEnseignant();
         } else if (isEtudiant()) {
@@ -297,6 +300,7 @@ public class MainController {
             show(menuIA);
             show(newsBar);
             show(menuPlus);
+            show(btnMonProfil);
             hide(btnGamesHub);
             showParcours(); // Vue par défaut
         }
@@ -491,10 +495,16 @@ public class MainController {
     }
 
     @FXML
-    void showUtilisateurs() {
+    void showGestionUtilisateurs() {
         if (!acl.canAccess(AccessControlService.Module.UTILISATEURS)) return;
-        loadView("/fxml/UtilisateurList.fxml");
-        setActiveBtn(btnUtilisateurs);
+        loadView("/com/esprit/views/BackOffice.fxml");
+        setActiveBtn(btnGestionUtilisateurs);
+    }
+
+    @FXML
+    void showMonProfil() {
+        loadView("/com/esprit/views/ProfilUser.fxml");
+        setActiveBtn(btnMonProfil);
     }
 
     @FXML
@@ -740,9 +750,9 @@ public class MainController {
             btnDashboardEnseignant, btnDashboardAdmin, btnPlanActions, btnArticles,
             btnAIPedagogique, btnAIDecisionnel, btnParcours, btnProjets,
             btnBackParcours, btnBackProjets, btnBackFeedbacks, btnBackObjectifs,
-            btnDashboardObjectifs, btnUtilisateurs, btnCategories, btnIoT,
+            btnDashboardObjectifs, btnGestionUtilisateurs, btnCategories, btnIoT,
             btnAtRisk, btnPlanActionsBack, btnArticlesBack, btnHumeur,
-            btnPlanning, btnCarnet, btnGamesHub
+            btnPlanning, btnCarnet, btnGamesHub, btnMonProfil
         };
 
         for (Button b : allBtns) {

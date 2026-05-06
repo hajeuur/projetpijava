@@ -16,7 +16,7 @@ public class MainFx extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/views/Login.fxml"));
         Parent root = loader.load();
         Scene sc = new Scene(root, 1200, 750);
         sc.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());

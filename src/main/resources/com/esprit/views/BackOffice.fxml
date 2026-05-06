@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.esprit.controllers.BackOfficeController"
+            prefHeight="720.0" prefWidth="1400.0">
+
+    <left>
+        <VBox spacing="0" style="-fx-background-color: #1a2a4a; -fx-min-width: 200;">
+            <Label text="MentorAI"
+                   style="-fx-text-fill: white; -fx-font-size: 20; -fx-font-weight: bold; -fx-padding: 30 20 20 20;"/>
+            <Button text="Gestion Utilisateurs" maxWidth="Infinity"
+                    style="-fx-background-color: #2a3a5a; -fx-text-fill: white; -fx-padding: 15 20; -fx-alignment: CENTER-LEFT;"/>
+            <VBox VBox.vgrow="ALWAYS"/>
+            <Button text="Déconnexion" maxWidth="Infinity" onAction="#handleLogout"
+                    style="-fx-background-color: transparent; -fx-text-fill: #ff6b6b; -fx-padding: 15 20; -fx-alignment: CENTER-LEFT;"/>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox spacing="12" style="-fx-padding: 20;">
+
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="Gestion des utilisateurs"
+                       style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #1a2a4a;"/>
+                <HBox HBox.hgrow="ALWAYS"/>
+                <Button text="🤖 Analyser tous (IA)" onAction="#handleAnalyseAllAI"
+                        style="-fx-background-color: #e67e22; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 14; -fx-font-weight: bold;"/>
+                <Button text="⟳ Recalculer tous" onAction="#handleRecalculAll"
+                        style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 14;"/>
+                <Button text="Exporter Excel" onAction="#handleExportExcel"
+                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 14;"/>
+                <Button text="Exporter PDF" onAction="#handleExportPDF"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 14;"/>
+                <Button text="+ Ajouter" onAction="#handleAjouter"
+                        style="-fx-background-color: #1a2a4a; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 14;"/>
+            </HBox>
+
+            <!-- Cartes statistiques -->
+            <HBox spacing="12">
+                <VBox alignment="CENTER" spacing="5" HBox.hgrow="ALWAYS"
+                      style="-fx-background-color: #e8f5e9; -fx-background-radius: 10; -fx-padding: 12;">
+                    <Label text="Risque Faible" style="-fx-font-size: 11; -fx-text-fill: #555;"/>
+                    <Label fx:id="lblLow" text="0" style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                </VBox>
+                <VBox alignment="CENTER" spacing="5" HBox.hgrow="ALWAYS"
+                      style="-fx-background-color: #fff8e1; -fx-background-radius: 10; -fx-padding: 12;">
+                    <Label text="Risque Moyen" style="-fx-font-size: 11; -fx-text-fill: #555;"/>
+                    <Label fx:id="lblMedium" text="0" style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #f39c12;"/>
+                </VBox>
+                <VBox alignment="CENTER" spacing="5" HBox.hgrow="ALWAYS"
+                      style="-fx-background-color: #ffebee; -fx-background-radius: 10; -fx-padding: 12;">
+                    <Label text="Risque Élevé" style="-fx-font-size: 11; -fx-text-fill: #555;"/>
+                    <Label fx:id="lblHigh" text="0" style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
+                </VBox>
+                <VBox alignment="CENTER" spacing="5" HBox.hgrow="ALWAYS"
+                      style="-fx-background-color: #fff3e0; -fx-background-radius: 10; -fx-padding: 12;">
+                    <Label text="Doublons IP" style="-fx-font-size: 11; -fx-text-fill: #555;"/>
+                    <Label fx:id="lblDuplicates" text="0" style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #e67e22;"/>
+                </VBox>
+            </HBox>
+
+            <!-- Status IA -->
+            <Label fx:id="aiStatusLabel" text="🤖 Cliquez sur '🤖 IA' pour analyser un utilisateur avec Mistral"
+                   style="-fx-font-size: 12; -fx-text-fill: #e67e22; -fx-font-style: italic;"/>
+
+            <!-- Recherche + tri -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="searchField" promptText="Rechercher..." prefWidth="280"
+                           onKeyReleased="#handleSearch"
+                           style="-fx-border-color: #cccccc; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8;"/>
+                <Label text="Trier :" style="-fx-font-size: 12; -fx-text-fill: #555;"/>
+                <ComboBox fx:id="sortCombo" onAction="#handleSort" prefWidth="180"
+                          style="-fx-border-color: #cccccc; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+                <Button text="Réinitialiser" onAction="#handleReset"
+                        style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 12;"/>
+            </HBox>
+
+            <!-- TableView -->
+            <TableView fx:id="tableView" VBox.vgrow="ALWAYS" fixedCellSize="80">
+                <columns>
+                    <TableColumn fx:id="colId"        text="#"           prefWidth="40"/>
+                    <TableColumn fx:id="colNom"       text="Nom"         prefWidth="85"/>
+                    <TableColumn fx:id="colPrenom"    text="Prénom"      prefWidth="85"/>
+                    <TableColumn fx:id="colEmail"     text="Email"       prefWidth="150"/>
+                    <TableColumn fx:id="colRole"      text="Rôle"        prefWidth="75"/>
+                    <TableColumn fx:id="colStatus"    text="Status"      prefWidth="70"/>
+                    <TableColumn fx:id="colScore"     text="Score"       prefWidth="105"/>
+                    <TableColumn fx:id="colRisk"      text="Risque"      prefWidth="75"/>
+                    <TableColumn fx:id="colDuplicate" text="Doublon"     prefWidth="70"/>
+                    <TableColumn fx:id="colAiVerdict" text="🤖 Verdict IA" prefWidth="200"/>
+                    <TableColumn fx:id="colActions"   text="Actions"     prefWidth="230"/>
+                </columns>
+            </TableView>
+
+            <Label fx:id="countLabel" style="-fx-font-size: 11; -fx-text-fill: #888;"/>
+
+        </VBox>
+    </center>
+
+</BorderPane>
