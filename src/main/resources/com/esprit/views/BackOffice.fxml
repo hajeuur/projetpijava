@@ -8,17 +8,7 @@
             fx:controller="com.esprit.controllers.BackOfficeController"
             prefHeight="720.0" prefWidth="1400.0">
 
-    <left>
-        <VBox spacing="0" style="-fx-background-color: #1a2a4a; -fx-min-width: 200;">
-            <Label text="MentorAI"
-                   style="-fx-text-fill: white; -fx-font-size: 20; -fx-font-weight: bold; -fx-padding: 30 20 20 20;"/>
-            <Button text="Gestion Utilisateurs" maxWidth="Infinity"
-                    style="-fx-background-color: #2a3a5a; -fx-text-fill: white; -fx-padding: 15 20; -fx-alignment: CENTER-LEFT;"/>
-            <VBox VBox.vgrow="ALWAYS"/>
-            <Button text="Déconnexion" maxWidth="Infinity" onAction="#handleLogout"
-                    style="-fx-background-color: transparent; -fx-text-fill: #ff6b6b; -fx-padding: 15 20; -fx-alignment: CENTER-LEFT;"/>
-        </VBox>
-    </left>
+
 
     <center>
         <VBox spacing="12" style="-fx-padding: 20;">

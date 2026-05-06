@@ -129,7 +129,7 @@ public class MainController {
         Utilisateur user = SessionManager.getCurrentUser();
         if (user == null) return;
 
-        String displayName = user.getPrenom() + " (" + user.getRole() + ")";
+        String displayName = user.getPrenom() + " " + user.getNom();
         if (lblUser != null)     lblUser.setText(displayName);
         if (lblUserBack != null) lblUserBack.setText(displayName);
 
@@ -185,7 +185,7 @@ public class MainController {
                 for (javafx.scene.Node n : boxGestions.getChildren()) {
                     if (n instanceof Button b) {
                         if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks || b == btnHumeur || b == btnPlanning || b == btnCarnet
-                                || b == btnDashboardObjectifs) show(b);
+                                || b == btnDashboardObjectifs || b == btnGestionUtilisateurs) show(b);
                         else hide(b);
                     } else {
                         hide(n); // On cache labels et séparateurs pour un look épuré
@@ -334,7 +334,7 @@ public class MainController {
                 for (javafx.scene.Node n : boxGestions.getChildren()) {
                     if (n instanceof Button b) {
                         if (b == btnBackParcours || b == btnBackProjets || b == btnBackFeedbacks || b == btnHumeur || b == btnPlanning || b == btnCarnet
-                                || b == btnDashboardObjectifs) show(b);
+                                || b == btnDashboardObjectifs || b == btnGestionUtilisateurs) show(b);
                         else hide(b);
                     } else hide(n);
                 }
@@ -496,14 +496,33 @@ public class MainController {
 
     @FXML
     void showGestionUtilisateurs() {
-        if (!acl.canAccess(AccessControlService.Module.UTILISATEURS)) return;
         loadView("/com/esprit/views/BackOffice.fxml");
         setActiveBtn(btnGestionUtilisateurs);
     }
 
     @FXML
     void showMonProfil() {
-        loadView("/com/esprit/views/ProfilUser.fxml");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/esprit/views/FrontOffice.fxml"));
+            Parent view = loader.load();
+            com.esprit.controllers.FrontOfficeController ctrl = loader.getController();
+
+            edu.connection3a36.entities.Utilisateur eduUser = SessionManager.getCurrentUser();
+            if (eduUser != null) {
+                com.esprit.models.Utilisateur u = new com.esprit.models.Utilisateur();
+                u.setId(eduUser.getId());
+                u.setNom(eduUser.getNom());
+                u.setPrenom(eduUser.getPrenom());
+                u.setEmail(eduUser.getEmail());
+                u.setRole(eduUser.getRole());
+                u.setStatus("actif"); // Par défaut
+                ctrl.setUtilisateur(u);
+            }
+            contentArea.getChildren().setAll(view);
+            applyGlobalPreferences();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         setActiveBtn(btnMonProfil);
     }
 
@@ -667,7 +686,7 @@ public class MainController {
         try {
             SessionManager.logout();
             Stage stage = (Stage) contentArea.getScene().getWindow();
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/Login.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/com/esprit/views/Login.fxml"));
             Scene scene = new Scene(root, 1200, 750);
             scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
             stage.setScene(scene);
