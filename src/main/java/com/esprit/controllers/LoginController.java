@@ -205,18 +205,21 @@ public class LoginController {
             sessionUser.setMdp(u.getMdp());
             sessionUser.setStatus(u.getStatus());
 
-            if (role.equals("admin")) {
+            if (role.equalsIgnoreCase("admin")) {
                 sessionUser.setRole("ADMIN");
                 edu.connection3a36.tools.SessionManager.setFrontMode(false);
-            } else if (role.equals("adminm")) {
+            } else if (role.equalsIgnoreCase("adminm")) {
                 sessionUser.setRole("ADMINM");
                 edu.connection3a36.tools.SessionManager.setFrontMode(false);
-            } else if (role.equals("enseignant")) {
+            } else if (role.equalsIgnoreCase("enseignant")) {
                 sessionUser.setRole("ENSEIGNANT");
                 edu.connection3a36.tools.SessionManager.setFrontMode(true);
-            } else {
+            } else if (role.equalsIgnoreCase("etudiant")) {
                 sessionUser.setRole("ETUDIANT");
                 edu.connection3a36.tools.SessionManager.setFrontMode(true);
+            } else {
+                sessionUser.setRole(role.toUpperCase());
+                edu.connection3a36.tools.SessionManager.setFrontMode(!role.toUpperCase().contains("ADMIN"));
             }
             edu.connection3a36.tools.SessionManager.setCurrentUser(sessionUser);
 
