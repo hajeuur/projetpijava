@@ -2,8 +2,8 @@ package edu.connection3a36.services;
 
 import edu.connection3a36.interfaces.IService;
 import edu.connection3a36.tools.MyConnection;
-import edu.mentorai.entities.Etat;
-import edu.mentorai.entities.Tache;
+import edu.connection3a36.entities.Etat;
+import edu.connection3a36.entities.Tache;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class TacheService implements IService<Tache> {
         pst.setInt(1, t.getOrdre());
         pst.setString(2, t.getTitre());
         pst.setString(3, t.getDescription() != null ? t.getDescription() : "");
-        pst.setString(4, t.getEtat() != null ? t.getEtat().getValue() : Etat.Abandonner.getValue());
+        pst.setString(4, t.getEtat() != null ? t.getEtat().getValue() : Etat.encours.getValue());
         pst.setInt(5, t.getProgrammeId());
         pst.executeUpdate();
         ResultSet rs = pst.getGeneratedKeys();
@@ -41,7 +41,7 @@ public class TacheService implements IService<Tache> {
         pst.setInt(1, t.getOrdre());
         pst.setString(2, t.getTitre());
         pst.setString(3, t.getDescription() != null ? t.getDescription() : "");
-        pst.setString(4, t.getEtat() != null ? t.getEtat().getValue() : Etat.Abandonner.getValue());
+        pst.setString(4, t.getEtat() != null ? t.getEtat().getValue() : Etat.encours.getValue());
         pst.setInt(5, id);
         pst.executeUpdate();
     }
@@ -81,7 +81,7 @@ public class TacheService implements IService<Tache> {
      * Valide une tâche avant insertion/modification.
      * @return liste des erreurs (vide = valide)
      */
-    public List<String> validate(edu.mentorai.entities.Tache t) {
+    public List<String> validate(edu.connection3a36.entities.Tache t) {
         List<String> erreurs = new ArrayList<>();
         if (t.getTitre() == null || t.getTitre().isBlank())
             erreurs.add("Le titre de la tache est obligatoire");

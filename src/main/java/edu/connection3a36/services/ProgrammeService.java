@@ -2,8 +2,8 @@ package edu.connection3a36.services;
 
 import edu.connection3a36.interfaces.IService;
 import edu.connection3a36.tools.MyConnection;
-import edu.mentorai.entities.Medaille;
-import edu.mentorai.entities.Programme;
+import edu.connection3a36.entities.Medaille;
+import edu.connection3a36.entities.Programme;
 
 import java.sql.*;
 import java.time.LocalDate;

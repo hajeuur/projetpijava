@@ -8,7 +8,7 @@
       fx:controller="com.mentorai.controllers.TraiterFeedbackController"
       spacing="0"
       style="-fx-background-color: #f5f7fa;"
-      prefWidth="620" prefHeight="600">
+      prefWidth="620" prefHeight="850">
 
     <!-- HEADER -->
     <HBox style="-fx-background-color: #102c59; -fx-padding: 16 20 16 20;"
@@ -31,13 +31,121 @@
                          -fx-padding: 0;">
                 <HBox style="-fx-background-color: #eef2ff; -fx-padding: 10 15 10 15;
                              -fx-background-radius: 8 8 0 0;" alignment="CENTER_LEFT" spacing="8">
-                    <Label text="Informations du Feedback"
+                    <Label text="📋 Informations du Feedback"
                            style="-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 12px;"/>
                 </HBox>
                 <VBox style="-fx-padding: 12 15 12 15;" spacing="6">
                     <Label fx:id="labelInfoFeedback" text="..."
                            wrapText="true"
                            style="-fx-text-fill: #444; -fx-font-size: 12px;"/>
+                </VBox>
+            </VBox>
+
+            <!-- ANALYSE DE SENTIMENT AZURE IA -->
+            <VBox style="-fx-background-color: white; -fx-background-radius: 10;
+                         -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.12),8,0,0,3);
+                         -fx-padding: 0;">
+                <HBox style="-fx-background-color: linear-gradient(to right, #0078d4, #00bcf2); 
+                             -fx-padding: 14 20 14 20;
+                             -fx-background-radius: 10 10 0 0;" alignment="CENTER_LEFT" spacing="10">
+                    <Label text="🧠"
+                           style="-fx-font-size: 20px;"/>
+                    <VBox spacing="2">
+                        <Label text="Analyse d'Émotions par Intelligence Artificielle"
+                               style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 13px;"/>
+                        <Label text="Propulsé par Azure Cognitive Services"
+                               style="-fx-text-fill: rgba(255,255,255,0.85); -fx-font-size: 10px;"/>
+                    </VBox>
+                </HBox>
+                
+                <VBox spacing="16" style="-fx-padding: 20;">
+                    
+                    <!-- Sentiment principal avec design amélioré -->
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label text="Sentiment détecté :"
+                               style="-fx-font-size: 12px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                        <Label fx:id="labelSentimentPrincipal" text="😐 NEUTRE"
+                               style="-fx-background-color: #f0a500; -fx-text-fill: white;
+                                      -fx-padding: 8 16 8 16; -fx-background-radius: 20;
+                                      -fx-font-size: 14px; -fx-font-weight: bold;
+                                      -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.2),4,0,0,2);"/>
+                    </HBox>
+                    
+                    <!-- Scores avec design sophistiqué -->
+                    <HBox spacing="15" alignment="CENTER" style="-fx-padding: 10 0 10 0;">
+                        <!-- Positif -->
+                        <VBox spacing="6" alignment="CENTER" prefWidth="120"
+                              style="-fx-background-color: #f0fdf4; -fx-background-radius: 10;
+                                     -fx-padding: 12; -fx-border-color: #28a745; -fx-border-width: 2;
+                                     -fx-border-radius: 10;">
+                            <Label text="😊" style="-fx-font-size: 28px;"/>
+                            <Label fx:id="labelScorePositif" text="0%"
+                                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #28a745;"/>
+                            <Label text="Positif"
+                                   style="-fx-font-size: 11px; -fx-text-fill: #28a745; -fx-font-weight: bold;"/>
+                        </VBox>
+                        
+                        <!-- Neutre -->
+                        <VBox spacing="6" alignment="CENTER" prefWidth="120"
+                              style="-fx-background-color: #fffbeb; -fx-background-radius: 10;
+                                     -fx-padding: 12; -fx-border-color: #f0a500; -fx-border-width: 2;
+                                     -fx-border-radius: 10;">
+                            <Label text="😐" style="-fx-font-size: 28px;"/>
+                            <Label fx:id="labelScoreNeutre" text="0%"
+                                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #f0a500;"/>
+                            <Label text="Neutre"
+                                   style="-fx-font-size: 11px; -fx-text-fill: #f0a500; -fx-font-weight: bold;"/>
+                        </VBox>
+                        
+                        <!-- Négatif -->
+                        <VBox spacing="6" alignment="CENTER" prefWidth="120"
+                              style="-fx-background-color: #fef2f2; -fx-background-radius: 10;
+                                     -fx-padding: 12; -fx-border-color: #d52e28; -fx-border-width: 2;
+                                     -fx-border-radius: 10;">
+                            <Label text="😞" style="-fx-font-size: 28px;"/>
+                            <Label fx:id="labelScoreNegatif" text="0%"
+                                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #d52e28;"/>
+                            <Label text="Négatif"
+                                   style="-fx-font-size: 11px; -fx-text-fill: #d52e28; -fx-font-weight: bold;"/>
+                        </VBox>
+                    </HBox>
+                    
+                    <!-- Séparateur -->
+                    <HBox style="-fx-background-color: #e0e0e0; -fx-pref-height: 1;"/>
+                    
+                    <!-- Recommandation avec badge -->
+                    <HBox style="-fx-background-color: #e8f4fd; -fx-padding: 12;
+                                 -fx-background-radius: 8; -fx-border-color: #0078d4;
+                                 -fx-border-width: 0 0 0 4; -fx-border-radius: 8;"
+                          spacing="10" alignment="TOP_LEFT">
+                        <Label text="💡" style="-fx-font-size: 18px;"/>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Recommandation Stratégique"
+                                   style="-fx-font-weight: bold; -fx-text-fill: #0078d4; -fx-font-size: 12px;"/>
+                            <Label fx:id="labelRecommandation" text="Analyse en cours..."
+                                   wrapText="true"
+                                   style="-fx-text-fill: #0078d4; -fx-font-size: 12px; -fx-font-weight: bold;"
+                                   maxWidth="500"/>
+                        </VBox>
+                    </HBox>
+                    
+                    <!-- Explication détaillée -->
+                    <VBox style="-fx-background-color: #f8f9fa; -fx-padding: 14;
+                                 -fx-background-radius: 8; -fx-border-color: #dee2e6;
+                                 -fx-border-width: 1; -fx-border-radius: 8;"
+                          spacing="6">
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <Label text="📋" style="-fx-font-size: 16px;"/>
+                            <Label text="Guide de Réponse Personnalisée"
+                                   style="-fx-font-weight: bold; -fx-text-fill: #495057; -fx-font-size: 12px;"/>
+                        </HBox>
+                        <Label fx:id="labelExplication" 
+                               text="L'intelligence artificielle analyse le ton, les émotions et le contexte du message pour vous proposer la meilleure approche de réponse..."
+                               wrapText="true"
+                               style="-fx-text-fill: #495057; -fx-font-size: 11px; -fx-line-spacing: 2px;"
+                               maxWidth="540"/>
+                    </VBox>
+                    
                 </VBox>
             </VBox>
 

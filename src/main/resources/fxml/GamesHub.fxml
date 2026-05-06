@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.canvas.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.image.ImageView?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.connection3a36.controllers.GamesHubController"
+      spacing="0" style="-fx-background-color: #f0f4f8;">
+
+    <!-- ===== TOP BAR ===== -->
+    <HBox style="-fx-background-color: linear-gradient(to right, #1a237e, #283593); -fx-padding: 14 25;"
+          alignment="CENTER_LEFT" spacing="20">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="🎮 Espace Accessibilité &amp; Bien-être"
+                   style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Label text="Outils pour la concentration, l'accessibilité et l'apprentissage interactif."
+                   style="-fx-text-fill: rgba(255,255,255,0.75); -fx-font-size: 13px;"/>
+        </VBox>
+        <Button fx:id="btnDyslexia" text="📖 Mode Dyslexie" onAction="#toggleDyslexiaMode"
+                style="-fx-background-color: rgba(255,255,255,0.15); -fx-text-fill: white;
+                       -fx-border-color: rgba(255,255,255,0.4); -fx-border-radius: 8; -fx-background-radius: 8;
+                       -fx-padding: 8 18; -fx-cursor: hand;"/>
+    </HBox>
+
+    <!-- ===== TAB NAVIGATION ===== -->
+    <HBox fx:id="tabBar" spacing="4" style="-fx-background-color: white; -fx-padding: 8 20; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
+        <Button fx:id="tab1" text="🫁 Respiration"  onAction="#showTab1" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 6 16; -fx-cursor: hand;"/>
+        <Button fx:id="tab2" text="🌊 Vague Calme"  onAction="#showTab2" style="-fx-background-color: #e2e8f0; -fx-background-radius: 20; -fx-padding: 6 16; -fx-cursor: hand;"/>
+        <Button fx:id="tab3" text="📖 Dyslexie"    onAction="#showTab3" style="-fx-background-color: #e2e8f0; -fx-background-radius: 20; -fx-padding: 6 16; -fx-cursor: hand;"/>
+        <Button fx:id="tab4" text="🎵 Chasse Son"  onAction="#showTab4" style="-fx-background-color: #e2e8f0; -fx-background-radius: 20; -fx-padding: 6 16; -fx-cursor: hand;"/>
+        <Button fx:id="tab5" text="🎯 Pomodoro"    onAction="#showTab5" style="-fx-background-color: #e2e8f0; -fx-background-radius: 20; -fx-padding: 6 16; -fx-cursor: hand;"/>
+        <Button fx:id="tab6" text="⏱️ Speed Quiz"  onAction="#showTab6" style="-fx-background-color: #e2e8f0; -fx-background-radius: 20; -fx-padding: 6 16; -fx-cursor: hand;"/>
+    </HBox>
+
+    <!-- ===== CONTENT AREA ===== -->
+    <StackPane VBox.vgrow="ALWAYS" style="-fx-padding: 20;">
+
+        <!-- TAB 1 : BULLE DE RESPIRATION -->
+        <VBox fx:id="pane1" spacing="20" alignment="CENTER"
+              style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 40;
+                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 5);">
+            <Label text="🫁 Technique de Respiration 4-7-8"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a237e;"/>
+            <Label text="Inspirez 4s — Retenez 7s — Expirez 8s (cycle anti-stress éprouvé)"
+                   style="-fx-text-fill: #64748b; -fx-font-size: 13px;"/>
+            <StackPane prefHeight="200" prefWidth="200">
+                <Circle fx:id="breathingCircle" radius="40"
+                        fill="radial-gradient(center 50% 50%, radius 100%, #7ec8e3, #0070a8)"/>
+                <Label fx:id="lblBreathingText" text="Prêt ?"
+                       style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: white;"/>
+            </StackPane>
+            <Label fx:id="lblBreathPhase" text=""
+                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1a237e;"/>
+            <ProgressBar fx:id="breathProgressBar" progress="0" prefWidth="320" prefHeight="12"
+                         style="-fx-accent: #3b82f6;"/>
+            <Button fx:id="btnBreathe" text="▶  Démarrer l'exercice" onAction="#startBreathing"
+                    style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-size: 14px;
+                           -fx-padding: 12 32; -fx-background-radius: 25; -fx-cursor: hand;"/>
+            <Label fx:id="lblBreathCycles" text="Cycles complétés : 0"
+                   style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;"/>
+        </VBox>
+
+        <!-- TAB 2 : VAGUE DE CALME -->
+        <VBox fx:id="pane2" spacing="15" alignment="CENTER" visible="false" managed="false"
+              style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 30;
+                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 5);">
+            <Label text="🌊 Vague de Calme — Méditation"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0f4c81;"/>
+            <Label text="Laissez-vous porter par la vague pendant 5 minutes."
+                   style="-fx-text-fill: #64748b;"/>
+            <Canvas fx:id="waveCanvas" width="520" height="150"/>
+            <Label fx:id="lblMeditationTimer" text="05:00"
+                   style="-fx-font-size: 52px; -fx-font-weight: bold; -fx-text-fill: #0f4c81;"/>
+            <HBox spacing="15" alignment="CENTER">
+                <Button fx:id="btnWaveStart" text="🌊 Démarrer la méditation" onAction="#startWave"
+                        style="-fx-background-color: #0f4c81; -fx-text-fill: white; -fx-padding: 12 28;
+                               -fx-background-radius: 25; -fx-cursor: hand;"/>
+                <Button text="↺ Réinitialiser" onAction="#resetWave"
+                        style="-fx-background-color: #e2e8f0; -fx-padding: 12 20; -fx-background-radius: 25; -fx-cursor: hand;"/>
+            </HBox>
+            <Label fx:id="lblMeditationStatus" text="Respirez doucement et observez la vague..."
+                   style="-fx-text-fill: #64748b; -fx-font-style: italic;"/>
+        </VBox>
+
+        <!-- TAB 3 : MODE DYSLEXIE (Preview) -->
+        <VBox fx:id="pane3" spacing="20" visible="false" managed="false"
+              style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 30;
+                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 5);">
+            <Label text="📖 Mode Dyslexie — Paramètres d'Accessibilité"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <HBox spacing="20">
+                <VBox spacing="10" HBox.hgrow="ALWAYS">
+                    <Label text="Couleur de fond :" style="-fx-font-weight: bold;"/>
+                    <HBox spacing="8">
+                        <Button text="🟡 Crème" onAction="#setBgCream" style="-fx-background-color: #fdf6e3; -fx-border-color: #ccc; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 14;"/>
+                        <Button text="🟢 Vert pâle" onAction="#setBgGreen" style="-fx-background-color: #e8f5e9; -fx-border-color: #ccc; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 14;"/>
+                        <Button text="🔵 Bleu pâle" onAction="#setBgBlue" style="-fx-background-color: #e3f2fd; -fx-border-color: #ccc; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 14;"/>
+                        <Button text="⚪ Normal" onAction="#setBgNormal" style="-fx-border-color: #ccc; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 14;"/>
+                    </HBox>
+                    <Label text="Taille de la police :" style="-fx-font-weight: bold;"/>
+                    <Slider fx:id="fontSizeSlider" min="12" max="24" value="15" prefWidth="280" onMouseReleased="#adjustFontSize"/>
+                    <Label text="Espacement des lettres :" style="-fx-font-weight: bold;"/>
+                    <Slider fx:id="letterSpacingSlider" min="0" max="8" value="2" prefWidth="280" onMouseReleased="#adjustLetterSpacing"/>
+                    <HBox spacing="10" style="-fx-padding: 10 0 0 0;">
+                        <Button fx:id="btnDyslexiaApply" text="✅ Appliquer à toute l'app" onAction="#toggleDyslexiaMode"
+                                style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-padding: 10 24; -fx-background-radius: 20; -fx-cursor: hand;"/>
+                        <Button text="↺ Réinitialiser" onAction="#resetDyslexia"
+                                style="-fx-background-color: #e2e8f0; -fx-padding: 10 18; -fx-background-radius: 20; -fx-cursor: hand;"/>
+                    </HBox>
+                </VBox>
+                <VBox spacing="10" HBox.hgrow="ALWAYS">
+                    <Label text="Prévisualisation :" style="-fx-font-weight: bold;"/>
+                    <VBox fx:id="previewBox" spacing="8" style="-fx-background-color: #fdf6e3; -fx-padding: 16; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10;">
+                        <Label fx:id="previewText1" text="Voici un exemple de texte éducatif"
+                               style="-fx-font-size: 16px; -fx-font-family: 'Arial';"/>
+                        <Label fx:id="previewText2" text="avec un meilleur espacement pour les"
+                               style="-fx-font-size: 16px;"/>
+                        <Label fx:id="previewText3" text="étudiants ayant des difficultés de lecture."
+                               style="-fx-font-size: 16px;"/>
+                    </VBox>
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <!-- TAB 4 : CHASSE AU SON -->
+        <VBox fx:id="pane4" spacing="20" alignment="CENTER" visible="false" managed="false"
+              style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 30;
+                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 5);">
+            <Label text="🎵 Chasse au Son — Lettres &amp; Syllabes"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #7c3aed;"/>
+            <Label text="Écoute le son et identifie la bonne lettre/syllabe !"
+                   style="-fx-text-fill: #64748b;"/>
+            <Label fx:id="lblSoundSymbol" text="?"
+                   style="-fx-font-size: 80px; -fx-font-weight: bold; -fx-text-fill: #7c3aed;"/>
+            <Button fx:id="btnPlaySound" text="🔊 Jouer le Son" onAction="#playCurrentSound"
+                    style="-fx-background-color: #7c3aed; -fx-text-fill: white; -fx-font-size: 14px;
+                           -fx-padding: 10 28; -fx-background-radius: 20; -fx-cursor: hand;"/>
+            <HBox fx:id="soundChoicesBox" spacing="12" alignment="CENTER"/>
+            <Label fx:id="lblSoundFeedback" text="Cliquez sur 'Jouer le Son' pour commencer !"
+                   style="-fx-font-size: 14px; -fx-text-fill: #64748b;"/>
+            <Label fx:id="lblSoundScore" text="Score : 0 / 0"
+                   style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #7c3aed;"/>
+        </VBox>
+
+        <!-- TAB 5 : POMODORO -->
+        <VBox fx:id="pane5" spacing="20" alignment="CENTER" visible="false" managed="false"
+              style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 40;
+                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 5);">
+            <Label text="🎯 Focus Timer — Technique Pomodoro"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #dc2626;"/>
+            <Label fx:id="lblPomodoroMode" text="MODE TRAVAIL"
+                   style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #dc2626; -fx-letter-spacing: 2;"/>
+            <StackPane>
+                <Circle radius="100" fill="transparent" stroke="#dc2626" strokeWidth="8"/>
+                <Label fx:id="lblPomodoroTime" text="25:00"
+                       style="-fx-font-size: 52px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+            </StackPane>
+            <HBox spacing="15" alignment="CENTER">
+                <Button fx:id="btnPomodoro" text="▶ Démarrer" onAction="#togglePomodoro"
+                        style="-fx-background-color: #dc2626; -fx-text-fill: white; -fx-font-size: 15px;
+                               -fx-padding: 12 36; -fx-background-radius: 25; -fx-cursor: hand;"/>
+                <Button text="⏹ Reset" onAction="#resetPomodoro"
+                        style="-fx-background-color: #e2e8f0; -fx-padding: 12 20; -fx-background-radius: 25; -fx-cursor: hand;"/>
+            </HBox>
+            <HBox spacing="20" alignment="CENTER">
+                <Label fx:id="lblPomodoroSessions" text="Sessions: 0"
+                       style="-fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                <Label text="🍅 Pomodoros pour aujourd'hui :"
+                       style="-fx-text-fill: #64748b;"/>
+                <HBox fx:id="pomodoroDotsBox" spacing="6" alignment="CENTER"/>
+            </HBox>
+            <Label fx:id="lblPomodoroMotivation" text="&quot;La concentration est la racine de toute capacité.&quot;" 
+                   style="-fx-text-fill: #94a3b8; -fx-font-style: italic; -fx-font-size: 13px;"/>
+        </VBox>
+
+        <!-- TAB 6 : SPEED QUIZ + CAMERA GESTE -->
+        <VBox fx:id="pane6" spacing="15" visible="false" managed="false"
+              style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 25;
+                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 5);">
+            <HBox spacing="20">
+                <!-- Quiz -->
+                <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <Label text="⏱️ Speed Quiz — QCM Intelligent"
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #d97706;"/>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label fx:id="lblQuizTimer" text="⏱ 10s"
+                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblQuizScore" text="⭐ 0 pts"
+                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #d97706;"/>
+                    </HBox>
+                    <ProgressBar fx:id="quizTimerBar" progress="1.0" prefWidth="380" prefHeight="10"
+                                 style="-fx-accent: #f59e0b;"/>
+                    <VBox fx:id="quizQuestionBox" spacing="10"
+                          style="-fx-background-color: #fffbeb; -fx-padding: 20; -fx-background-radius: 12; -fx-border-color: #fde68a; -fx-border-radius: 12;">
+                        <Label fx:id="lblQuizQuestion" text="Appuyez sur Démarrer pour commencer le quiz !"
+                               style="-fx-font-size: 15px; -fx-wrap-text: true; -fx-text-fill: #92400e;" wrapText="true"/>
+                    </VBox>
+                    <HBox fx:id="quizAnswersBox" spacing="10" alignment="CENTER" disable="true">
+                        <Button fx:id="btnA" text="" onAction="#handleAnswerA"
+                                prefWidth="170" prefHeight="45"
+                                style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 12; -fx-font-size: 13px; -fx-cursor: hand;"/>
+                        <Button fx:id="btnB" text="" onAction="#handleAnswerB"
+                                prefWidth="170" prefHeight="45"
+                                style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-background-radius: 12; -fx-font-size: 13px; -fx-cursor: hand;"/>
+                    </HBox>
+                    <HBox fx:id="quizAnswers4Box" spacing="10" alignment="CENTER" disable="true" visible="false" managed="false">
+                        <Button fx:id="btnC" text="" onAction="#handleAnswerC"
+                                prefWidth="170" prefHeight="45"
+                                style="-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-background-radius: 12; -fx-font-size: 13px; -fx-cursor: hand;"/>
+                        <Button fx:id="btnD" text="" onAction="#handleAnswerD"
+                                prefWidth="170" prefHeight="45"
+                                style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 12; -fx-font-size: 13px; -fx-cursor: hand;"/>
+                    </HBox>
+                    <Label fx:id="lblQuizFeedback" text=""
+                           style="-fx-font-size: 15px; -fx-font-weight: bold;" wrapText="true"/>
+                    <Button fx:id="btnQuizStart" text="🚀 Démarrer le Quiz" onAction="#startQuiz"
+                            style="-fx-background-color: #d97706; -fx-text-fill: white; -fx-padding: 10 28; -fx-background-radius: 20; -fx-cursor: hand;"/>
+                </VBox>
+
+                <!-- Caméra Geste -->
+                <VBox spacing="10" alignment="CENTER" prefWidth="260"
+                      style="-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-padding: 15; -fx-border-color: #e2e8f0; -fx-border-radius: 12;">
+                    <Label text="✋ Réponse par Geste (Caméra)"
+                           style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #475569;"/>
+                    <Label fx:id="lblCameraStatus" text="Caméra non activée"
+                           style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;"/>
+                    <!-- Webcam Preview via ImageView -->
+                    <ImageView fx:id="webcamView" fitWidth="230" fitHeight="160"
+                               style="-fx-background-color: black; -fx-border-color: #334155; -fx-border-radius: 10;"
+                               preserveRatio="true"/>
+                    <Label fx:id="lblGestureDetected" text="👁 Attente geste..."
+                           style="-fx-font-size: 22px;"/>
+                    <HBox spacing="8" alignment="CENTER">
+                        <Button text="📷 Activer Caméra" onAction="#startCamera"
+                                style="-fx-background-color: #334155; -fx-text-fill: white; -fx-padding: 7 14; -fx-background-radius: 12; -fx-cursor: hand;"/>
+                        <Button text="⛔ Arrêter" onAction="#stopCamera"
+                                style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-padding: 7 12; -fx-background-radius: 12; -fx-cursor: hand;"/>
+                    </HBox>
+                    <Label text="Mode manuel (si pas de caméra) :" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8;"/>
+                    <HBox spacing="8" alignment="CENTER">
+                        <Button text="👍 VRAI" onAction="#gestureTrueManual"
+                                style="-fx-font-size: 13px; -fx-background-color: #10b981; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 5 12; -fx-cursor: hand;"/>
+                        <Button text="👎 FAUX" onAction="#gestureFalseManual"
+                                style="-fx-font-size: 13px; -fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 5 12; -fx-cursor: hand;"/>
+                    </HBox>
+                </VBox>
+            </HBox>
+        </VBox>
+
+    </StackPane>
+</VBox>

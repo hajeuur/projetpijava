@@ -4,9 +4,12 @@ import edu.connection3a36.services.*;
 import edu.connection3a36.tools.AlertUtil;
 import edu.connection3a36.tools.ExportUtil;
 import edu.connection3a36.tools.SessionManager;
-import edu.mentorai.entities.Objectif;
-import edu.mentorai.entities.Programme;
-import edu.mentorai.entities.Statutobj;
+import edu.connection3a36.tools.ToastNotification;
+import edu.connection3a36.entities.Objectif;
+import edu.connection3a36.entities.Programme;
+import edu.connection3a36.entities.Statutobj;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -44,9 +47,17 @@ public class ObjectifListController {
     @FXML private Label lblCalJourSemaine;
     @FXML private VBox vboxCalGrille;
 
+    // ── Plan du jour ──────────────────────────────────────────────────────────
+    @FXML private VBox cardPlanDuJour;
+    @FXML private VBox vboxPlanTimeline;
+    @FXML private Label lblPlanConseil;
+    @FXML private Button btnPlanDuJour;
+    @FXML private ProgressIndicator progressPlan;
+
     private final ObjectifService objectifService = new ObjectifService();
     private final ProgrammeService programmeService = new ProgrammeService();
-    private final NotificationService notifService = new NotificationService();
+    private final DeadlineNotificationService notifService = new DeadlineNotificationService();
+    private final PlanificateurService planificateurService = new PlanificateurService();
 
     private List<Objectif> tousObjectifs;
 
@@ -61,17 +72,13 @@ public class ObjectifListController {
     private void charger() {
         try {
             int userId = SessionManager.getCurrentUser().getId();
-            String emailUser = SessionManager.getCurrentUser().getEmail();
             tousObjectifs = objectifService.getByUtilisateur(userId);
-
-            // Envoi automatique des alertes email en arrière-plan
-            notifService.envoyerAlerteAutomatique(emailUser, tousObjectifs);
 
             afficherAlertes();
             mettreAJourStats();
             filtrer();
         } catch (Exception e) {
-            AlertUtil.showError("Erreur chargement objectifs : " + e.getMessage());
+            ToastNotification.showError("Chargement impossible", e.getMessage());
         }
     }
 
@@ -327,7 +334,7 @@ public class ObjectifListController {
             ctrl.setObjectif(objectif);
             ctrl.setOnSaved(this::charger);
             MainController.getInstance().loadInContentArea(view);
-        } catch (Exception e) { AlertUtil.showError("Erreur ouverture formulaire : " + e.getMessage()); }
+        } catch (Exception e) { ToastNotification.showError("Ouverture formulaire", e.getMessage()); }
     }
 
     private void ouvrirProgramme(Objectif objectif) {
@@ -337,7 +344,7 @@ public class ObjectifListController {
             ProgrammeDetailController ctrl = loader.getController();
             ctrl.setObjectif(objectif);
             MainController.getInstance().loadInContentArea(view);
-        } catch (Exception e) { AlertUtil.showError("Erreur ouverture programme : " + e.getMessage()); }
+        } catch (Exception e) { ToastNotification.showError("Ouverture programme", e.getMessage()); }
     }
 
     private void supprimer(Objectif o) {
@@ -346,8 +353,12 @@ public class ObjectifListController {
                 ButtonType.YES, ButtonType.NO);
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.YES) {
-                try { objectifService.deleteEntity(o); charger(); }
-                catch (Exception e) { AlertUtil.showError("Erreur suppression : " + e.getMessage()); }
+                try {
+                    objectifService.deleteEntity(o);
+                    charger();
+                    ToastNotification.showSuccess("Objectif supprimé", "\"" + o.getTitre() + "\" a été supprimé.");
+                }
+                catch (Exception e) { ToastNotification.showError("Erreur suppression", e.getMessage()); }
             }
         });
     }
@@ -357,7 +368,7 @@ public class ObjectifListController {
     // ─────────────────────────────────────────────────────────────────────────
 
     @FXML void handleExportExcel() {
-        if (tousObjectifs == null || tousObjectifs.isEmpty()) { AlertUtil.showError("Aucun objectif a exporter."); return; }
+        if (tousObjectifs == null || tousObjectifs.isEmpty()) { ToastNotification.showWarning("Export Excel", "Aucun objectif à exporter."); return; }
         FileChooser fc = new FileChooser();
         fc.setTitle("Exporter en Excel");
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel (.xlsx)", "*.xlsx"));
@@ -372,13 +383,13 @@ public class ObjectifListController {
                         break;
                     }
                 }
-                AlertUtil.showSuccess("Export Excel reussi : " + file.getName());
-            } catch (Exception e) { AlertUtil.showError("Erreur export Excel : " + e.getMessage()); }
+                ToastNotification.showSuccess("Export Excel réussi", file.getName() + " sauvegardé.");
+            } catch (Exception e) { ToastNotification.showError("Erreur export Excel", e.getMessage()); }
         }
     }
 
     @FXML void handleExportWord() {
-        if (tousObjectifs == null || tousObjectifs.isEmpty()) { AlertUtil.showError("Aucun objectif a exporter."); return; }
+        if (tousObjectifs == null || tousObjectifs.isEmpty()) { ToastNotification.showWarning("Export Word", "Aucun objectif à exporter."); return; }
         FileChooser fc = new FileChooser();
         fc.setTitle("Exporter en Word");
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Word (.docx)", "*.docx"));
@@ -393,8 +404,8 @@ public class ObjectifListController {
                         break;
                     }
                 }
-                AlertUtil.showSuccess("Export Word reussi : " + file.getName());
-            } catch (Exception e) { AlertUtil.showError("Erreur export Word : " + e.getMessage()); }
+                ToastNotification.showSuccess("Export Word réussi", file.getName() + " sauvegardé.");
+            } catch (Exception e) { ToastNotification.showError("Erreur export Word", e.getMessage()); }
         }
     }
 
@@ -403,10 +414,96 @@ public class ObjectifListController {
                 "Supprimer TOUS vos objectifs ? Action irreversible.", ButtonType.YES, ButtonType.NO);
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.YES) {
-                try { for (Objectif o : tousObjectifs) objectifService.deleteEntity(o); charger(); AlertUtil.showSuccess("Donnees reinitialises."); }
-                catch (Exception e) { AlertUtil.showError("Erreur : " + e.getMessage()); }
+                try {
+                    for (Objectif o : tousObjectifs) objectifService.deleteEntity(o);
+                    charger();
+                    ToastNotification.showInfo("Réinitialisation", "Toutes les données ont été supprimées.");
+                }
+                catch (Exception e) { ToastNotification.showError("Erreur réinitialisation", e.getMessage()); }
             }
         });
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // PLAN DU JOUR
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @FXML void handlePlanDuJour() {
+        if (cardPlanDuJour == null) return;
+        if (progressPlan != null) { progressPlan.setVisible(true); progressPlan.setManaged(true); }
+        if (btnPlanDuJour != null) btnPlanDuJour.setDisable(true);
+
+        final List<Objectif> snapshot = tousObjectifs != null ? List.copyOf(tousObjectifs) : List.of();
+
+        Task<PlanificateurService.PlanResultat> task = new Task<>() {
+            @Override
+            protected PlanificateurService.PlanResultat call() {
+                return planificateurService.genererPlan(snapshot);
+            }
+        };
+        task.setOnSucceeded(e -> Platform.runLater(() -> {
+            afficherPlan(task.getValue());
+            if (progressPlan != null) { progressPlan.setVisible(false); progressPlan.setManaged(false); }
+            if (btnPlanDuJour != null) btnPlanDuJour.setDisable(false);
+        }));
+        task.setOnFailed(e -> Platform.runLater(() -> {
+            if (progressPlan != null) { progressPlan.setVisible(false); progressPlan.setManaged(false); }
+            if (btnPlanDuJour != null) btnPlanDuJour.setDisable(false);
+        }));
+        new Thread(task).start();
+    }
+
+    private void afficherPlan(PlanificateurService.PlanResultat r) {
+        if (cardPlanDuJour == null) return;
+        if (vboxPlanTimeline != null) vboxPlanTimeline.getChildren().clear();
+
+        if (r.plan.isEmpty()) {
+            if (lblPlanConseil != null) lblPlanConseil.setText(r.conseil);
+            cardPlanDuJour.setVisible(true);
+            cardPlanDuJour.setManaged(true);
+            return;
+        }
+
+        for (PlanificateurService.CreneauPlan creneau : r.plan) {
+            HBox ligne = new HBox(0);
+            ligne.setAlignment(Pos.CENTER_LEFT);
+
+            // Heure
+            Label lblHeure = new Label(creneau.heure);
+            lblHeure.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #102c59;"
+                    + " -fx-min-width: 80; -fx-padding: 10 12 10 0;");
+
+            // Ligne verticale timeline
+            VBox timeline = new VBox();
+            timeline.setAlignment(Pos.CENTER);
+            timeline.setMinWidth(20);
+            Label dot = new Label("●");
+            dot.setStyle("-fx-text-fill: #102c59; -fx-font-size: 8px;");
+            timeline.getChildren().add(dot);
+
+            // Contenu
+            VBox contenu = new VBox(2);
+            contenu.setPadding(new Insets(8, 12, 8, 12));
+            contenu.setStyle("-fx-background-color: #f8faff; -fx-background-radius: 8;"
+                    + " -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-border-width: 1;");
+            HBox.setHgrow(contenu, Priority.ALWAYS);
+
+            Label lblTache = new Label(creneau.tache);
+            lblTache.setStyle("-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 12px;");
+            lblTache.setWrapText(true);
+
+            Label lblObj = new Label("📌 " + creneau.objectif);
+            lblObj.setStyle("-fx-text-fill: #888; -fx-font-size: 11px;");
+
+            contenu.getChildren().addAll(lblTache, lblObj);
+            ligne.getChildren().addAll(lblHeure, timeline, contenu);
+
+            if (vboxPlanTimeline != null) vboxPlanTimeline.getChildren().add(ligne);
+        }
+
+        if (lblPlanConseil != null) lblPlanConseil.setText("💡 " + r.conseil);
+        cardPlanDuJour.setVisible(true);
+        cardPlanDuJour.setManaged(true);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

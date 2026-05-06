@@ -3,7 +3,8 @@ package edu.connection3a36.controllers;
 import edu.connection3a36.services.*;
 import edu.connection3a36.tools.AlertUtil;
 import edu.connection3a36.tools.SessionManager;
-import edu.mentorai.entities.*;
+import edu.connection3a36.tools.ToastNotification;
+import edu.connection3a36.entities.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -65,7 +66,7 @@ public class ObjectifFormController {
     @FXML
     void handleGenererTaches() {
         String titre = tfTitre.getText().trim();
-        if (titre.isEmpty()) { AlertUtil.showError("Saisissez d abord un titre."); return; }
+        if (titre.isEmpty()) { ToastNotification.showWarning("Champ requis", "Saisissez d'abord un titre."); return; }
         progressIA.setVisible(true); progressIA.setManaged(true);
         lblGenerationStatus.setText("Generation en cours...");
         lblGenerationStatus.setStyle("-fx-text-fill: #888; -fx-font-weight: bold;");
@@ -83,6 +84,7 @@ public class ObjectifFormController {
                     lblGenerationStatus.setText(taches.size() + " taches generees !");
                     lblGenerationStatus.setStyle("-fx-text-fill: #198754; -fx-font-weight: bold;");
                     btnGenererTaches.setDisable(false);
+                    ToastNotification.showSuccess("IA Ollama", taches.size() + " tâches générées avec succès !");
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
@@ -90,6 +92,7 @@ public class ObjectifFormController {
                     lblGenerationStatus.setText("Ollama indisponible — taches par defaut utilisees.");
                     lblGenerationStatus.setStyle("-fx-text-fill: #ffc107; -fx-font-weight: bold;");
                     btnGenererTaches.setDisable(false);
+                    ToastNotification.showWarning("Ollama indisponible", "Tâches par défaut utilisées.");
                     try { tachesGenerees = ollamaService.genererTaches("", ""); afficherPreview(tachesGenerees); } catch (Exception ignored) {}
                 });
             }
@@ -116,16 +119,15 @@ public class ObjectifFormController {
     @FXML
     void handleSauvegarder() {
         String titre = tfTitre.getText().trim();
-        if (titre.isEmpty()) { AlertUtil.showError("Le titre est obligatoire."); return; }
-        if (dpDebut.getValue() == null) { AlertUtil.showError("La date de debut est obligatoire."); return; }
-        if (dpFin.getValue() == null) { AlertUtil.showError("La date de fin est obligatoire."); return; }
+        if (titre.isEmpty()) { ToastNotification.showWarning("Champ requis", "Le titre est obligatoire."); return; }
+        if (dpDebut.getValue() == null) { ToastNotification.showWarning("Champ requis", "La date de début est obligatoire."); return; }
+        if (dpFin.getValue() == null) { ToastNotification.showWarning("Champ requis", "La date de fin est obligatoire."); return; }
         if (dpFin.getValue().isBefore(dpDebut.getValue())) {
-            AlertUtil.showError("La date de fin doit etre apres la date de debut."); return;
+            ToastNotification.showWarning("Dates invalides", "La date de fin doit être après la date de début."); return;
         }
 
         try {
             if (objectif == null) {
-                // Création — statut initial EnCours (aucune tâche faite)
                 Objectif o = new Objectif(titre, taDescription.getText().trim(),
                         dpDebut.getValue(), dpFin.getValue(), SessionManager.getCurrentUser().getId());
                 o.setStatut(Statutobj.EnCours);
@@ -134,23 +136,21 @@ public class ObjectifFormController {
                 if (tachesGenerees != null && !tachesGenerees.isEmpty() && o.getProgramme() != null) {
                     for (int i = 0; i < tachesGenerees.size(); i++) {
                         tacheService.addEntity(new Tache(i + 1, tachesGenerees.get(i)[0],
-                                tachesGenerees.get(i)[1], Etat.Abandonner, o.getProgramme().getId()));
+                                tachesGenerees.get(i)[1], Etat.encours, o.getProgramme().getId()));
                     }
                 }
-                AlertUtil.showSuccess("Objectif cree avec succes !");
+                ToastNotification.showSuccess("Objectif créé !", "\"" + titre + "\" a été ajouté à vos objectifs.");
             } else {
-                // Modification — on ne touche pas au statut, il est géré automatiquement
                 objectif.setTitre(titre);
                 objectif.setDescription(taDescription.getText().trim());
                 objectif.setDatedebut(dpDebut.getValue());
                 objectif.setDatefin(dpFin.getValue());
-                // statut inchangé
                 objectifService.updateEntity(objectif.getId(), objectif);
-                AlertUtil.showSuccess("Objectif modifie avec succes !");
+                ToastNotification.showSuccess("Objectif modifié", "\"" + titre + "\" a été mis à jour.");
             }
             if (onSaved != null) onSaved.run();
             handleAnnuler();
-        } catch (Exception e) { AlertUtil.showError("Erreur sauvegarde : " + e.getMessage()); }
+        } catch (Exception e) { ToastNotification.showError("Erreur sauvegarde", e.getMessage()); }
     }
 
     @FXML

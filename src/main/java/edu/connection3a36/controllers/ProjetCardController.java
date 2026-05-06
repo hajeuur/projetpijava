@@ -7,36 +7,30 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
 import javafx.scene.web.WebView;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 
 public class ProjetCardController {
 
-    @FXML
-    private Label lblTypeTag;
-    @FXML
-    private Label lblDate;
-    @FXML
-    private Label lblTitre;
-    @FXML
-    private Label lblDescription;
-    @FXML
-    private FlowPane flowPaneTech;
-    @FXML
-    private VBox vboxRessources;
-    @FXML
-    private Button btnModifier;
-    @FXML
-    private Button btnSupprimer;
+    @FXML private Label lblTypeTag;
+    @FXML private Label lblDate;
+    @FXML private Label lblTitre;
+    @FXML private Label lblDescription;
+    @FXML private FlowPane flowPaneTech;
+    @FXML private VBox vboxRessources;
+    @FXML private Button btnModifier;
+    @FXML private Button btnSupprimer;
 
     private Projet projet;
     private AfficherProjetsGlobalController mainController;
@@ -51,19 +45,16 @@ public class ProjetCardController {
         lblDate.setText(p.getDateDebut() != null ? p.getDateDebut().toString() : "??");
         lblDescription.setText(p.getDescription());
 
-        // Tech tags
         flowPaneTech.getChildren().clear();
         if (p.getTechnologies() != null && !p.getTechnologies().isEmpty()) {
             String[] techs = p.getTechnologies().split(",");
             for (String s : techs) {
                 Label tag = new Label(s.trim());
-                tag.setStyle(
-                        "-fx-background-color: #f1f2f6; -fx-text-fill: #102c59; -fx-font-size: 10px; -fx-padding: 3 8; -fx-background-radius: 10; -fx-font-weight: bold;");
+                tag.setStyle("-fx-background-color: #f1f2f6; -fx-text-fill: #102c59; -fx-font-size: 10px; -fx-padding: 3 8; -fx-background-radius: 10; -fx-font-weight: bold;");
                 flowPaneTech.getChildren().add(tag);
             }
         }
 
-        // Resources
         try {
             List<Ressource> res = ressourceService.getByProjetId(p.getId());
             vboxRessources.getChildren().clear();
@@ -82,12 +73,10 @@ public class ProjetCardController {
                     HBox.setHgrow(sp, javafx.scene.layout.Priority.ALWAYS);
 
                     Label typeTag = new Label(r.getTypeRessource());
-                    typeTag.setStyle(
-                            "-fx-background-color: #e8f0fe; -fx-text-fill: #1a73e8; -fx-font-size: 9px; -fx-padding: 2 6; -fx-background-radius: 3; -fx-font-weight: bold;");
+                    typeTag.setStyle("-fx-background-color: #e8f0fe; -fx-text-fill: #1a73e8; -fx-font-size: 9px; -fx-padding: 2 6; -fx-background-radius: 3; -fx-font-weight: bold;");
 
                     row.getChildren().addAll(name, sp, typeTag);
 
-                    // Add Edit/Delete buttons for each resource
                     Button btnMod = new Button("✏️");
                     btnMod.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #102c59;");
                     btnMod.setOnAction(e -> modifierRessourceSpecific(r));
@@ -99,7 +88,6 @@ public class ProjetCardController {
                     row.getChildren().addAll(btnMod, btnSupp);
                     vboxRessources.getChildren().add(row);
 
-                    // YouTube Preview if Video
                     if ("VIDEO".equalsIgnoreCase(r.getTypeRessource()) && r.getUrlRessource() != null) {
                         String videoId = extractYoutubeId(r.getUrlRessource());
                         if (videoId != null) {
@@ -108,28 +96,19 @@ public class ProjetCardController {
                             webView.setPrefWidth(350);
                             String embedUrl = "https://www.youtube.com/embed/" + videoId;
                             webView.getEngine().load(embedUrl);
-
-                            VBox videoBox = new VBox(webView);
-                            videoBox.setStyle(
-                                    "-fx-padding: 10; -fx-background-color: #f8f9fa; -fx-background-radius: 10; -fx-border-color: #dcdde1; -fx-border-radius: 10;");
-                            vboxRessources.getChildren().add(videoBox);
+                            vboxRessources.getChildren().add(new VBox(webView));
                         }
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
     }
 
     private String extractYoutubeId(String url) {
         String pattern = "(?<=watch\\?v=|/videos/|embed/|youtu.be/|/v/|/e/|watch\\?v%3D|watch\\?feature=player_embedded&v=|%2Fvideos%2F|embed%2F|youtu.be%2F|%2Fv%2F)[^#&?\\n]*";
         Pattern compiledPattern = Pattern.compile(pattern);
         Matcher matcher = compiledPattern.matcher(url);
-        if (matcher.find()) {
-            return matcher.group();
-        }
-        return null;
+        return matcher.find() ? matcher.group() : null;
     }
 
     private void modifierRessourceSpecific(Ressource r) {
@@ -139,32 +118,19 @@ public class ProjetCardController {
             ModifierRessourceController ctrl = loader.getController();
             ctrl.initData(r, projet);
             MainController.getInstance().loadInContentArea(view);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private void supprimerRessourceSpecific(Ressource r) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer la ressource \"" + r.getNom() + "\" ?",
-                ButtonType.YES, ButtonType.NO);
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.YES) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer la ressource \"" + r.getNom() + "\" ?", ButtonType.YES, ButtonType.NO);
+        if (alert.showAndWait().orElse(ButtonType.NO) == ButtonType.YES) {
             try {
                 ressourceService.deleteEntity(r);
-                setData(projet, mainController); // Refresh card
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+                setData(projet, mainController);
+            } catch (SQLException e) { e.printStackTrace(); }
         }
     }
 
-    @FXML
-    private void modifierProjet() {
-        mainController.modifierProjetSpecific(projet);
-    }
-
-    @FXML
-    private void supprimerProjet() {
-        mainController.supprimerProjetSpecific(projet);
-    }
+    @FXML private void modifierProjet() { mainController.modifierProjetSpecific(projet); }
+    @FXML private void supprimerProjet() { mainController.supprimerProjetSpecific(projet); }
 }

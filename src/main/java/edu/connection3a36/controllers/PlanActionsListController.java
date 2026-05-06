@@ -3,8 +3,12 @@ package edu.connection3a36.controllers;
 import edu.connection3a36.entities.PlanActions;
 import edu.connection3a36.enums.CategorieSortie;
 import edu.connection3a36.enums.Statut;
+import edu.connection3a36.services.EmailService;
 import edu.connection3a36.services.PlanActionsService;
+import edu.connection3a36.services.UserPreferencesService;
 import edu.connection3a36.tools.AlertUtil;
+import edu.connection3a36.tools.AIJsonParser;
+import edu.connection3a36.tools.AIJsonSchemas;
 import edu.connection3a36.tools.SessionManager;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -57,6 +61,8 @@ public class PlanActionsListController {
     @FXML private Button             btnNewPlan;
 
     private final PlanActionsService           service   = new PlanActionsService();
+    private final UserPreferencesService       prefsService = new UserPreferencesService();
+    private final EmailService                 emailService = new EmailService();
     private final ObservableList<PlanActions>  plansList = FXCollections.observableArrayList();
     private static final DateTimeFormatter     DATE_FMT  = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -212,9 +218,10 @@ public class PlanActionsListController {
         String userRole = SessionManager.getCurrentUser() != null
                 ? SessionManager.getCurrentUser().getRole() : "";
         boolean isEnseignant = "ENSEIGNANT".equals(userRole);
+        boolean darkMode = prefsService.load().darkMode;
 
         for (PlanActions plan : plansList) {
-            cardsContainer.getChildren().add(buildPlanCard(plan, isEnseignant));
+            cardsContainer.getChildren().add(buildPlanCard(plan, isEnseignant, darkMode));
         }
 
         if (plansList.isEmpty()) {
@@ -224,7 +231,7 @@ public class PlanActionsListController {
         }
     }
 
-    private VBox buildPlanCard(PlanActions plan, boolean isEnseignant) {
+    private VBox buildPlanCard(PlanActions plan, boolean isEnseignant, boolean darkMode) {
         VBox card = new VBox(10);
         card.getStyleClass().add("plan-card");
         card.setPrefWidth(320);
@@ -237,7 +244,7 @@ public class PlanActionsListController {
             case REJETE     -> "#d52e28";
         };
         card.setStyle("-fx-border-left-color: " + borderColor + "; -fx-border-left-width: 4;"
-                + "-fx-padding: 16; -fx-background-color: white; -fx-background-radius: 12;"
+                + "-fx-padding: 16; -fx-background-color: " + (darkMode ? "#161b22" : "white") + "; -fx-background-radius: 12;"
                 + "-fx-border-color: " + borderColor + "; -fx-border-width: 0 0 0 4; -fx-border-radius: 12;"
                 + "-fx-effect: dropshadow(gaussian, rgba(16,44,89,0.08), 10, 0, 0, 2);");
 
@@ -257,7 +264,7 @@ public class PlanActionsListController {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         Label catBadge = new Label(plan.getCategorie() != null ? plan.getCategorie().getLabel() : "");
-        catBadge.setStyle("-fx-background-color: rgba(16,44,89,0.08); -fx-text-fill: #102c59;"
+        catBadge.setStyle("-fx-background-color: " + (darkMode ? "#30363d" : "rgba(16,44,89,0.08)") + "; -fx-text-fill: " + (darkMode ? "#e6edf3" : "#102c59") + ";"
                 + "-fx-padding: 2 8; -fx-background-radius: 12; -fx-font-size: 10px;");
 
         titleRow.getChildren().addAll(badge, spacer, catBadge);
@@ -266,18 +273,18 @@ public class PlanActionsListController {
         Label decision = new Label(plan.getDecision() != null ? plan.getDecision() : "");
         decision.setWrapText(true);
         decision.setMaxWidth(290);
-        decision.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #102c59;");
+        decision.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: " + (darkMode ? "#e6edf3" : "#102c59") + ";");
 
         // ── Description courte ──
         String desc = plan.getDescription() != null ? plan.getDescription() : "";
         Label description = new Label(desc.length() > 120 ? desc.substring(0, 120) + "..." : desc);
         description.setWrapText(true);
         description.setMaxWidth(290);
-        description.setStyle("-fx-font-size: 12px; -fx-text-fill: #5a7a90;");
+        description.setStyle("-fx-font-size: 12px; -fx-text-fill: " + (darkMode ? "#c9d1d9" : "#5a7a90") + ";");
 
         // ── Date ──
         Label dateLabel = new Label("📅 " + (plan.getDate() != null ? plan.getDate().format(DATE_FMT) : "—"));
-        dateLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #9dbbce;");
+        dateLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: " + (darkMode ? "#8b949e" : "#9dbbce") + ";");
 
         // ── Feedback existant ──
         VBox feedbackBox = new VBox(4);
@@ -288,7 +295,7 @@ public class PlanActionsListController {
             fbText.getStyleClass().add("feedback-text");
             fbText.setWrapText(true);
             fbText.setMaxWidth(280);
-            feedbackBox.setStyle("-fx-background-color: #eef4f9; -fx-padding: 8; -fx-background-radius: 8;");
+            feedbackBox.setStyle("-fx-background-color: " + (darkMode ? "#1f2937" : "#eef4f9") + "; -fx-padding: 8; -fx-background-radius: 8;");
             feedbackBox.getChildren().addAll(fbTitle, fbText);
         }
 
@@ -309,6 +316,13 @@ public class PlanActionsListController {
             btnFeedback.setStyle("-fx-padding: 5 12; -fx-font-size: 12px;");
             btnFeedback.setOnAction(e -> handleFeedback(plan));
             actions.getChildren().add(btnFeedback);
+        } else {
+            // ADMIN / Superadmin peuvent générer un article
+            Button btnGenArticle = new Button("📝 Générer Article");
+            btnGenArticle.getStyleClass().add("btn-info");
+            btnGenArticle.setStyle("-fx-padding: 5 12; -fx-font-size: 12px;");
+            btnGenArticle.setOnAction(e -> handleGenerateArticle(plan));
+            actions.getChildren().add(btnGenArticle);
         }
 
         card.getChildren().addAll(titleRow, decision, description, dateLabel);
@@ -346,17 +360,92 @@ public class PlanActionsListController {
     @FXML void handleAdd() { openForm(null); }
 
     void handleView(PlanActions plan) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Détails du Plan d'Action");
-        alert.setHeaderText("📋 Plan #" + plan.getId() + " — " + plan.getDecision());
-        alert.setContentText(
-                "Description :\n" + plan.getDescription() + "\n\n"
-                + "Statut : " + (plan.getStatut() != null ? plan.getStatut().getLabel() : "N/A") + "\n"
-                + "Catégorie : " + (plan.getCategorie() != null ? plan.getCategorie().getLabel() : "N/A") + "\n"
-                + "Date : " + (plan.getDate() != null ? plan.getDate().format(DATE_FMT) : "N/A") + "\n\n"
-                + "Feedback : " + (plan.getFeedbackEnseignant() != null ? plan.getFeedbackEnseignant() : "Aucun"));
-        alert.getDialogPane().setMinWidth(500);
-        alert.showAndWait();
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Détails du Plan d'Action");
+        dialog.setHeaderText(null);
+        dialog.getDialogPane().setStyle("-fx-background-color: white;");
+
+        VBox content = new VBox(20);
+        content.setPadding(new Insets(25));
+        content.setPrefWidth(600);
+        content.setPrefHeight(500);
+
+        // ── Custom Header ──
+        HBox header = new HBox(15);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setStyle("-fx-padding: 0 0 15 0; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;");
+        
+        Label icon = new Label("📋");
+        icon.setStyle("-fx-font-size: 32px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
+        
+        VBox titleBox = new VBox(4);
+        Label title = new Label("Plan #" + plan.getId());
+        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+        Label subtitle = new Label(plan.getDecision().length() > 80 ? plan.getDecision().substring(0, 80) + "..." : plan.getDecision());
+        subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b;");
+        titleBox.getChildren().addAll(title, subtitle);
+        
+        header.getChildren().addAll(icon, titleBox);
+
+        // ── Tags (Statut, Catégorie, Date) ──
+        HBox tagsBox = new HBox(10);
+        
+        Label lblStatut = new Label("Statut : " + (plan.getStatut() != null ? plan.getStatut().getLabel() : "N/A"));
+        lblStatut.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-padding: 6 12; -fx-background-radius: 12; -fx-font-size: 12px; -fx-font-weight: bold;");
+        
+        Label lblCat = new Label("Catégorie : " + (plan.getCategorie() != null ? plan.getCategorie().getLabel() : "N/A"));
+        lblCat.setStyle("-fx-background-color: #f0fdf4; -fx-text-fill: #166534; -fx-padding: 6 12; -fx-background-radius: 12; -fx-font-size: 12px; -fx-font-weight: bold;");
+        
+        Label lblDate = new Label("📅 " + (plan.getDate() != null ? plan.getDate().format(DATE_FMT) : "N/A"));
+        lblDate.setStyle("-fx-background-color: #f8fafc; -fx-text-fill: #94a3b8; -fx-padding: 6 12; -fx-background-radius: 12; -fx-font-size: 12px; -fx-border-color: #e2e8f0; -fx-border-radius: 12;");
+        
+        tagsBox.getChildren().addAll(lblStatut, lblCat, lblDate);
+
+        // ── Body (Description Markdown) ──
+        Label descTitle = new Label("Analyse & Description :");
+        descTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #334155; -fx-font-size: 14px;");
+        
+        ScrollPane scrollDesc = new ScrollPane();
+        scrollDesc.setFitToWidth(true);
+        scrollDesc.setStyle("-fx-background-color: transparent; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-padding: 15;");
+        
+        VBox descBox = new VBox(10);
+        descBox.setStyle("-fx-background-color: white;");
+        
+        // Rendu Markdown pour éliminer les astérisques et styliser !
+        if (plan.getDescription() != null && !plan.getDescription().isBlank()) {
+            edu.connection3a36.tools.MarkdownRenderer.render(plan.getDescription(), descBox);
+        } else {
+            Label noDesc = new Label("Aucune description.");
+            noDesc.setStyle("-fx-text-fill: #94a3b8; -fx-font-style: italic;");
+            descBox.getChildren().add(noDesc);
+        }
+        scrollDesc.setContent(descBox);
+
+        // ── Feedback ──
+        VBox fbBox = new VBox(8);
+        Label fbTitle = new Label("💬 Feedback Enseignant :");
+        fbTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #334155; -fx-font-size: 14px;");
+        
+        Label fbText = new Label(plan.getFeedbackEnseignant() != null && !plan.getFeedbackEnseignant().isBlank() ? plan.getFeedbackEnseignant() : "Aucun feedback pour le moment.");
+        fbText.setWrapText(true);
+        fbText.setStyle("-fx-text-fill: " + (plan.getFeedbackEnseignant() != null && !plan.getFeedbackEnseignant().isBlank() ? "#1e293b" : "#94a3b8") + "; -fx-font-style: " + (plan.getFeedbackEnseignant() != null && !plan.getFeedbackEnseignant().isBlank() ? "normal" : "italic") + "; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-padding: 12; -fx-background-radius: 8;");
+        fbBox.getChildren().addAll(fbTitle, fbText);
+
+        content.getChildren().addAll(header, tagsBox, descTitle, scrollDesc, fbBox);
+        VBox.setVgrow(scrollDesc, Priority.ALWAYS);
+        
+        dialog.getDialogPane().setContent(content);
+        
+        ButtonType btnClose = new ButtonType("Fermer l'aperçu", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(btnClose);
+        
+        javafx.scene.Node closeBtn = dialog.getDialogPane().lookupButton(btnClose);
+        if (closeBtn != null) {
+            closeBtn.setStyle("-fx-background-color: #475569; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 24; -fx-background-radius: 6; -fx-cursor: hand;");
+        }
+
+        dialog.showAndWait();
     }
 
     void handleEdit(PlanActions plan) { openForm(plan); }
@@ -379,54 +468,143 @@ public class PlanActionsListController {
         boolean isEnseignant = "ENSEIGNANT".equals(userRole);
 
         Dialog<Boolean> dialog = new Dialog<>();
-        dialog.setTitle(isEnseignant ? "Feedback Enseignant" : "Gestion du Feedback (Admin)");
-        dialog.setHeaderText(isEnseignant ? "Ajouter un feedback" : "Statut du feedback");
+        dialog.setTitle(isEnseignant ? "Feedback Enseignant" : "Gestion du Feedback");
+        dialog.setHeaderText(null);
+        dialog.getDialogPane().setStyle("-fx-background-color: white;");
 
-        VBox content = new VBox(10);
-        content.setPadding(new Insets(15));
-        content.setPrefWidth(440);
+        VBox content = new VBox(20);
+        content.setPadding(new Insets(25));
+        content.setPrefWidth(520);
+
+        // ── Custom Header ──
+        HBox header = new HBox(15);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setStyle("-fx-padding: 0 0 15 0; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;");
+        
+        Label icon = new Label(isEnseignant ? "💬" : "🛡️");
+        icon.setStyle("-fx-font-size: 32px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
+        
+        VBox titleBox = new VBox(4);
+        Label title = new Label(isEnseignant ? "Ajouter un Feedback" : "Aperçu du Feedback");
+        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+        Label subtitle = new Label("Plan d'action : " + (plan.getDecision().length() > 50 ? plan.getDecision().substring(0, 50) + "..." : plan.getDecision()));
+        subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b;");
+        titleBox.getChildren().addAll(title, subtitle);
+        
+        header.getChildren().addAll(icon, titleBox);
+
+        // ── Body ──
+        VBox body = new VBox(15);
 
         TextArea taFeedback = new TextArea();
-        taFeedback.setPromptText("Aucun feedback...");
-        taFeedback.setPrefRowCount(4);
+        taFeedback.setPromptText("Aucun feedback n'a encore été saisi...");
+        taFeedback.setPrefRowCount(5);
         taFeedback.setWrapText(true);
-        if (plan.getFeedbackEnseignant() != null) {
+        if (plan.getFeedbackEnseignant() != null && !plan.getFeedbackEnseignant().isBlank()) {
             taFeedback.setText(plan.getFeedbackEnseignant());
         }
 
         if (isEnseignant) {
-            // Mode Enseignant
             Label lblEval = new Label("Évaluation rapide :");
-            HBox evalBox = new HBox(5);
+            lblEval.setStyle("-fx-font-weight: bold; -fx-text-fill: #334155; -fx-font-size: 14px;");
+            HBox evalBox = new HBox(10);
             String[] evals = {"Insuffisant", "Passable", "Bien", "Excellent"};
             ToggleGroup tg = new ToggleGroup();
             for (String eval : evals) {
                 ToggleButton tb = new ToggleButton(eval);
                 tb.setToggleGroup(tg);
-                tb.setStyle("-fx-font-size: 10px; -fx-padding: 3 6;");
+                tb.setStyle("-fx-font-size: 13px; -fx-padding: 8 16; -fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-background-radius: 8; -fx-cursor: hand; -fx-border-color: #cbd5e1; -fx-border-radius: 8;");
                 tb.selectedProperty().addListener((obs, oldVal, newVal) -> {
-                    if (newVal) taFeedback.appendText(" [" + eval + "]");
+                    if (newVal) {
+                        tb.setStyle("-fx-font-size: 13px; -fx-padding: 8 16; -fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: bold; -fx-border-color: #2563eb; -fx-border-radius: 8;");
+                        taFeedback.appendText(taFeedback.getText().isEmpty() ? "[" + eval + "] " : " [" + eval + "]");
+                    } else {
+                        tb.setStyle("-fx-font-size: 13px; -fx-padding: 8 16; -fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-background-radius: 8; -fx-cursor: hand; -fx-border-color: #cbd5e1; -fx-border-radius: 8;");
+                    }
                 });
                 evalBox.getChildren().add(tb);
             }
-            content.getChildren().addAll(lblEval, evalBox, new Label("Votre retour :"), taFeedback);
+            
+            Label lblRetour = new Label("Votre retour détaillé :");
+            lblRetour.setStyle("-fx-font-weight: bold; -fx-text-fill: #334155; -fx-font-size: 14px;");
+            
+            taFeedback.setStyle("-fx-control-inner-background: #ffffff; -fx-background-radius: 8; -fx-border-color: #94a3b8; -fx-border-radius: 8; -fx-font-size: 14px;");
+            
+            body.getChildren().addAll(lblEval, evalBox, lblRetour, taFeedback);
         } else {
-            // Mode Admin
             taFeedback.setEditable(false);
-            taFeedback.setStyle("-fx-control-inner-background: #f4f4f4;");
-            content.getChildren().addAll(new Label("Feedback enseignant (Lecture Seule) :"), taFeedback);
+            taFeedback.setStyle("-fx-control-inner-background: #f8fafc; -fx-background-color: transparent; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-font-size: 15px; -fx-text-fill: #1e293b;");
+            
+            Label lblDesc = new Label("Observations de l'enseignant (Lecture Seule) :");
+            lblDesc.setStyle("-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 13px; -fx-padding: 0 0 5 0;");
+            
+            body.getChildren().addAll(lblDesc, taFeedback);
         }
 
+        content.getChildren().addAll(header, body);
         dialog.getDialogPane().setContent(content);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        
+        ButtonType btnSaveType = new ButtonType(isEnseignant ? "Publier le feedback" : "Fermer l'aperçu", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().add(btnSaveType);
+        
+        if (isEnseignant) {
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+        }
+        
+        // Custom styling for buttons
+        javafx.scene.Node okBtn = dialog.getDialogPane().lookupButton(btnSaveType);
+        if (okBtn != null) {
+            okBtn.setStyle("-fx-background-color: " + (isEnseignant ? "#0ea5e9" : "#475569") + "; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 24; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 14px;");
+        }
+        
+        if (isEnseignant) {
+            javafx.scene.Node cancelBtn = dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+            if (cancelBtn != null) {
+                cancelBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-padding: 10 24; -fx-cursor: hand; -fx-font-size: 14px;");
+            }
+        }
 
         dialog.setResultConverter(bt -> {
-            if (bt == ButtonType.OK) {
+            if (bt == btnSaveType) {
+                if (!isEnseignant) return true; // Admin just closes
+                
                 try {
-                    if (isEnseignant) {
-                        int userId = SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getId() : 0;
-                        service.addFeedback(plan.getId(), taFeedback.getText().trim(), userId);
-                    }
+                    int userId = SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getId() : 0;
+                    service.addFeedback(plan.getId(), taFeedback.getText().trim(), userId);
+                    
+                    // ─ Auto-notification pour le superadmin ──────────────────────
+                    new Thread(() -> {
+                        try {
+                            edu.connection3a36.services.NotificationService ns = new edu.connection3a36.services.NotificationService();
+                            String profName = SessionManager.getCurrentUser() != null 
+                                    ? (SessionManager.getCurrentUser().getPrenom() + " " + SessionManager.getCurrentUser().getNom()).trim()
+                                    : "Un enseignant";
+                            ns.addFeedbackNotificationForAdmin(plan.getId(), plan.getDecision(), profName);
+                            // ── Email au superadmin ──────────────────────────────────────
+                            try {
+                                edu.connection3a36.services.UtilisateurService us = new edu.connection3a36.services.UtilisateurService();
+                                us.getData().stream()
+                                    .filter(u -> "ADMIN".equals(u.getRole()) || "SUPERADMIN".equals(u.getRole()))
+                                    .forEach(admin -> {
+                                        try {
+                                            emailService.sendNotification(
+                                                admin.getEmail(),
+                                                admin.getPrenom() + " " + admin.getNom(),
+                                                "Feedback enseignant sur Plan #" + plan.getId(),
+                                                profName + " a soumis un feedback sur le plan : \"" + plan.getDecision() + "\""
+                                            );
+                                        } catch (Exception ignored) {}
+                                    });
+                            } catch (Exception ignored) {}
+                            // ─────────────────────────────────────────────────────────────
+                            // Mettre à jour le badge dans MainController
+                            int count = ns.countNonLues();
+                            javafx.application.Platform.runLater(() -> {
+                                if (MainController.getInstance() != null)
+                                    MainController.getInstance().updateNotificationBadge(count);
+                            });
+                        } catch (Exception ignored) {}
+                    }).start();
                     return true;
                 } catch (SQLException e) {
                     AlertUtil.showError("Erreur : " + e.getMessage());
@@ -440,6 +618,85 @@ public class PlanActionsListController {
             AlertUtil.showSuccess("Mise à jour enregistrée avec succès !");
             loadData();
         }
+    }
+
+    /**
+     * Génère automatiquement un article lié à ce plan d'action (Requirement #5)
+     */
+    void handleGenerateArticle(PlanActions plan) {
+        if (!AlertUtil.showConfirmation("Voulez-vous générer un article pédagogique basé sur ce plan d'action ?\nCela prendra quelques secondes.")) {
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                edu.connection3a36.services.GroqService groq = new edu.connection3a36.services.GroqService();
+                String prompt = "Rédige un article pédagogique professionnel basé sur le plan d'action suivant.\n"
+                              + "Titre : " + plan.getDecision() + "\n"
+                              + "Description : " + plan.getDescription();
+                
+                String raw = groq.sendSimpleJsonMessage(
+                        prompt,
+                        "ADMIN",
+                        AIJsonSchemas.ARTICLE
+                );
+                org.json.JSONObject json = AIJsonParser.extractFirstJsonObject(raw);
+                String contenu = AIJsonParser.extractMarkdownContent(raw);
+                String aiTitle = json != null ? json.optString("title", "") : "";
+
+                // 1. Créer l'article
+                edu.connection3a36.entities.ReferenceArticle article = new edu.connection3a36.entities.ReferenceArticle();
+                String finalTitle = !aiTitle.isBlank() ? aiTitle : ("Guide : " + plan.getDecision());
+                article.setTitre(finalTitle.length() > 255 ? finalTitle.substring(0, 255) : finalTitle);
+                article.setContenu(contenu);
+                article.setPublished(true);
+                article.setPlanActionsId(plan.getId());
+                int fallbackCatId = 1;
+                try {
+                    edu.connection3a36.services.CategorieArticleService catServ = new edu.connection3a36.services.CategorieArticleService();
+                    var cats = catServ.getData();
+                    if (!cats.isEmpty()) fallbackCatId = cats.get(0).getId();
+                } catch (Exception ignored) {}
+                article.setCategorieId(fallbackCatId);
+                article.setAuteurId(SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getId() : 1);
+
+                edu.connection3a36.services.ReferenceArticleService articleService = new edu.connection3a36.services.ReferenceArticleService();
+                articleService.addEntity(article);
+
+                // 2. Lier l'article au plan d'action
+                if (article.getId() > 0) {
+                    service.addArticleToPlan(plan.getId(), article.getId());
+                }
+
+                javafx.application.Platform.runLater(() -> {
+                    AlertUtil.showSuccess("L'article a été généré et lié au plan d'action avec succès !");
+                });
+
+                // ── Email notification plan d'action ─────────────────────────
+                try {
+                    edu.connection3a36.entities.Utilisateur currentUser = SessionManager.getCurrentUser();
+                    if (currentUser != null && currentUser.getEmail() != null && !currentUser.getEmail().isBlank()) {
+                        emailService.sendPlanCreatedNotification(
+                            currentUser.getEmail(),
+                            currentUser.getPrenom() + " " + currentUser.getNom(),
+                            plan.getDecision(),
+                            plan.getDescription() != null
+                                ? (plan.getDescription().length() > 300 ? plan.getDescription().substring(0, 300) + "..." : plan.getDescription())
+                                : ""
+                        );
+                        System.out.println("✅ Email plan d'action envoyé à " + currentUser.getEmail());
+                    }
+                } catch (Exception e) {
+                    System.err.println("⚠️ Email plan non envoyé: " + e.getMessage());
+                }
+                // ─────────────────────────────────────────────────────────────
+
+            } catch (Exception ex) {
+                javafx.application.Platform.runLater(() -> {
+                    AlertUtil.showError("Erreur lors de la génération de l'article : " + ex.getMessage());
+                });
+            }
+        }).start();
     }
 
     @FXML

@@ -63,4 +63,25 @@ public class DashboardEnseignantController {
             System.err.println("Erreur chargement dashboard enseignant: " + e.getMessage());
         }
     }
+
+    @FXML
+    void handleGoToPlans() {
+        if (MainController.getInstance() != null) {
+            MainController.getInstance().showPlanActions();
+        }
+    }
+
+    @FXML
+    void handleGoToArticles() {
+        if (MainController.getInstance() != null) {
+            MainController.getInstance().showArticles();
+        }
+    }
+
+    @FXML
+    void handleGoToAtRisk() {
+        if (MainController.getInstance() != null) {
+            MainController.getInstance().showAtRisk();
+        }
+    }
 }

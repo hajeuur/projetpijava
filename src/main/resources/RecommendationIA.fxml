@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.web.WebView?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.connection3a36.controllers.RecommendationIAController"
+      spacing="0" style="-fx-background-color: #f8fafc;" prefWidth="1100" prefHeight="850">
+    
+    <!-- Professional Header (MentorAI Theme) -->
+    <VBox spacing="10" style="-fx-background-color: #102c59; -fx-padding: 25 50;">
+        <HBox alignment="CENTER_LEFT" spacing="20">
+            <Button text="⬅ Retour" onAction="#retourParcours"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-border-color: rgba(255,255,255,0.3); -fx-border-radius: 20; -fx-padding: 5 15; -fx-cursor: hand;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="INTELLIGENCE ARTIFICIELLE" 
+                   style="-fx-background-color: #d52e28; -fx-text-fill: white; -fx-padding: 3 12; -fx-background-radius: 20; -fx-font-size: 10px; -fx-font-weight: bold;"/>
+        </HBox>
+        
+        <HBox spacing="20" alignment="BOTTOM_LEFT">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Assistant de Carrière Intelligent" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                <Label text="Analyse temps réel de vos opportunités sur le marché du travail." style="-fx-font-size: 13px; -fx-text-fill: #9dbbce;"/>
+            </VBox>
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button text="🚀 LANCER L'ANALYSE IA" onAction="#lancerAnalyse"
+                        style="-fx-background-color: #d52e28; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;"/>
+            </HBox>
+        </HBox>
+    </VBox>
+
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+        <VBox spacing="30" style="-fx-padding: 30 50;">
+            
+
+
+            <!-- Results Section -->
+            <VBox spacing="20">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="💼" style="-fx-font-size: 22px;"/>
+                    <Label text="Historique des Opportunités" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #102c59;"/>
+                </HBox>
+                <FlowPane fx:id="flowResults" hgap="25" vgap="25" alignment="TOP_LEFT">
+                    <VBox alignment="CENTER" prefWidth="1000" prefHeight="100">
+                        <Label text="Prêt pour l'analyse ?" style="-fx-text-fill: #94a3b8; -fx-font-size: 16px;"/>
+                    </VBox>
+                </FlowPane>
+            </VBox>
+        </VBox>
+    </ScrollPane>
+
+    <!-- Floating Loading Overlay (Small & Bottom) -->
+    <StackPane fx:id="paneLoading" visible="false" managed="false" maxHeight="50" style="-fx-background-color: #102c59; -fx-background-radius: 10 10 0 0;">
+        <HBox alignment="CENTER" spacing="15">
+            <ProgressIndicator prefWidth="25" prefHeight="25" style="-fx-progress-color: white;"/>
+            <Label text="L'IA étudie les offres Adzuna..." style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+        </HBox>
+    </StackPane>
+
+</VBox>

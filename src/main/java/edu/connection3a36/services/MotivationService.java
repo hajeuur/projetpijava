@@ -2,7 +2,7 @@ package edu.connection3a36.services;
 
 import edu.connection3a36.interfaces.IService;
 import edu.connection3a36.tools.MyConnection;
-import edu.mentorai.entities.Motivation;
+import edu.connection3a36.entities.Motivation;
 
 import java.sql.*;
 import java.time.LocalDate;

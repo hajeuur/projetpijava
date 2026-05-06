@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.shape.Circle?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1" 
+           fx:controller="edu.connection3a36.controllers.CareerDashboardController"
+           style="-fx-background-color: #f1f5f9;">
+
+    <VBox spacing="25" style="-fx-padding: 30;">
+        
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT" spacing="20">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="📊 Dashboard de Carrière IA" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                <Label text="Analyse prédictive basée sur vos projets et compétences réelles." style="-fx-text-fill: #64748b; -fx-font-size: 14px;"/>
+            </VBox>
+            <HBox spacing="10">
+                <Button text="🎙️ Entraînement Interview" onAction="#ouvrirEntretien"
+                        style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <Button text="🔃 Analyser à nouveau" onAction="#refreshAnalysis"
+                        style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;"/>
+            </HBox>
+        </HBox>
+
+        <Separator/>
+
+        <!-- Main Content -->
+        <HBox spacing="30" VBox.vgrow="ALWAYS">
+            
+            <!-- Left: Top Career Card -->
+            <VBox spacing="20" prefWidth="400" style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 5);">
+                <Label text="VOTRE MEILLEUR MATCH" style="-fx-font-weight: bold; -fx-text-fill: #6366f1; -fx-letter-spacing: 1px;"/>
+                
+                <VBox alignment="CENTER" spacing="15">
+                    <StackPane>
+                        <Circle radius="60" fill="#f5f3ff"/>
+                        <Label fx:id="lblTopIcon" text="🚀" style="-fx-font-size: 40px;"/>
+                    </StackPane>
+                    <Label fx:id="lblTopJob" text="..." style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                    <Label fx:id="lblTopScore" text="--%" style="-fx-font-size: 32px; -fx-font-weight: 900; -fx-text-fill: #6366f1;"/>
+                </VBox>
+
+                <VBox spacing="15" style="-fx-background-color: #f8fafc; -fx-padding: 15; -fx-background-radius: 10;">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="💰 Salaire :" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <Label fx:id="lblSalary" text="..." style="-fx-text-fill: #1e293b;"/>
+                    </HBox>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="📈 Demande :" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <Label fx:id="lblDemand" text="..." style="-fx-text-fill: #1e293b;"/>
+                    </HBox>
+                </VBox>
+
+                <VBox VBox.vgrow="ALWAYS"/>
+                <Label text="Conseil IA : Continuez à renforcer vos compétences en Docker et Microservices pour atteindre 95%." 
+                       wrapText="true" style="-fx-text-fill: #64748b; -fx-font-style: italic; -fx-font-size: 12px;"/>
+            </VBox>
+
+            <!-- Right: All Predictions List -->
+            <VBox spacing="15" HBox.hgrow="ALWAYS">
+                <Label text="Autres opportunités analysées" style="-fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-font-size: 16px;"/>
+                
+                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+                    <VBox fx:id="vboxPredictions" spacing="12">
+                        <!-- Items injected here -->
+                    </VBox>
+                </ScrollPane>
+            </VBox>
+        </HBox>
+    </VBox>
+
+    <!-- Overlay Loading -->
+    <VBox fx:id="paneLoading" alignment="CENTER" spacing="20" visible="false" style="-fx-background-color: rgba(255,255,255,0.8); -fx-background-radius: 20;">
+        <ProgressIndicator prefWidth="60" prefHeight="60"/>
+        <Label text="L'IA analyse votre parcours..." style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #6366f1;"/>
+    </VBox>
+
+</StackPane>

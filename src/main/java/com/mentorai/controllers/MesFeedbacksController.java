@@ -4,6 +4,7 @@ import com.mentorai.models.Feedback;
 import com.mentorai.models.Traitement;
 import com.mentorai.services.FeedbackService;
 import com.mentorai.services.TraitementService;
+import com.mentorai.services.PrioriteService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,6 +25,7 @@ public class MesFeedbacksController implements Initializable {
 
     @FXML private TableView<Feedback> tableFeedbacks;
     @FXML private TableColumn<Feedback, Integer> colId;
+    @FXML private TableColumn<Feedback, Void>    colPriorite;
     @FXML private TableColumn<Feedback, String>  colType;
     @FXML private TableColumn<Feedback, String>  colDate;
     @FXML private TableColumn<Feedback, Integer> colNote;
@@ -36,11 +38,12 @@ public class MesFeedbacksController implements Initializable {
     @FXML private ComboBox<String> comboTri;
     @FXML private Label labelTotal;
 
-    private int utilisateurId = 11;
-    private List<Feedback> tousLesFeedbacks;
+    private int utilisateurId = edu.connection3a36.tools.SessionManager.getCurrentUser() != null ? edu.connection3a36.tools.SessionManager.getCurrentUser().getId() : 0;
+    private List<Feedback> tousLesFeedbacks = new java.util.ArrayList<>();
 
     private FeedbackService feedbackService = new FeedbackService();
     private TraitementService traitementService = new TraitementService();
+    private PrioriteService prioriteService = new PrioriteService();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -56,6 +59,15 @@ public class MesFeedbacksController implements Initializable {
 
         // ✅ CORRECTION : message quand table vide
         tableFeedbacks.setPlaceholder(new Label("Aucun feedback trouvé."));
+        
+        // ✅ CHARGER LES DONNÉES
+        chargerDonnees();
+        
+        // ✅ RECHERCHE DYNAMIQUE (temps réel)
+        champRecherche.textProperty().addListener((obs, old, nouveau) -> filtrer());
+        
+        // ✅ TRI DYNAMIQUE
+        comboTri.valueProperty().addListener((obs, old, nouveau) -> filtrer());
     }
 
     public void setUtilisateurId(int id) {
@@ -65,6 +77,28 @@ public class MesFeedbacksController implements Initializable {
 
     private void configurerColonnes() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        
+        // ===== PRIORITÉ badge =====
+        colPriorite.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getIndex() >= getTableView().getItems().size()) {
+                    setGraphic(null);
+                    return;
+                }
+                Feedback f = getTableView().getItems().get(getIndex());
+                String priorite = prioriteService.calculerPriorite(f);
+                String couleur = prioriteService.getCouleurPriorite(priorite);
+                Label badge = new Label(priorite);
+                badge.setStyle("-fx-background-color: " + couleur + "; -fx-text-fill: white;" +
+                        "-fx-padding: 3 8 3 8; -fx-background-radius: 10;" +
+                        "-fx-font-size: 11px; -fx-font-weight: bold;");
+                setGraphic(badge);
+                setText(null);
+            }
+        });
+        
         colDate.setCellValueFactory(new PropertyValueFactory<>("datefeedback"));
         colNote.setCellValueFactory(new PropertyValueFactory<>("note"));
         colMessage.setCellValueFactory(new PropertyValueFactory<>("contenu"));
@@ -220,9 +254,11 @@ public class MesFeedbacksController implements Initializable {
         String motCle = champRecherche.getText().trim().toLowerCase();
         String tri = comboTri.getValue();
 
+        if (tousLesFeedbacks == null) return;
+
         List<Feedback> filtre = tousLesFeedbacks.stream()
                 .filter(f -> motCle.isEmpty() ||
-                        f.getContenu().toLowerCase().contains(motCle))
+                        (f.getContenu() != null && f.getContenu().toLowerCase().contains(motCle)))
                 .collect(Collectors.toList());
 
         switch (tri) {
@@ -248,9 +284,7 @@ public class MesFeedbacksController implements Initializable {
             ModifierFeedbackController ctrl = loader.getController();
             ctrl.setFeedback(feedback, this);
 
-            Stage stage = (Stage) tableFeedbacks.getScene().getWindow();
-            stage.setTitle("MentorAI - Modifier mon feedback");
-            stage.setScene(new Scene(root));
+            edu.connection3a36.controllers.MainController.getInstance().loadInContentArea(root);
         } catch (Exception e) {
             System.out.println("❌ Erreur modification : " + e.getMessage());
             e.printStackTrace();
@@ -277,9 +311,7 @@ public class MesFeedbacksController implements Initializable {
                     getClass().getResource("/fxml/AjouterFeedback.fxml")
             );
             VBox root = loader.load();
-            Stage stage = (Stage) tableFeedbacks.getScene().getWindow();
-            stage.setTitle("MentorAI - Donner un feedback");
-            stage.setScene(new Scene(root));
+            edu.connection3a36.controllers.MainController.getInstance().loadInContentArea(root);
         } catch (Exception e) {
             System.out.println("❌ Erreur : " + e.getMessage());
         }

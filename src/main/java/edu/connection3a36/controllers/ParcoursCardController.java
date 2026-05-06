@@ -50,7 +50,6 @@ public class ParcoursCardController {
 
         lblDescription.setText(p.getDescription());
 
-        // Load related projects
         try {
             List<Projet> projets = projetService.getByParcoursId(p.getId());
             flowPaneProjets.getChildren().clear();
@@ -61,8 +60,7 @@ public class ParcoursCardController {
             } else {
                 for (Projet proj : projets) {
                     Label tag = new Label(proj.getTitre());
-                    tag.setStyle(
-                            "-fx-background-color: #f0f4f8; -fx-text-fill: #102c59; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 4; -fx-border-color: #9dbbce; -fx-border-radius: 4;");
+                    tag.setStyle("-fx-background-color: #f0f4f8; -fx-text-fill: #102c59; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 4; -fx-border-color: #9dbbce; -fx-border-radius: 4;");
                     flowPaneProjets.getChildren().add(tag);
                 }
             }
@@ -73,16 +71,16 @@ public class ParcoursCardController {
 
     @FXML
     private void modifierParcours() {
-        mainController.modifierParcoursSpecific(parcours);
+        mainController.modifierParcours(parcours);
     }
 
     @FXML
     private void supprimerParcours() {
-        mainController.supprimerParcoursSpecific(parcours);
+        mainController.supprimerParcours(parcours);
     }
 
     @FXML
     private void voirProjets() {
-        mainController.voirProjetsSpecific(parcours);
+        mainController.voirProjets(parcours);
     }
 }

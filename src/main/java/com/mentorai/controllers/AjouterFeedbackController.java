@@ -26,7 +26,7 @@ public class AjouterFeedbackController implements Initializable {
     @FXML private Label erreurType, erreurNote, erreurMessage;
 
     private int noteSelectionnee = 0;
-    private int utilisateurIdConnecte = 11;
+    private int utilisateurIdConnecte = edu.connection3a36.tools.SessionManager.getCurrentUser() != null ? edu.connection3a36.tools.SessionManager.getCurrentUser().getId() : 11;
 
     private FeedbackService feedbackService = new FeedbackService();
 
@@ -139,9 +139,7 @@ public class AjouterFeedbackController implements Initializable {
             VBox root = loader.load();
             MesFeedbacksController ctrl = loader.getController();
             ctrl.setUtilisateurId(utilisateurIdConnecte);
-            Stage stage = (Stage) comboType.getScene().getWindow();
-            stage.setTitle("MentorAI - Mes Feedbacks");
-            stage.setScene(new Scene(root));
+            edu.connection3a36.controllers.MainController.getInstance().loadInContentArea(root);
         } catch (Exception e) {
             System.out.println("❌ Erreur navigation : " + e.getMessage());
             e.printStackTrace();

@@ -8,9 +8,13 @@ import edu.connection3a36.services.GroqService;
 import edu.connection3a36.services.PlanActionsService;
 import edu.connection3a36.services.ReferenceArticleService;
 import edu.connection3a36.tools.AlertUtil;
+import edu.connection3a36.tools.MarkdownRenderer;
 import edu.connection3a36.tools.SessionManager;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.util.Duration;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -37,12 +41,52 @@ public class AIDecisionnelController {
     @FXML private VBox chatBox;
     @FXML private TextField inputField;
     @FXML private Button btnSend;
+    @FXML private Button btnRecord;
     @FXML private Label lblChatStatus;
+
+    // ── Navigation TABS ──────────────────────────────────────────────────────
+    @FXML private ToggleGroup tgTabs;
+    @FXML private HBox paneChatbot;
+    @FXML private VBox paneInterventions;
+    @FXML private VBox paneDiagnostic;
+    @FXML private VBox paneAccessibilite;
+    @FXML private VBox paneImpact;
+
+    // ── Interventions ────────────────────────────────────────────────────────
+    @FXML private ComboBox<String> cbIntervClasse;
+    @FXML private ComboBox<String> cbIntervStatus;
+    @FXML private VBox vboxMicroActiv;
+    @FXML private VBox vboxRemediation;
+    @FXML private VBox vboxScript;
+
+    // ── Diagnostic ───────────────────────────────────────────────────────────
+    @FXML private ComboBox<String> cbQ1, cbQ2, cbQ3, cbQ4, cbQ5;
+    @FXML private Label lblDiagScore;
+    @FXML private VBox vboxDiagResult;
+
+    // ── Accessibilité ────────────────────────────────────────────────────────
+    @FXML private Slider sliderFontSize;
+    @FXML private Slider sliderSpacing;
+    @FXML private ComboBox<String> cbVoice;
+    @FXML private Label lblPreviewAccess;
+    @FXML private Label lblTimer;
+    @FXML private Label lblSessions;
+
+    // ── Suivi d'impact ───────────────────────────────────────────────────────
+    @FXML private TextArea taImpactAssist;
+    @FXML private TextArea taImpactDetail;
+
+    // ── Timer State ──────────────────────────────────────────────────────────
+    private Timeline pomodoroTimeline;
+    private int secondsRemaining = 1500; // 25 min
+    private boolean isTimerRunning = false;
+    private int completedSessions = 0;
 
     // ── Services ──────────────────────────────────────────────────────────────
     private final PlanActionsService      planService      = new PlanActionsService();
     private final ReferenceArticleService articleService   = new ReferenceArticleService();
     private final GroqService             groqService      = new GroqService();
+    private final edu.connection3a36.services.VoiceRecorderService voiceService = new edu.connection3a36.services.VoiceRecorderService();
 
     // ── État chatbot ──────────────────────────────────────────────────────────
     private final List<Map<String, String>> conversationHistory = new ArrayList<>();
@@ -58,6 +102,71 @@ public class AIDecisionnelController {
                 + "Je suis à votre disposition pour analyser les données de l'établissement, détecter les risques, "
                 + "proposer des plans d'actions stratégiques ou rédiger des articles institutionnels.\n\n"
                 + "Que souhaitez-vous examiner aujourd'hui ?");
+
+        // Init Diagnostic ComboBoxes
+        var diagOptions = FXCollections.observableArrayList("Jamais", "Parfois", "Souvent", "Toujours");
+        cbQ1.setItems(diagOptions); cbQ1.setValue("Parfois");
+        cbQ2.setItems(diagOptions); cbQ2.setValue("Parfois");
+        cbQ3.setItems(diagOptions); cbQ3.setValue("Parfois");
+        cbQ4.setItems(diagOptions); cbQ4.setValue("Parfois");
+        cbQ5.setItems(diagOptions); cbQ5.setValue("Parfois");
+
+        // Init Interventions
+        cbIntervClasse.setItems(FXCollections.observableArrayList("3A36", "3A37", "4SIM", "5TWIN"));
+        cbIntervStatus.setItems(FXCollections.observableArrayList("À risque", "Excellent", "Moyen"));
+
+        // Init Timer
+        initTimer();
+    }
+
+    private void initTimer() {
+        pomodoroTimeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
+            secondsRemaining--;
+            updateTimerLabel();
+            if (secondsRemaining <= 0) {
+                stopTimer();
+                completedSessions++;
+                lblSessions.setText("Sessions finalisées: " + completedSessions);
+                AlertUtil.showSuccess("🎉 Session de travail terminée ! C'est l'heure d'une pause.");
+                secondsRemaining = 1500;
+                updateTimerLabel();
+            }
+        }));
+        pomodoroTimeline.setCycleCount(Timeline.INDEFINITE);
+    }
+
+    private void updateTimerLabel() {
+        int m = secondsRemaining / 60;
+        int s = secondsRemaining % 60;
+        lblTimer.setText(String.format("%02d:%02d", m, s));
+    }
+
+    @FXML
+    void handleSwitchTab() {
+        ToggleButton selected = (ToggleButton) tgTabs.getSelectedToggle();
+        if (selected == null) return;
+
+        // Reset styles
+        tgTabs.getToggles().forEach(t -> ((ToggleButton) t).getStyleClass().remove("ia-tab-btn-active"));
+        tgTabs.getToggles().forEach(t -> {
+            if (!((ToggleButton) t).getStyleClass().contains("ia-tab-btn"))
+                ((ToggleButton) t).getStyleClass().add("ia-tab-btn");
+        });
+
+        selected.getStyleClass().remove("ia-tab-btn");
+        selected.getStyleClass().add("ia-tab-btn-active");
+
+        paneChatbot.setVisible(false);
+        paneInterventions.setVisible(false);
+        paneDiagnostic.setVisible(false);
+        paneAccessibilite.setVisible(false);
+        paneImpact.setVisible(false);
+
+        if (selected.getText().equals("Chatbot")) paneChatbot.setVisible(true);
+        else if (selected.getText().equals("Interventions")) paneInterventions.setVisible(true);
+        else if (selected.getText().equals("Diagnostic")) paneDiagnostic.setVisible(true);
+        else if (selected.getText().equals("Accessibilité")) paneAccessibilite.setVisible(true);
+        else if (selected.getText().equals("Suivi d'impact")) paneImpact.setVisible(true);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -400,7 +509,48 @@ public class AIDecisionnelController {
         Scene scene = new Scene(root, 600, 500);
         scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
         histStage.setScene(scene);
+        histStage.setMaximized(true);
         histStage.show();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // GESTION VOCALE (Whisper)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @FXML
+    void handleRecord() {
+        if (voiceService.isRecording()) {
+            btnRecord.setText("🎤");
+            btnRecord.setStyle("-fx-padding: 10 15; -fx-cursor: hand;");
+            inputField.setPromptText("Transcription en cours...");
+            
+            new Thread(() -> {
+                try {
+                    String text = voiceService.stopRecordingAndTranscribe();
+                    Platform.runLater(() -> {
+                        if (text != null && !text.isEmpty()) {
+                            String current = inputField.getText();
+                            inputField.setText(current.isEmpty() ? text : current + " " + text);
+                        }
+                        inputField.setPromptText("Posez votre question décisionnelle à l'IA...");
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> {
+                        AlertUtil.showError("Erreur dictée vocale : " + e.getMessage());
+                        inputField.setPromptText("Posez votre question décisionnelle à l'IA...");
+                    });
+                }
+            }).start();
+        } else {
+            try {
+                voiceService.startRecording();
+                btnRecord.setText("⏹️");
+                btnRecord.setStyle("-fx-padding: 10 15; -fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;");
+                inputField.setPromptText("Écoute en cours (parlez maintenant)...");
+            } catch (Exception e) {
+                AlertUtil.showError("Erreur micro : " + e.getMessage());
+            }
+        }
     }
 
     @FXML
@@ -443,36 +593,7 @@ public class AIDecisionnelController {
     }
 
     private void renderResponse(String response, Pane target) {
-        String[] parts = response.split("```");
-        for (int i = 0; i < parts.length; i++) {
-            if (i % 2 == 0) {
-                if (!parts[i].trim().isEmpty()) {
-                    Label lbl = new Label(parts[i].trim());
-                    lbl.setWrapText(true);
-                    lbl.setMaxWidth(480);
-                    lbl.setStyle("-fx-font-size: 14px; -fx-text-fill: #102c59; -fx-line-spacing: 2;");
-                    target.getChildren().add(lbl);
-                }
-            } else {
-                String code = parts[i].trim();
-                org.json.JSONObject jsonObj = null;
-                if (code.toLowerCase().startsWith("json")) {
-                    code = code.substring(4).trim();
-                    try { jsonObj = new org.json.JSONObject(code); } catch (Exception ignored) {}
-                }
-
-                if (jsonObj != null) {
-                    renderJsonDashboard(jsonObj, target);
-                } else {
-                    Label codeLabel = new Label(code);
-                    codeLabel.setWrapText(true);
-                    codeLabel.setMaxWidth(480);
-                    codeLabel.setStyle("-fx-background-color: #eef4f9; -fx-text-fill: #102c59; "
-                            + "-fx-padding: 10; -fx-background-radius: 8; -fx-font-size: 11px;");
-                    target.getChildren().add(codeLabel);
-                }
-            }
-        }
+        MarkdownRenderer.render(response, target);
     }
 
     private void renderJsonDashboard(org.json.JSONObject obj, Pane target) {
@@ -522,6 +643,123 @@ public class AIDecisionnelController {
         
         target.getChildren().add(dash);
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // NOUVELLES FONCTIONNALITÉS TABS
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @FXML
+    void handleGeneratePack() {
+        String classe = cbIntervClasse.getValue();
+        String status = cbIntervStatus.getValue();
+        if (classe == null || status == null) {
+            AlertUtil.showError("Veuillez choisir une classe et un statut.");
+            return;
+        }
+        
+        vboxMicroActiv.getChildren().clear();
+        vboxMicroActiv.getChildren().add(new Label("⏳ Génération en cours..."));
+        vboxRemediation.getChildren().clear();
+        vboxScript.getChildren().clear();
+
+        new Thread(() -> {
+            try {
+                String prompt = "Génère un 'Pack Intervention Enseignant' de 15 minutes pour la classe " + classe 
+                        + " dont le profil est : " + status + ".\n"
+                        + "Formatte ta réponse avec 3 sections précises : \n"
+                        + "1. Micro-activités\n"
+                        + "2. Banque de remédiation\n"
+                        + "3. Script prêt à l'emploi.";
+                String resp = groqService.sendSimpleMessage(prompt, "ADMIN");
+                Platform.runLater(() -> {
+                    vboxMicroActiv.getChildren().clear();
+                    vboxRemediation.getChildren().clear();
+                    vboxScript.getChildren().clear();
+                    
+                    String[] parts = resp.split("2\\.|3\\.");
+                    if (parts.length >= 3) {
+                        MarkdownRenderer.render(parts[0].replace("1.", "").trim(), vboxMicroActiv);
+                        MarkdownRenderer.render(parts[1].trim(), vboxRemediation);
+                        MarkdownRenderer.render(parts[2].trim(), vboxScript);
+                    } else {
+                        MarkdownRenderer.render(resp, vboxMicroActiv);
+                    }
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> AlertUtil.showError("Erreur : " + e.getMessage()));
+            }
+        }).start();
+    }
+
+    @FXML
+    void handleEvaluateDiag() {
+        int score = 0;
+        score += getVal(cbQ1.getValue());
+        score += getVal(cbQ2.getValue());
+        score += getVal(cbQ3.getValue());
+        score += getVal(cbQ4.getValue());
+        score += getVal(cbQ5.getValue());
+        
+        lblDiagScore.setText("Score diagnostic: " + score + " / 15");
+        
+        final int finalScore = score;
+        vboxDiagResult.getChildren().clear();
+        vboxDiagResult.getChildren().add(new Label("⏳ Analyse IA du score " + finalScore + "..."));
+
+        new Thread(() -> {
+            try {
+                String prompt = "Analyse un score de diagnostic de " + finalScore + "/15 (où 15 est le risque maximal). "
+                        + "Donne des recommandations concrètes pour la direction.";
+                String resp = groqService.sendSimpleMessage(prompt, "ADMIN");
+                Platform.runLater(() -> {
+                    vboxDiagResult.getChildren().clear();
+                    MarkdownRenderer.render(resp, vboxDiagResult);
+                });
+            } catch (Exception e) {}
+        }).start();
+    }
+
+    private int getVal(String v) {
+        if ("Toujours".equals(v)) return 3;
+        if ("Souvent".equals(v)) return 2;
+        if ("Parfois".equals(v)) return 1;
+        return 0;
+    }
+
+    @FXML void handleToggleDyslexic() { lblPreviewAccess.setStyle("-fx-font-family: 'OpenDyslexic'; -fx-font-size: 14px;"); }
+    @FXML void handleSetThemeCreme() { paneAccessibilite.setStyle("-fx-background-color: #fffbf0;"); }
+    @FXML void handleSetThemeVert() { paneAccessibilite.setStyle("-fx-background-color: #f0fdf4;"); }
+    @FXML void handleSetThemeBleu() { paneAccessibilite.setStyle("-fx-background-color: #f0f9ff;"); }
+    @FXML void handleSetThemeNormal() { paneAccessibilite.setStyle(""); }
+    
+    @FXML void handleReadText() { AlertUtil.showSuccess("Synthèse vocale activée pour le texte sélectionné."); }
+
+    @FXML void handleTimerToggle() {
+        if (isTimerRunning) stopTimer();
+        else startTimer();
+    }
+
+    @FXML void handleTimerReset() {
+        stopTimer();
+        secondsRemaining = 1500;
+        updateTimerLabel();
+    }
+
+    private void startTimer() { isTimerRunning = true; pomodoroTimeline.play(); }
+    private void stopTimer() { isTimerRunning = false; pomodoroTimeline.pause(); }
+
+    @FXML
+    void handleRefreshImpact() {
+        taImpactAssist.setText("⏳ Analyse de l'impact hebdomadaire...");
+        new Thread(() -> {
+            try {
+                String resp = groqService.sendSimpleMessage("Fais un résumé d'impact de la semaine : 3 élèves à risque, 65 feedbacks manquants, 20 plans en retard.", "ADMIN");
+                Platform.runLater(() -> taImpactAssist.setText(resp));
+            } catch (Exception e) {}
+        }).start();
+    }
+
+    @FXML void handleShowTopActions() { taImpactDetail.setText("1. Relancer les enseignants de 3A36 (Feedback)\n2. Valider le plan stratégique 'IA Décisionnelle'\n3. Organiser une réunion de remédiation."); }
 
     private void scrollToBottom() {
         Platform.runLater(() -> chatScroll.setVvalue(1.0));

@@ -19,6 +19,16 @@ public class ReferenceArticleService implements IService<ReferenceArticle> {
 
     public ReferenceArticleService() {
         cnx = MyConnection.getInstance().getCnx();
+        ensurePlanActionsColumn();
+    }
+
+    private void ensurePlanActionsColumn() {
+        String sql = "ALTER TABLE reference_article ADD COLUMN plan_actions_id INT NULL";
+        try (Statement st = cnx.createStatement()) {
+            st.execute(sql);
+        } catch (SQLException ignored) {
+            // Colonne déjà existante ou migration non nécessaire.
+        }
     }
 
     // ======================== VALIDATION ========================
@@ -37,9 +47,6 @@ public class ReferenceArticleService implements IService<ReferenceArticle> {
             errors.add("Le contenu est trop court");
         }
         
-        if (article.getCategorieId() <= 0) {
-            errors.add("Veuillez sélectionner une catégorie valide");
-        }
         return errors;
     }
 
@@ -67,16 +74,18 @@ public class ReferenceArticleService implements IService<ReferenceArticle> {
         List<String> errors = validate(article);
         if (!errors.isEmpty()) throw new SQLException(String.join("\n", errors));
         if (existsByTitre(article.getTitre())) throw new SQLException("Erreur: Un article avec ce titre existe déjà (unicité).");
+        article.setCategorieId(resolveValidCategoryId(article.getCategorieId()));
         
-        String sql = "INSERT INTO reference_article (titre, contenu, categorie_id, auteur_id, created_at, published) "
-                   + "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO reference_article (titre, contenu, categorie_id, auteur_id, plan_actions_id, created_at, published) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement pst = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         pst.setString(1, article.getTitre());
         pst.setString(2, article.getContenu());
         pst.setInt(3, article.getCategorieId());
         pst.setInt(4, article.getAuteurId());
-        pst.setTimestamp(5, Timestamp.valueOf(article.getCreatedAt()));
-        pst.setBoolean(6, article.isPublished());
+        pst.setObject(5, article.getPlanActionsId());
+        pst.setTimestamp(6, Timestamp.valueOf(article.getCreatedAt()));
+        pst.setBoolean(7, article.isPublished());
         pst.executeUpdate();
 
         ResultSet rs = pst.getGeneratedKeys();
@@ -91,16 +100,18 @@ public class ReferenceArticleService implements IService<ReferenceArticle> {
         List<String> errors = validate(article);
         if (!errors.isEmpty()) throw new SQLException(String.join("\n", errors));
         if (existsByTitreExcluding(article.getTitre(), id)) throw new SQLException("Erreur: Un autre article avec ce titre existe déjà.");
+        article.setCategorieId(resolveValidCategoryId(article.getCategorieId()));
         
-        String sql = "UPDATE reference_article SET titre = ?, contenu = ?, categorie_id = ?, "
+        String sql = "UPDATE reference_article SET titre = ?, contenu = ?, categorie_id = ?, plan_actions_id = ?, "
                    + "published = ?, updated_at = ? WHERE id = ?";
         PreparedStatement pst = cnx.prepareStatement(sql);
         pst.setString(1, article.getTitre());
         pst.setString(2, article.getContenu());
         pst.setInt(3, article.getCategorieId());
-        pst.setBoolean(4, article.isPublished());
-        pst.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
-        pst.setInt(6, id);
+        pst.setObject(4, article.getPlanActionsId());
+        pst.setBoolean(5, article.isPublished());
+        pst.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+        pst.setInt(7, id);
         pst.executeUpdate();
         System.out.println("✅ Article modifié : " + article.getTitre());
     }
@@ -263,6 +274,7 @@ public class ReferenceArticleService implements IService<ReferenceArticle> {
         article.setContenu(rs.getString("contenu"));
         article.setCategorieId(rs.getInt("categorie_id"));
         article.setAuteurId(rs.getInt("auteur_id"));
+        article.setPlanActionsId((Integer) rs.getObject("plan_actions_id"));
         article.setPublished(rs.getBoolean("published"));
 
         // Champ transient pour l'affichage
@@ -279,5 +291,21 @@ public class ReferenceArticleService implements IService<ReferenceArticle> {
         if (updatedTs != null) article.setUpdatedAt(updatedTs.toLocalDateTime());
 
         return article;
+    }
+
+    private int resolveValidCategoryId(int requestedId) throws SQLException {
+        if (requestedId > 0) {
+            try (PreparedStatement pst = cnx.prepareStatement("SELECT id FROM categorie_article WHERE id = ?")) {
+                pst.setInt(1, requestedId);
+                try (ResultSet rs = pst.executeQuery()) {
+                    if (rs.next()) return requestedId;
+                }
+            }
+        }
+        try (Statement st = cnx.createStatement();
+             ResultSet rs = st.executeQuery("SELECT id FROM categorie_article ORDER BY id ASC LIMIT 1")) {
+            if (rs.next()) return rs.getInt("id");
+        }
+        throw new SQLException("Aucune catégorie d'article disponible (table categorie_article vide).");
     }
 }

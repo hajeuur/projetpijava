@@ -1,146 +1,183 @@
 package edu.connection3a36.services;
 
-import edu.mentorai.entities.Etat;
-import edu.mentorai.entities.Objectif;
-import edu.mentorai.entities.Tache;
+import edu.connection3a36.entities.Notification;
+import edu.connection3a36.tools.MyConnection;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 /**
- * Service de notifications deadline.
- * L'envoi email est automatique au chargement de la liste des objectifs
- * si la deadline approche (≤ 3 jours) et des tâches sont non terminées.
+ * Service de gestion des notifications pour le superadmin (ADMINM).
+ * Crée la table si elle n'existe pas (auto-migration).
  */
 public class NotificationService {
 
-    private static final String SMTP_HOST = "smtp.gmail.com";
-    private static final int    SMTP_PORT = 587;
-    private static String SMTP_USER = "";
-    private static String SMTP_PASS = "";
+    private final Connection cnx;
 
-    static {
-        try (java.io.InputStream is = new java.io.FileInputStream("config.properties")) {
-            Properties props = new Properties();
-            props.load(is);
-            if (props.getProperty("SMTP_USER") != null) SMTP_USER = props.getProperty("SMTP_USER");
-            if (props.getProperty("SMTP_PASS") != null) SMTP_PASS = props.getProperty("SMTP_PASS");
-        } catch (Exception ignored) {}
+    public NotificationService() {
+        this.cnx = MyConnection.getInstance().getCnx();
+        ensureTableExists();
     }
 
-    private final TacheService tacheService = new TacheService();
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // VÉRIFICATION DEADLINE
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Retourne un message d'alerte si la deadline est dans ≤ 3 jours
-     * ET qu'il reste des tâches non terminées. Sinon null.
-     */
-    public String verifierDeadline(Objectif objectif, int programmeId) {
-        if (objectif.getDatefin() == null) return null;
-        long joursRestants = ChronoUnit.DAYS.between(LocalDate.now(), objectif.getDatefin());
-        if (joursRestants > 3 || joursRestants < 0) return null;
-        try {
-            List<Tache> taches = tacheService.getByProgramme(programmeId);
-            long nonTerminees = taches.stream().filter(t -> t.getEtat() != Etat.realisee).count();
-            if (nonTerminees == 0) return null;
-            if (joursRestants == 0)
-                return "URGENT : La deadline de \"" + objectif.getTitre()
-                        + "\" est aujourd'hui ! " + nonTerminees + " tache(s) non terminee(s).";
-            return "Il reste " + joursRestants + " jour(s) avant la deadline de \""
-                    + objectif.getTitre() + "\". " + nonTerminees + " tache(s) non terminee(s).";
-        } catch (Exception e) { return null; }
-    }
-
-    /**
-     * Vérifie toutes les deadlines et retourne les messages d'alerte.
-     */
-    public List<String> verifierToutesDeadlines(List<Objectif> objectifs) {
-        List<String> alertes = new ArrayList<>();
-        for (Objectif o : objectifs) {
-            try {
-                if (o.getProgramme() == null) continue;
-                String alerte = verifierDeadline(o, o.getProgramme().getId());
-                if (alerte != null) alertes.add(alerte);
-            } catch (Exception ignored) {}
+    /** Crée la table notification si elle n'existe pas encore. */
+    private void ensureTableExists() {
+        String sql = """
+                CREATE TABLE IF NOT EXISTS notification (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    titre VARCHAR(255) NOT NULL,
+                    message TEXT,
+                    type VARCHAR(20) DEFAULT 'INFO',
+                    is_lu TINYINT(1) DEFAULT 0,
+                    is_done TINYINT(1) DEFAULT 0,
+                    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    auteur_id INT DEFAULT 0
+                )
+                """;
+        try (Statement stmt = cnx.createStatement()) {
+            stmt.execute(sql);
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur création table notification: " + e.getMessage());
         }
-        return alertes;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // ENVOI EMAIL AUTOMATIQUE
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Vérifie toutes les deadlines et envoie automatiquement un email
-     * à l'utilisateur pour chaque objectif en alerte.
-     * Appelé en arrière-plan au chargement de la liste des objectifs.
-     *
-     * @param emailUtilisateur Email de l'utilisateur connecté
-     * @param objectifs        Liste des objectifs de l'utilisateur
-     */
-    public void envoyerAlerteAutomatique(String emailUtilisateur, List<Objectif> objectifs) {
-        if (emailUtilisateur == null || emailUtilisateur.isBlank()) return;
-        if (SMTP_USER.isBlank() || SMTP_PASS.isBlank()) {
-            System.out.println("⚠️ SMTP non configuré — alertes email désactivées.");
-            return;
+    /** Ajoute une nouvelle notification. */
+    public void addNotification(Notification notif) {
+        String sql = "INSERT INTO notification (titre, message, type, is_lu, is_done, date_creation, auteur_id) " +
+                     "VALUES (?, ?, ?, 0, 0, NOW(), ?)";
+        try (PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, notif.getTitre());
+            ps.setString(2, notif.getMessage());
+            ps.setString(3, notif.getType());
+            ps.setInt(4, notif.getAuteurId());
+            ps.executeUpdate();
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) notif.setId(rs.getInt(1));
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur ajout notification: " + e.getMessage());
         }
+    }
 
-        Thread thread = new Thread(() -> {
-            for (Objectif o : objectifs) {
-                try {
-                    if (o.getProgramme() == null) continue;
-                    String alerte = verifierDeadline(o, o.getProgramme().getId());
-                    if (alerte != null) {
-                        envoyerEmail(emailUtilisateur, o, alerte);
-                    }
-                } catch (Exception e) {
-                    System.err.println("⚠️ Erreur envoi email alerte : " + e.getMessage());
-                }
+    /** Raccourci pour créer une notif système rapide. */
+    public void addSystemNotification(String titre, String message, String type) {
+        Notification n = new Notification(titre, message, type);
+        n.setAuteurId(0);
+        addNotification(n);
+    }
+
+    /** Récupère toutes les notifications (les plus récentes en premier). */
+    public List<Notification> getAll() {
+        List<Notification> list = new ArrayList<>();
+        String sql = "SELECT * FROM notification ORDER BY date_creation DESC";
+        try (Statement stmt = cnx.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(mapRow(rs));
             }
-        });
-        thread.setDaemon(true);
-        thread.start();
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur chargement notifications: " + e.getMessage());
+        }
+        return list;
+    }
+
+    /** Récupère uniquement les notifications non lues. */
+    public List<Notification> getNonLues() {
+        List<Notification> list = new ArrayList<>();
+        String sql = "SELECT * FROM notification WHERE is_lu = 0 ORDER BY date_creation DESC";
+        try (Statement stmt = cnx.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur chargement notifs non lues: " + e.getMessage());
+        }
+        return list;
+    }
+
+    /** Compte les notifications non lues. */
+    public int countNonLues() {
+        try (Statement stmt = cnx.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM notification WHERE is_lu = 0")) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur comptage: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    /** Marque une notification comme lue. */
+    public void marquerCommeLue(int id) {
+        try (PreparedStatement ps = cnx.prepareStatement(
+                "UPDATE notification SET is_lu = 1 WHERE id = ?")) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur marquer lue: " + e.getMessage());
+        }
+    }
+
+    /** Marque une notification comme terminée. */
+    public void marquerCommeDone(int id) {
+        try (PreparedStatement ps = cnx.prepareStatement(
+                "UPDATE notification SET is_done = 1, is_lu = 1 WHERE id = ?")) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur marquer done: " + e.getMessage());
+        }
+    }
+
+    /** Marque toutes les notifications comme lues. */
+    public void marquerToutesLues() {
+        try (Statement stmt = cnx.createStatement()) {
+            stmt.executeUpdate("UPDATE notification SET is_lu = 1");
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur marquer toutes lues: " + e.getMessage());
+        }
+    }
+
+    /** Supprime une notification par ID. */
+    public void supprimer(int id) {
+        try (PreparedStatement ps = cnx.prepareStatement(
+                "DELETE FROM notification WHERE id = ?")) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur suppression: " + e.getMessage());
+        }
+    }
+
+    /** Supprime toutes les notifications terminées (done). */
+    public void supprimerDones() {
+        try (Statement stmt = cnx.createStatement()) {
+            stmt.executeUpdate("DELETE FROM notification WHERE is_done = 1");
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur suppression dones: " + e.getMessage());
+        }
     }
 
     /**
-     * Envoie un email de notification deadline via SMTP Gmail.
+     * Notification spécifique pour un feedback enseignant (vers l'admin).
      */
-    public void envoyerEmail(String destinataire, Objectif objectif, String message) throws Exception {
-        Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", SMTP_HOST);
-        props.put("mail.smtp.port", String.valueOf(SMTP_PORT));
-        props.put("mail.smtp.ssl.trust", SMTP_HOST);
+    public void addFeedbackNotificationForAdmin(int planId, String decision, String profName) {
+        String titre = "💬 Feedback de " + profName;
+        String message = "L'enseignant " + profName + " a ajouté un feedback sur le plan #" + planId + " : \"" + decision + "\".";
+        addSystemNotification(titre, message, "FEEDBACK");
+    }
 
-        javax.mail.Session session = javax.mail.Session.getInstance(props, new javax.mail.Authenticator() {
-            @Override
-            protected javax.mail.PasswordAuthentication getPasswordAuthentication() {
-                return new javax.mail.PasswordAuthentication(SMTP_USER, SMTP_PASS);
-            }
-        });
-
-        javax.mail.Message mail = new javax.mail.internet.MimeMessage(session);
-        mail.setFrom(new javax.mail.internet.InternetAddress(SMTP_USER, "MentorAI — Notifications"));
-        mail.setRecipients(javax.mail.Message.RecipientType.TO,
-                javax.mail.internet.InternetAddress.parse(destinataire));
-        mail.setSubject("⏰ Rappel deadline : " + objectif.getTitre());
-
-        String corps = "Bonjour,\n\n"
-                + message + "\n\n"
-                + "Objectif : " + objectif.getTitre() + "\n"
-                + "Deadline : " + (objectif.getDatefin() != null ? objectif.getDatefin() : "Non definie") + "\n\n"
-                + "Connectez-vous a MentorAI pour mettre a jour vos taches.\n\n"
-                + "— L'equipe MentorAI";
-
-        mail.setText(corps);
-        javax.mail.Transport.send(mail);
-        System.out.println("✅ Email alerte envoyé à " + destinataire + " pour : " + objectif.getTitre());
+    private Notification mapRow(ResultSet rs) throws SQLException {
+        Notification n = new Notification();
+        n.setId(rs.getInt("id"));
+        n.setTitre(rs.getString("titre"));
+        n.setMessage(rs.getString("message"));
+        n.setType(rs.getString("type") != null ? rs.getString("type") : "INFO");
+        n.setLu(rs.getBoolean("is_lu"));
+        n.setDone(rs.getBoolean("is_done"));
+        n.setAuteurId(rs.getInt("auteur_id"));
+        Timestamp ts = rs.getTimestamp("date_creation");
+        if (ts != null) n.setDateCreation(ts.toLocalDateTime());
+        return n;
     }
 }

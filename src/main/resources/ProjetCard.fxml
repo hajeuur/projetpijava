@@ -4,9 +4,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="cardRoot" spacing="12" 
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.connection3a36.controllers.ProjetCardController" fx:id="cardRoot" spacing="12" 
       style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5); -fx-border-color: #f1f2f6; -fx-border-radius: 12; -fx-border-width: 1;" 
-      prefWidth="400" maxWidth="400" minHeight="500" fx:controller="edu.connection3a36.controllers.ProjetCardController">
+      prefWidth="400" maxWidth="400" minHeight="500">
     <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
 
     <!-- Top Info Row -->
@@ -53,6 +53,6 @@
         <Button fx:id="btnModifier" text="✎ Modifier" onAction="#modifierProjet" 
                 style="-fx-background-color: #9dbbce; -fx-text-fill: #102c59; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 20; -fx-cursor: hand;" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
         <Button fx:id="btnSupprimer" text="🗑 Supprimer" onAction="#supprimerProjet" 
-                style="-fx-background-color: transparent; -fx-border-color: #e74c3c; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-padding: 8 20; -fx-cursor: hand;" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                style="-fx-background-color: transparent; -fx-border-color: #e74c3c; -fx-border-radius: 8; -fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-padding: 8 20; -fx-cursor: hand;" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
     </HBox>
 </VBox>

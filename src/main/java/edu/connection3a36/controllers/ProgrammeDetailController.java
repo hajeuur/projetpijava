@@ -3,8 +3,10 @@ package edu.connection3a36.controllers;
 import edu.connection3a36.services.*;
 import edu.connection3a36.tools.AlertUtil;
 import edu.connection3a36.tools.ExportUtil;
-import edu.mentorai.entities.*;
+import edu.connection3a36.tools.ToastNotification;
+import edu.connection3a36.entities.*;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -56,6 +58,14 @@ public class ProgrammeDetailController {
     @FXML private Button btnReinitialiser;
     @FXML private Button btnSupprimerToutesTaches;
 
+    // ── Resume IA ─────────────────────────────────────────────────────────────
+    @FXML private VBox    cardResume;
+    @FXML private Label   lblResumeTexte;
+    @FXML private Label   lblResumePointPositif;
+    @FXML private Label   lblResumeConseil;
+    @FXML private Button  btnGenererRapport;
+    @FXML private ProgressIndicator progressResume;
+
     // Tâche en cours de modification (null = ajout)
     private Tache tacheEnEdition = null;
 
@@ -63,15 +73,18 @@ public class ProgrammeDetailController {
     private Programme programme;
     private List<Tache> taches;
     private int scorePrecedent = 0;
-    // Mode lecture seule pour l'admin
     private boolean readOnly = false;
+    // Titres des taches a risque (pour badge 🚨)
+    private List<String> tachesARisque = new java.util.ArrayList<>();
 
     private final ProgrammeService programmeService = new ProgrammeService();
     private final TacheService tacheService = new TacheService();
     private final MotivationService motivationService = new MotivationService();
     private final ScoreService scoreService = new ScoreService();
     private final OllamaService ollamaService = new OllamaService();
-    private final NotificationService notifService = new NotificationService();
+    private final DeadlineNotificationService notifService = new DeadlineNotificationService();
+    private final ResumeService resumeService = new ResumeService();
+    private final RisqueAbandonService risqueService = new RisqueAbandonService();
 
     @FXML
     public void initialize() {
@@ -108,13 +121,13 @@ public class ProgrammeDetailController {
                 programmeService.addForObjectif(programme, o.getId());
             }
             if (programme == null) {
-                AlertUtil.showError("Aucun programme trouve pour cet objectif.");
+                ToastNotification.showError("Programme introuvable", "Aucun programme trouvé pour cet objectif.");
                 return;
             }
             scorePrecedent = programme.getScorePourcentage();
             charger();
         } catch (Exception e) {
-            AlertUtil.showError("Erreur chargement programme : " + e.getMessage());
+            ToastNotification.showError("Chargement programme", e.getMessage());
         }
     }
 
@@ -136,6 +149,8 @@ public class ProgrammeDetailController {
                 : "Cliquez sur 'Rafraichir le message' pour generer un message motivant.");
 
         afficherTaches();
+        // Analyse risque automatique en arriere-plan
+        analyserRisqueAbandon();
     }
 
     private void rafraichirScore() {
@@ -210,54 +225,126 @@ public class ProgrammeDetailController {
         for (Tache t : filtrees) vboxTaches.getChildren().add(buildTacheRow(t));
     }
 
-    private HBox buildTacheRow(Tache t) {
+    private VBox buildTacheRow(Tache t) {
+        VBox card = new VBox(0);
+        card.setStyle("-fx-background-color: " + bgEtat(t.getEtat())
+                + "; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.05), 6, 0, 0, 2);");
+        card.setCursor(javafx.scene.Cursor.HAND);
+
+        // ── Ligne principale (toujours visible) ───────────────────────────────
         HBox row = new HBox(12);
         row.setAlignment(Pos.CENTER_LEFT);
-        row.setPadding(new Insets(12, 18, 12, 18));
-        row.setStyle("-fx-background-color: " + bgEtat(t.getEtat())
-                + "; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.05), 6, 0, 0, 2);");
+        row.setPadding(new Insets(14, 20, 14, 20));
 
         Label lblOrdre = new Label(t.getOrdre() + ".");
-        lblOrdre.setStyle("-fx-font-weight: bold; -fx-text-fill: #aaa; -fx-min-width: 28;");
+        lblOrdre.setStyle("-fx-font-weight: bold; -fx-text-fill: #aaa; -fx-min-width: 28; -fx-font-size: 14px;");
 
-        VBox info = new VBox(3);
         Label lblTitre = new Label(t.getTitre());
-        String titreStyle = "-fx-font-weight: bold; -fx-text-fill: #102c59;";
-        if (t.getEtat() == Etat.realisee) titreStyle += " -fx-strikethrough: true; -fx-text-fill: #aaa;";
+        String titreStyle = "-fx-font-weight: bold; -fx-text-fill: #102c59; -fx-font-size: 13px;";
+        if (t.getEtat() == Etat.realisee)
+            titreStyle = "-fx-font-weight: bold; -fx-text-fill: #aaa; -fx-font-size: 13px; -fx-strikethrough: true;";
         lblTitre.setStyle(titreStyle);
-        info.getChildren().add(lblTitre);
-        if (t.getDescription() != null && !t.getDescription().isBlank()) {
-            Label lblDesc = new Label(t.getDescription());
-            lblDesc.setStyle("-fx-text-fill: #888; -fx-font-size: 11px;");
-            lblDesc.setWrapText(true);
-            info.getChildren().add(lblDesc);
-        }
-        HBox.setHgrow(info, Priority.ALWAYS);
+        lblTitre.setWrapText(true);
+        HBox.setHgrow(lblTitre, Priority.ALWAYS);
+
+        // Icône tiroir
+        Label lblArrow = new Label("▼");
+        lblArrow.setStyle("-fx-text-fill: #aaa; -fx-font-size: 10px;");
 
         Label badge = new Label(labelEtat(t.getEtat()));
         badge.setStyle("-fx-background-color: " + couleurEtat(t.getEtat())
-                + "; -fx-text-fill: white; -fx-background-radius: 50; -fx-padding: 3 10 3 10; -fx-font-size: 10px; -fx-font-weight: bold;");
+                + "; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 4 12 4 12;"
+                + " -fx-font-size: 11px; -fx-font-weight: bold; -fx-min-width: 100; -fx-alignment: CENTER;");
 
-        row.getChildren().addAll(lblOrdre, info, badge);
+        row.getChildren().addAll(lblOrdre, lblTitre, lblArrow);
+
+        // Badge risque — visible uniquement si tache abandonnee a risque
+        if (t.getEtat() == Etat.Abandonner && tachesARisque.contains(t.getTitre())) {
+            Label badgeRisque = new Label("🚨");
+            badgeRisque.setStyle(
+                    "-fx-background-color: #fee2e2; -fx-text-fill: #dc2626;"
+                    + " -fx-background-radius: 6; -fx-padding: 3 8 3 8; -fx-font-size: 13px;");
+            badgeRisque.setTooltip(new Tooltip("Cette tache met en danger votre objectif"));
+            row.getChildren().add(badgeRisque);
+        }
 
         if (!readOnly) {
+            // Spacer pour tout pousser à droite
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
             ComboBox<String> cbEtat = new ComboBox<>();
             cbEtat.getItems().addAll("encours", "realisee", "Abandonner");
             cbEtat.setValue(t.getEtat() != null ? t.getEtat().getValue() : "encours");
+            cbEtat.setPrefWidth(115);
             cbEtat.setStyle("-fx-font-size: 11px; -fx-background-radius: 8;");
             cbEtat.setOnAction(e -> changerEtat(t, cbEtat.getValue()));
 
-            Button btnEdit = new Button("✏️");
-            btnEdit.setStyle("-fx-background-color: transparent; -fx-text-fill: #102c59; -fx-cursor: hand; -fx-font-size: 13px;");
-            btnEdit.setTooltip(new Tooltip("Modifier cette tache"));
+            Button btnEdit = new Button("✎");
+            btnEdit.setStyle(
+                    "-fx-background-color: transparent;"
+                    + " -fx-text-fill: #f59e0b;"
+                    + " -fx-cursor: hand;"
+                    + " -fx-background-radius: 0;"
+                    + " -fx-padding: 4 8 4 8;"
+                    + " -fx-font-size: 16px;"
+                    + " -fx-border-color: transparent;");
+            btnEdit.setTooltip(new Tooltip("Modifier"));
             btnEdit.setOnAction(e -> ouvrirFormModification(t));
 
-            Button btnDel = new Button("✕");
-            btnDel.setStyle("-fx-background-color: transparent; -fx-text-fill: #d52e28; -fx-cursor: hand; -fx-font-weight: bold;");
+            Button btnDel = new Button("🗑");
+            btnDel.setStyle(
+                    "-fx-background-color: transparent;"
+                    + " -fx-text-fill: #dc2626;"
+                    + " -fx-cursor: hand;"
+                    + " -fx-background-radius: 0;"
+                    + " -fx-padding: 4 8 4 8;"
+                    + " -fx-font-size: 16px;"
+                    + " -fx-border-color: transparent;");
+            btnDel.setTooltip(new Tooltip("Supprimer"));
             btnDel.setOnAction(e -> supprimerTache(t));
-            row.getChildren().addAll(cbEtat, btnEdit, btnDel);
+
+            row.getChildren().addAll(spacer, badge, cbEtat, btnEdit, btnDel);
+        } else {
+            HBox.setHgrow(lblTitre, Priority.ALWAYS);
+            row.getChildren().add(badge);
         }
-        return row;
+
+        // ── Panneau description (tiroir, masqué par défaut) ───────────────────
+        VBox descPane = new VBox(6);
+        descPane.setVisible(false);
+        descPane.setManaged(false);
+        descPane.setPadding(new Insets(0, 20, 14, 56));
+        descPane.setStyle("-fx-border-color: transparent transparent transparent #e2e8f0;"
+                + " -fx-border-width: 0 0 0 3;");
+
+        Label lblDescLabel = new Label("Description");
+        lblDescLabel.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #aaa;");
+
+        Label lblDesc = new Label(t.getDescription() != null && !t.getDescription().isBlank()
+                ? t.getDescription() : "Aucune description pour cette tache.");
+        lblDesc.setStyle("-fx-text-fill: #555; -fx-font-size: 12px; -fx-line-spacing: 2;");
+        lblDesc.setWrapText(true);
+
+        descPane.getChildren().addAll(lblDescLabel, lblDesc);
+
+        card.getChildren().addAll(row, descPane);
+
+        // ── Clic sur la carte = toggle tiroir ─────────────────────────────────
+        card.setOnMouseClicked(e -> {
+            // Ignorer les clics sur les boutons/combobox
+            if (e.getTarget() instanceof Button || e.getTarget() instanceof ComboBox
+                    || e.getTarget() instanceof javafx.scene.control.skin.ComboBoxListViewSkin) return;
+
+            boolean ouvert = descPane.isVisible();
+            descPane.setVisible(!ouvert);
+            descPane.setManaged(!ouvert);
+            lblArrow.setText(ouvert ? "▼" : "▲");
+            lblArrow.setStyle(ouvert ? "-fx-text-fill: #aaa; -fx-font-size: 10px;"
+                    : "-fx-text-fill: #102c59; -fx-font-size: 10px; -fx-font-weight: bold;");
+        });
+
+        return card;
     }
 
     private void changerEtat(Tache t, String nouvelEtat) {
@@ -265,10 +352,31 @@ public class ProgrammeDetailController {
             tacheService.updateEtat(t.getId(), nouvelEtat);
             t.setEtat(Etat.fromValue(nouvelEtat));
             scorePrecedent = programme.getScorePourcentage();
-            scoreService.recalculerEtSauvegarder(programme.getId());
+            int nouveauScore = scoreService.recalculerEtSauvegarder(programme.getId());
             rafraichirScore();
             afficherTaches();
-        } catch (Exception e) { AlertUtil.showError("Erreur mise a jour etat : " + e.getMessage()); }
+
+            // Toast selon le nouvel état
+            if ("realisee".equals(nouvelEtat)) {
+                programme = programmeService.getById(programme.getId());
+                Medaille m = programme.getMeilleureMedaille();
+                if (m != null && nouveauScore >= 80) {
+                    ToastNotification.showMedal(ScoreService.emojiMedaille(m) + " — Score : " + nouveauScore + "%");
+                } else if (nouveauScore == 100) {
+                    ToastNotification.showMedal("Objectif atteint à 100% ! Félicitations !");
+                } else {
+                    ToastNotification.showSuccess("Tâche réalisée ✅", "Score mis à jour : " + nouveauScore + "%");
+                }
+            } else if ("Abandonner".equals(nouvelEtat)) {
+                ToastNotification.showWarning("Tâche abandonnée", "\"" + t.getTitre() + "\" marquée comme abandonnée.");
+            }
+
+            // Regénérer automatiquement le message de motivation si le score a changé
+            if (nouveauScore != scorePrecedent && !readOnly) {
+                genererEtAfficherMotivation(true); // toast à chaque nouveau message
+            }
+
+        } catch (Exception e) { ToastNotification.showError("Mise à jour état", e.getMessage()); }
     }
 
     private void supprimerTache(Tache t) {
@@ -276,10 +384,17 @@ public class ProgrammeDetailController {
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.YES) {
                 try {
+                    int scoreAvant = programme.getScorePourcentage();
                     tacheService.deleteEntity(t); taches.remove(t);
-                    scoreService.recalculerEtSauvegarder(programme.getId());
+                    int scoreApres = scoreService.recalculerEtSauvegarder(programme.getId());
                     rafraichirScore(); afficherTaches();
-                } catch (Exception e) { AlertUtil.showError("Erreur suppression : " + e.getMessage()); }
+                    ToastNotification.showInfo("Tâche supprimée", "\"" + t.getTitre() + "\" a été supprimée.");
+                    // Regénérer la motivation si le score a changé
+                    if (scoreApres != scoreAvant) {
+                        scorePrecedent = scoreAvant;
+                        genererEtAfficherMotivation(true);
+                    }
+                } catch (Exception e) { ToastNotification.showError("Erreur suppression", e.getMessage()); }
             }
         });
     }
@@ -294,12 +409,16 @@ public class ProgrammeDetailController {
                         List<String[]> generated = ollamaService.genererTaches(objectif.getTitre(), objectif.getDescription());
                         int startOrdre = taches.size() + 1;
                         for (int i = 0; i < generated.size(); i++) {
-                            Tache t = new Tache(startOrdre + i, generated.get(i)[0], generated.get(i)[1], Etat.Abandonner, programme.getId());
+                            Tache t = new Tache(startOrdre + i, generated.get(i)[0], generated.get(i)[1], Etat.encours, programme.getId());
                             tacheService.addEntity(t); taches.add(t);
                         }
                         scoreService.recalculerEtSauvegarder(programme.getId());
-                        Platform.runLater(() -> { try { rafraichirScore(); } catch (Exception ignored) {} afficherTaches(); AlertUtil.showSuccess(generated.size() + " taches generees !"); });
-                    } catch (Exception e) { Platform.runLater(() -> AlertUtil.showError("Erreur IA : " + e.getMessage())); }
+                        Platform.runLater(() -> {
+                            try { rafraichirScore(); } catch (Exception ignored) {}
+                            afficherTaches();
+                            ToastNotification.showSuccess("IA Ollama", generated.size() + " tâches générées et ajoutées !");
+                        });
+                    } catch (Exception e) { Platform.runLater(() -> ToastNotification.showError("Erreur IA", e.getMessage())); }
                 });
                 thread.setDaemon(true); thread.start();
             }
@@ -334,31 +453,29 @@ public class ProgrammeDetailController {
     @FXML void handleSauvegarderTache() {
         String titre = tfTacheTitre.getText().trim();
         if (titre.isEmpty()) {
-            AlertUtil.showError("Le titre de la tache est obligatoire.");
+            ToastNotification.showWarning("Champ requis", "Le titre de la tâche est obligatoire.");
             return;
         }
         String description = taTacheDescription.getText().trim();
 
         try {
             if (tacheEnEdition == null) {
-                // Ajout — état par défaut : Abandonner
-                Tache t = new Tache(taches.size() + 1, titre, description, Etat.Abandonner, programme.getId());
+                Tache t = new Tache(taches.size() + 1, titre, description, Etat.encours, programme.getId());
                 tacheService.addEntity(t);
                 taches.add(t);
-                AlertUtil.showSuccess("Tache ajoutee avec succes !");
+                ToastNotification.showSuccess("Tâche ajoutée", "\"" + titre + "\" ajoutée au programme.");
             } else {
-                // Modification
                 tacheEnEdition.setTitre(titre);
                 tacheEnEdition.setDescription(description);
                 tacheService.updateEntity(tacheEnEdition.getId(), tacheEnEdition);
-                AlertUtil.showSuccess("Tache modifiee avec succes !");
+                ToastNotification.showSuccess("Tâche modifiée", "\"" + titre + "\" mise à jour.");
             }
             scoreService.recalculerEtSauvegarder(programme.getId());
             fermerFormTache();
             rafraichirScore();
             afficherTaches();
         } catch (Exception e) {
-            AlertUtil.showError("Erreur sauvegarde tache : " + e.getMessage());
+            ToastNotification.showError("Erreur sauvegarde tâche", e.getMessage());
         }
     }
 
@@ -382,17 +499,23 @@ public class ProgrammeDetailController {
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.YES) {
                 try {
+                    int scoreAvant = programme.getScorePourcentage();
                     for (Tache t : taches) { tacheService.updateEtat(t.getId(), Etat.encours.getValue()); t.setEtat(Etat.encours); }
-                    scoreService.recalculerEtSauvegarder(programme.getId());
-                    rafraichirScore(); afficherTaches(); AlertUtil.showSuccess("Taches reinitialises.");
-                } catch (Exception e) { AlertUtil.showError("Erreur : " + e.getMessage()); }
+                    int scoreApres = scoreService.recalculerEtSauvegarder(programme.getId());
+                    rafraichirScore(); afficherTaches();
+                    ToastNotification.showInfo("Réinitialisation", "Toutes les tâches sont remises en cours.");
+                    if (scoreApres != scoreAvant) {
+                        scorePrecedent = scoreAvant;
+                        genererEtAfficherMotivation(true);
+                    }
+                } catch (Exception e) { ToastNotification.showError("Erreur réinitialisation", e.getMessage()); }
             }
         });
     }
 
     @FXML void handleSupprimerToutesTaches() {
         if (readOnly) return;
-        if (taches == null || taches.isEmpty()) { AlertUtil.showError("Aucune tache a supprimer."); return; }
+        if (taches == null || taches.isEmpty()) { ToastNotification.showWarning("Aucune tâche", "Il n'y a aucune tâche à supprimer."); return; }
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
                 "Supprimer TOUTES les taches (" + taches.size() + ") ? Cette action est irreversible.",
                 ButtonType.YES, ButtonType.NO);
@@ -400,34 +523,94 @@ public class ProgrammeDetailController {
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.YES) {
                 try {
+                    int scoreAvant = programme.getScorePourcentage();
                     tacheService.deleteByProgramme(programme.getId());
                     taches.clear();
-                    scoreService.recalculerEtSauvegarder(programme.getId());
+                    int scoreApres = scoreService.recalculerEtSauvegarder(programme.getId());
                     rafraichirScore();
                     afficherTaches();
-                    AlertUtil.showSuccess("Toutes les taches ont ete supprimees.");
-                } catch (Exception e) { AlertUtil.showError("Erreur suppression : " + e.getMessage()); }
+                    ToastNotification.showInfo("Tâches supprimées", "Toutes les tâches ont été supprimées.");
+                    if (scoreApres != scoreAvant) {
+                        scorePrecedent = scoreAvant;
+                        genererEtAfficherMotivation(true);
+                    }
+                } catch (Exception e) { ToastNotification.showError("Erreur suppression", e.getMessage()); }
             }
         });
     }
 
     @FXML void handleRefreshMotivation() {
-        progressMotivation.setVisible(true); progressMotivation.setManaged(true);
-        btnRefreshMotivation.setDisable(true);
-        lblMotivation.setText("Generation en cours...");
+        // Appel manuel → affiche le toast de confirmation
+        genererEtAfficherMotivation(true);
+    }
+
+    /**
+     * Génère un message de motivation via Ollama et l'affiche dans lblMotivation.
+     * Sauvegarde le message en BDD via MotivationService.
+     *
+     * @param avecToast true = affiche un toast INFO après génération (appel manuel),
+     *                  false = silencieux (appel automatique après changement de score)
+     */
+    private void genererEtAfficherMotivation(boolean avecToast) {
+        if (readOnly) return;
+
+        // Afficher le spinner et désactiver le bouton
+        if (progressMotivation != null) { progressMotivation.setVisible(true); progressMotivation.setManaged(true); }
+        if (btnRefreshMotivation != null) btnRefreshMotivation.setDisable(true);
+
+        // Indiquer visuellement que la génération est en cours
+        if (avecToast) {
+            lblMotivation.setText("Génération en cours...");
+        } else {
+            // Mise à jour silencieuse : on garde l'ancien message pendant la génération
+            lblMotivation.setOpacity(0.5);
+        }
+
+        // Capturer les valeurs nécessaires avant le thread
+        final String titreObjectif   = objectif.getTitre();
+        final int    scoreCourant    = programme.getScorePourcentage();
+        final int    scorePrec       = scorePrecedent;
+        final LocalDate deadline     = objectif.getDatefin();
+        final int    programmeId     = programme.getId();
+
         Thread thread = new Thread(() -> {
             try {
-                String message = ollamaService.genererMessageMotivant(objectif.getTitre(),
-                        programme.getScorePourcentage(), scorePrecedent, objectif.getDatefin());
+                // Appel à Ollama pour générer le message
+                String message = ollamaService.genererMessageMotivant(
+                        titreObjectif, scoreCourant, scorePrec, deadline);
+
+                // Sauvegarder en BDD
                 Motivation m = new Motivation();
-                m.setMessagemotivant(message); m.setDategeneration(LocalDate.now()); m.setProgrammeId(programme.getId());
+                m.setMessagemotivant(message);
+                m.setDategeneration(LocalDate.now());
+                m.setProgrammeId(programmeId);
                 motivationService.addEntity(m);
-                Platform.runLater(() -> { lblMotivation.setText(message); progressMotivation.setVisible(false); progressMotivation.setManaged(false); btnRefreshMotivation.setDisable(false); });
+
+                // Mettre à jour l'UI sur le thread JavaFX
+                Platform.runLater(() -> {
+                    lblMotivation.setText(message);
+                    lblMotivation.setOpacity(1.0);
+                    if (progressMotivation != null) { progressMotivation.setVisible(false); progressMotivation.setManaged(false); }
+                    if (btnRefreshMotivation != null) btnRefreshMotivation.setDisable(false);
+                    if (avecToast) {
+                        ToastNotification.showInfo("💬 Message motivant", "Nouveau message généré par l'IA !");
+                    }
+                });
+
             } catch (Exception e) {
-                Platform.runLater(() -> { lblMotivation.setText("Ollama indisponible. Verifiez que le service est demarre."); progressMotivation.setVisible(false); progressMotivation.setManaged(false); btnRefreshMotivation.setDisable(false); });
+                Platform.runLater(() -> {
+                    lblMotivation.setOpacity(1.0);
+                    if (avecToast) {
+                        lblMotivation.setText("Ollama indisponible. Vérifiez que le service est démarré.");
+                        ToastNotification.showWarning("Ollama indisponible", "Vérifiez que le service est démarré.");
+                    }
+                    if (progressMotivation != null) { progressMotivation.setVisible(false); progressMotivation.setManaged(false); }
+                    if (btnRefreshMotivation != null) btnRefreshMotivation.setDisable(false);
+                });
             }
         });
-        thread.setDaemon(true); thread.start();
+        thread.setDaemon(true);
+        thread.start();
     }
 
     @FXML void handleExportExcel() {
@@ -437,8 +620,8 @@ public class ProgrammeDetailController {
         fc.setInitialFileName(objectif.getTitre().replaceAll("[^a-zA-Z0-9]", "_") + ".xlsx");
         File file = fc.showSaveDialog(vboxTaches.getScene().getWindow());
         if (file != null) {
-            try { ExportUtil.exporterExcel(file.getAbsolutePath(), objectif, programme, taches); AlertUtil.showSuccess("Export Excel reussi."); }
-            catch (Exception e) { AlertUtil.showError("Erreur export Excel : " + e.getMessage()); }
+            try { ExportUtil.exporterExcel(file.getAbsolutePath(), objectif, programme, taches); ToastNotification.showSuccess("Export Excel réussi", file.getName() + " sauvegardé."); }
+            catch (Exception e) { ToastNotification.showError("Erreur export Excel", e.getMessage()); }
         }
     }
 
@@ -449,9 +632,80 @@ public class ProgrammeDetailController {
         fc.setInitialFileName(objectif.getTitre().replaceAll("[^a-zA-Z0-9]", "_") + ".docx");
         File file = fc.showSaveDialog(vboxTaches.getScene().getWindow());
         if (file != null) {
-            try { ExportUtil.exporterWord(file.getAbsolutePath(), objectif, programme, taches); AlertUtil.showSuccess("Export Word reussi."); }
-            catch (Exception e) { AlertUtil.showError("Erreur export Word : " + e.getMessage()); }
+            try { ExportUtil.exporterWord(file.getAbsolutePath(), objectif, programme, taches); ToastNotification.showSuccess("Export Word réussi", file.getName() + " sauvegardé."); }
+            catch (Exception e) { ToastNotification.showError("Erreur export Word", e.getMessage()); }
         }
+    }
+
+    // ── Resume IA ─────────────────────────────────────────────────────────────
+
+    @FXML void handleGenererRapport() {
+        if (cardResume == null) return;
+        if (progressResume != null) { progressResume.setVisible(true); progressResume.setManaged(true); }
+        if (btnGenererRapport != null) btnGenererRapport.setDisable(true);
+        if (lblResumeTexte != null) lblResumeTexte.setText("Generation en cours...");
+
+        final String titre = objectif.getTitre();
+        final int score = programme.getScorePourcentage();
+        final List<Tache> snapshot = List.copyOf(taches);
+
+        Task<ResumeService.ResumeResultat> task = new Task<>() {
+            @Override
+            protected ResumeService.ResumeResultat call() {
+                return resumeService.genererResume(titre, score, snapshot);
+            }
+        };
+        task.setOnSucceeded(e -> Platform.runLater(() -> {
+            afficherResume(task.getValue());
+            if (progressResume != null) { progressResume.setVisible(false); progressResume.setManaged(false); }
+            if (btnGenererRapport != null) btnGenererRapport.setDisable(false);
+        }));
+        task.setOnFailed(e -> Platform.runLater(() -> {
+            if (lblResumeTexte != null) lblResumeTexte.setText("Ollama indisponible.");
+            if (progressResume != null) { progressResume.setVisible(false); progressResume.setManaged(false); }
+            if (btnGenererRapport != null) btnGenererRapport.setDisable(false);
+            ToastNotification.showWarning("Ollama indisponible", "Impossible de générer le rapport IA.");
+        }));
+        new Thread(task).start();
+    }
+
+    private void afficherResume(ResumeService.ResumeResultat r) {
+        if (cardResume == null) return;
+        if (lblResumeTexte != null)        lblResumeTexte.setText(r.resume);
+        if (lblResumePointPositif != null) lblResumePointPositif.setText("✅ " + r.pointPositif);
+        if (lblResumeConseil != null)      lblResumeConseil.setText("💡 " + r.conseil);
+        cardResume.setVisible(true);
+        cardResume.setManaged(true);
+    }
+
+    // ── Risque Abandon ────────────────────────────────────────────────────────
+
+    private void analyserRisqueAbandon() {
+        if (taches == null || taches.isEmpty()) return;
+        final List<Tache> snapshot = List.copyOf(taches);
+        final int score = programme.getScorePourcentage();
+        final LocalDate datefin = objectif.getDatefin();
+
+        Task<RisqueAbandonService.RisqueResultat> task = new Task<>() {
+            @Override
+            protected RisqueAbandonService.RisqueResultat call() {
+                return risqueService.analyserRisque(snapshot, score, datefin);
+            }
+        };
+        task.setOnSucceeded(e -> Platform.runLater(() -> {
+            RisqueAbandonService.RisqueResultat r = task.getValue();
+            tachesARisque.clear();
+            tachesARisque.addAll(r.tachesARelancer);
+            afficherTaches();
+            if (r.risque && !r.tachesARelancer.isEmpty()) {
+                int nb = r.tachesARelancer.size();
+                lblAlerte.setText("⚠️ " + nb + " tache(s) abandonnee(s) mettent en danger votre objectif. " + r.conseil);
+                lblAlerte.setVisible(true);
+                lblAlerte.setManaged(true);
+                ToastNotification.showDeadline(nb + " tâche(s) abandonnée(s) menacent votre objectif !");
+            }
+        }));
+        new Thread(task).start();
     }
 
     @FXML void handleRetour() {
@@ -468,9 +722,32 @@ public class ProgrammeDetailController {
     private int etatOrdre(Etat e) { if (e == null) return 1; return switch (e) { case encours -> 0; case realisee -> 1; case Abandonner -> 2; }; }
     private int etatOrdreRealise(Etat e) { if (e == null) return 1; return switch (e) { case realisee -> 0; case encours -> 1; case Abandonner -> 2; }; }
     private int etatOrdreAbandon(Etat e) { if (e == null) return 1; return switch (e) { case Abandonner -> 0; case encours -> 1; case realisee -> 2; }; }
-    private String bgEtat(Etat e) { if (e == null) return "white"; return switch (e) { case realisee -> "#f0fdf4"; case Abandonner -> "#fff5f5"; case encours -> "white"; }; }
-    private String couleurEtat(Etat e) { if (e == null) return "#888"; return switch (e) { case realisee -> "#198754"; case Abandonner -> "#d52e28"; case encours -> "#ffc107"; }; }
-    private String labelEtat(Etat e) { if (e == null) return "En cours"; return switch (e) { case realisee -> "Realisee"; case Abandonner -> "Abandonnee"; case encours -> "En cours"; }; }
+    private String bgEtat(Etat e) {
+        if (e == null) return "white";
+        return switch (e) {
+            case realisee   -> "#f0fdf4";
+            case Abandonner -> "#fff5f5";
+            case encours    -> "#fafbff";
+        };
+    }
+
+    private String couleurEtat(Etat e) {
+        if (e == null) return "#888";
+        return switch (e) {
+            case realisee   -> "#198754";
+            case Abandonner -> "#dc2626";
+            case encours    -> "#f59e0b";
+        };
+    }
+
+    private String labelEtat(Etat e) {
+        if (e == null) return "En cours";
+        return switch (e) {
+            case realisee   -> "✅ Realisee";
+            case Abandonner -> "⛔ Abandonnee";
+            case encours    -> "🔄 En cours";
+        };
+    }
 
     private static void hide(javafx.scene.Node n) {
         if (n != null) { n.setVisible(false); n.setManaged(false); }

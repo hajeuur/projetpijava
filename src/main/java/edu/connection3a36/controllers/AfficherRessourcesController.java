@@ -3,98 +3,105 @@ package edu.connection3a36.controllers;
 import edu.connection3a36.entities.Projet;
 import edu.connection3a36.entities.Ressource;
 import edu.connection3a36.services.RessourceService;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
+import java.awt.Desktop;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class AfficherRessourcesController implements Initializable {
 
-    @FXML
-    private Label lblProjetNom;
-    @FXML
-    private TableView<Ressource> tableRessources;
-    @FXML
-    private TableColumn<Ressource, Integer> colId;
-    @FXML
-    private TableColumn<Ressource, String> colNom;
-    @FXML
-    private TableColumn<Ressource, String> colType;
-    @FXML
-    private TableColumn<Ressource, String> colUrl;
-    @FXML
-    private TableColumn<Ressource, String> colDateCreation;
-    @FXML
-    private ComboBox<String> cbFiltreType;
-
-    @FXML
-    private Button btnAjouter;
-    @FXML
-    private Button btnModifier;
-    @FXML
-    private Button btnSupprimer;
+    @FXML private Label lblProjetNom;
+    @FXML private ComboBox<String> cbFiltreType;
+    @FXML private TableView<Ressource> tableRessources;
+    @FXML private TableColumn<Ressource, Integer> colId;
+    @FXML private TableColumn<Ressource, String> colNom;
+    @FXML private TableColumn<Ressource, String> colType;
+    @FXML private TableColumn<Ressource, String> colUrl;
+    @FXML private TableColumn<Ressource, String> colDateCreation;
+    @FXML private FlowPane flowPaneRessources;
 
     private final RessourceService ressourceService = new RessourceService();
     private Projet projetActuel;
     private ObservableList<Ressource> ressourcesData = FXCollections.observableArrayList();
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+    public void initialize(URL url, ResourceBundle rb) {
+        setupTable();
+        cbFiltreType.setItems(FXCollections.observableArrayList("Tous", "PDF", "VIDEO", "LIEN", "ARTICLE", "AUTRE"));
+        cbFiltreType.setValue("Tous");
+    }
+
+    private void setupTable() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colNom.setCellValueFactory(new PropertyValueFactory<>("nom"));
         colType.setCellValueFactory(new PropertyValueFactory<>("typeRessource"));
         colUrl.setCellValueFactory(new PropertyValueFactory<>("urlRessource"));
-        colDateCreation.setCellValueFactory(cellData -> new SimpleStringProperty(
-                cellData.getValue().getDateCreation() != null ? cellData.getValue().getDateCreation().toString() : ""));
-
-        cbFiltreType.setItems(FXCollections.observableArrayList(
-                "Tous", "PDF", "VIDEO", "LIEN", "ARTICLE", "AUTRE"));
-        cbFiltreType.setValue("Tous");
+        colDateCreation.setCellValueFactory(new PropertyValueFactory<>("dateCreation"));
     }
 
-    public void initData(Projet projet) {
-        this.projetActuel = projet;
-        lblProjetNom.setText("Ressources du projet : " + projet.getTitre());
+    public void initData(Projet p) {
+        this.projetActuel = p;
+        if (lblProjetNom != null) {
+            lblProjetNom.setText("Ressources : " + p.getTitre());
+        }
         chargerDonnees();
     }
 
     private void chargerDonnees() {
         try {
-            List<Ressource> liste = ressourceService.getByProjetId(projetActuel.getId());
-            ressourcesData = FXCollections.observableArrayList(liste);
+            List<Ressource> list = ressourceService.getByProjetId(projetActuel.getId());
+            ressourcesData.setAll(list);
             tableRessources.setItems(ressourcesData);
         } catch (SQLException e) {
-            afficherErreur("Erreur de chargement", e.getMessage());
+            e.printStackTrace();
         }
     }
 
     @FXML
     private void filtrerParType() {
         String type = cbFiltreType.getValue();
-        try {
-            List<Ressource> liste;
-            if (type == null || type.equals("Tous")) {
-                liste = ressourceService.getByProjetId(projetActuel.getId());
-            } else {
-                liste = ressourceService.filterByType(type);
-            }
-            ressourcesData = FXCollections.observableArrayList(liste);
+        if (type == null || type.equals("Tous")) {
             tableRessources.setItems(ressourcesData);
-        } catch (SQLException e) {
-            afficherErreur("Erreur de filtrage", e.getMessage());
+        } else {
+            List<Ressource> filtered = ressourcesData.stream()
+                    .filter(r -> r.getTypeRessource().equalsIgnoreCase(type))
+                    .collect(Collectors.toList());
+            tableRessources.setItems(FXCollections.observableArrayList(filtered));
+        }
+    }
+
+    @FXML
+    private void handleTableClick() {
+        // Optionnel : on pourrait faire quelque chose lors du clic
+    }
+
+    @FXML
+    private void ouvrirLien() {
+        Ressource selected = tableRessources.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getUrlRessource() == null) return;
+        try {
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().browse(new URI(selected.getUrlRessource()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -102,115 +109,57 @@ public class AfficherRessourcesController implements Initializable {
     private void ajouterRessource() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterRessource.fxml"));
-            Parent view = loader.load();
-            AjouterRessourceController controller = loader.getController();
-            controller.initData(projetActuel);
-            ((BorderPane) tableRessources.getScene().getRoot()).setCenter(view);
+            Parent root = loader.load();
+            AjouterRessourceController ctrl = loader.getController();
+            ctrl.initData(projetActuel);
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+            chargerDonnees();
         } catch (IOException e) {
-            afficherErreur("Erreur d'ouverture", e.getMessage());
+            e.printStackTrace();
         }
     }
 
     @FXML
     private void modifierRessource() {
         Ressource selected = tableRessources.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            afficherAvertissement("Sélection requise", "Veuillez sélectionner une ressource à modifier.");
-            return;
-        }
+        if (selected == null) return;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ModifierRessource.fxml"));
-            Parent view = loader.load();
-            ModifierRessourceController controller = loader.getController();
-            controller.initData(selected, projetActuel);
-            ((BorderPane) tableRessources.getScene().getRoot()).setCenter(view);
+            Parent root = loader.load();
+            ModifierRessourceController ctrl = loader.getController();
+            ctrl.initData(selected, projetActuel);
+
+            MainController.getInstance().loadInContentArea(root);
         } catch (IOException e) {
-            afficherErreur("Erreur d'ouverture", e.getMessage());
-        }
-    }
-
-    @FXML
-    private void ouvrirLien() {
-        Ressource selected = tableRessources.getSelectionModel().getSelectedItem();
-        if (selected != null && selected.getUrlRessource() != null && !selected.getUrlRessource().isEmpty()) {
-            try {
-                String url = selected.getUrlRessource().trim();
-                if (!url.startsWith("http"))
-                    url = "http://" + url;
-
-                java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
-            } catch (Exception e) {
-                afficherErreur("Erreur", "Impossible d'ouvrir le lien : " + e.getMessage());
-            }
-        } else {
-            afficherErreur("Attention", "Aucun lien URL disponible pour cette ressource.");
-        }
-    }
-
-    @FXML
-    private void handleTableClick(javafx.scene.input.MouseEvent event) {
-        if (event.getClickCount() == 2) {
-            ouvrirLien();
-        }
-    }
-
-    @FXML
-    private void retour() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherProjets.fxml"));
-            Parent view = loader.load();
-            AfficherProjetsController controller = loader.getController();
-
-            edu.connection3a36.services.ParcoursService ps = new edu.connection3a36.services.ParcoursService();
-            edu.connection3a36.entities.Parcours parc = ps.getById(projetActuel.getParcoursId());
-            controller.initData(parc);
-
-            ((BorderPane) tableRessources.getScene().getRoot()).setCenter(view);
-        } catch (Exception e) {
             e.printStackTrace();
-            afficherErreur("Erreur", "Impossible de retourner aux projets : " + e.getMessage());
         }
     }
 
     @FXML
     private void supprimerRessource() {
         Ressource selected = tableRessources.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            afficherAvertissement("Sélection requise", "Veuillez sélectionner une ressource à supprimer.");
-            return;
-        }
-        Optional<ButtonType> result = new Alert(Alert.AlertType.CONFIRMATION,
-                "Supprimer la ressource \"" + selected.getNom() + "\" ?",
-                ButtonType.YES, ButtonType.NO).showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.YES) {
+        if (selected == null) return;
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment supprimer cette ressource ?", ButtonType.YES, ButtonType.NO);
+        alert.setTitle("Confirmation de suppression");
+        alert.setHeaderText(null);
+
+        if (alert.showAndWait().orElse(ButtonType.NO) == ButtonType.YES) {
             try {
                 ressourceService.deleteEntity(selected);
                 chargerDonnees();
-                afficherInfo("Succès", "Ressource supprimée avec succès.");
             } catch (SQLException e) {
-                afficherErreur("Erreur de suppression", e.getMessage());
+                e.printStackTrace();
             }
         }
     }
 
-    private void afficherErreur(String titre, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(titre);
-        alert.setContentText(message);
-        alert.show();
-    }
-
-    private void afficherAvertissement(String titre, String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(titre);
-        alert.setContentText(message);
-        alert.show();
-    }
-
-    private void afficherInfo(String titre, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(titre);
-        alert.setContentText(message);
-        alert.show();
+    @FXML
+    private void retour() {
+        MainController.getInstance().showProjets();
     }
 }
