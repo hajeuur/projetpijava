@@ -15,6 +15,30 @@ import java.util.List;
  */
 public class UtilisateurRepository implements IUtilisateur {
 
+    public UtilisateurRepository() {
+        // Migration auto : ajoute pdp_url si la colonne n'existe pas encore
+        try {
+            Connection cnx = DatabaseConnection.getInstance();
+            if (cnx != null) {
+                // Vérifie si la colonne existe déjà
+                ResultSet rs = cnx.createStatement().executeQuery(
+                    "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
+                    "WHERE TABLE_SCHEMA = DATABASE() " +
+                    "AND TABLE_NAME = 'utilisateur' " +
+                    "AND COLUMN_NAME = 'pdp_url'"
+                );
+                if (rs.next() && rs.getInt(1) == 0) {
+                    cnx.createStatement().executeUpdate(
+                        "ALTER TABLE utilisateur ADD COLUMN pdp_url VARCHAR(500) NULL"
+                    );
+                    System.out.println("✅ Colonne pdp_url ajoutée à la table utilisateur");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("⚠️ Migration pdp_url : " + e.getMessage());
+        }
+    }
+
     // ── Hachage SHA-256 ───────────────────────────────────────────────────────
 
     private String hashPassword(String password) {
@@ -38,7 +62,7 @@ public class UtilisateurRepository implements IUtilisateur {
     @Override
     public void ajouter(Utilisateur u) {
         Connection cnx = DatabaseConnection.getInstance();
-        String sql = "INSERT INTO utilisateur (nom, prenom, email, mdp, role, status, trust_score, risk_level, flagged_duplicate, login_attempts, registration_ip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO utilisateur (nom, prenom, email, mdp, role, status, trust_score, risk_level, flagged_duplicate, login_attempts, registration_ip, pdp_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, u.getNom());
@@ -52,6 +76,7 @@ public class UtilisateurRepository implements IUtilisateur {
             ps.setInt(9, u.getFlaggedDuplicate());
             ps.setInt(10, u.getLoginAttempts());
             ps.setString(11, u.getRegistrationIp());
+            ps.setString(12, u.getPdpUrl());
             ps.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Erreur ajout : " + e.getMessage());
@@ -61,7 +86,7 @@ public class UtilisateurRepository implements IUtilisateur {
     @Override
     public void modifier(Utilisateur u) {
         Connection cnx = DatabaseConnection.getInstance();
-        String sql = "UPDATE utilisateur SET nom=?, prenom=?, email=?, mdp=?, role=?, status=?, trust_score=?, risk_level=?, flagged_duplicate=?, login_attempts=? WHERE id=?";
+        String sql = "UPDATE utilisateur SET nom=?, prenom=?, email=?, mdp=?, role=?, status=?, trust_score=?, risk_level=?, flagged_duplicate=?, login_attempts=?, pdp_url=? WHERE id=?";
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, u.getNom());
@@ -74,7 +99,8 @@ public class UtilisateurRepository implements IUtilisateur {
             ps.setString(8, u.getRiskLevel());
             ps.setInt(9, u.getFlaggedDuplicate());
             ps.setInt(10, u.getLoginAttempts());
-            ps.setInt(11, u.getId());
+            ps.setString(11, u.getPdpUrl());
+            ps.setInt(12, u.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Erreur modification : " + e.getMessage());

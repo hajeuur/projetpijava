@@ -5,19 +5,25 @@ import com.esprit.services.UtilisateurService;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class ModifierUserController implements Initializable {
 
-    @FXML private TextField prenomField;
-    @FXML private TextField nomField;
-    @FXML private TextField emailField;
+    @FXML private TextField        prenomField;
+    @FXML private TextField        nomField;
+    @FXML private TextField        emailField;
     @FXML private ComboBox<String> roleCombo;
     @FXML private ComboBox<String> statusCombo;
-    @FXML private Label errorLabel;
+    @FXML private Label            errorLabel;
+    @FXML private ImageView        photoView;
+    @FXML private Label            photoPathLabel;
 
     private final UtilisateurService service = new UtilisateurService();
     private Utilisateur utilisateur;
@@ -37,6 +43,41 @@ public class ModifierUserController implements Initializable {
         emailField.setText(u.getEmail());
         roleCombo.setValue(u.getRole());
         statusCombo.setValue(u.getStatus());
+        // Afficher la photo actuelle
+        chargerPhoto(u.getPdpUrl());
+        if (photoPathLabel != null && u.getPdpUrl() != null && !u.getPdpUrl().isBlank()) {
+            photoPathLabel.setText(new File(u.getPdpUrl()).getName());
+        }
+    }
+
+    /** Charge et affiche la photo depuis le chemin absolu. */
+    private void chargerPhoto(String pdpUrl) {
+        if (photoView == null) return;
+        if (pdpUrl != null && !pdpUrl.isBlank()) {
+            File f = new File(pdpUrl);
+            if (f.exists()) {
+                try { photoView.setImage(new Image(f.toURI().toString())); return; } catch (Exception ignored) {}
+            }
+        }
+        // Image par défaut
+        java.net.URL defUrl = getClass().getResource("/com/esprit/views/default_avatar.png");
+        if (defUrl != null) {
+            try { photoView.setImage(new Image(defUrl.toExternalForm())); } catch (Exception ignored) {}
+        }
+    }
+
+    @FXML
+    public void handleChangerPhoto() {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Choisir une photo de profil");
+        fc.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Images", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp"));
+        File file = fc.showOpenDialog((Stage) nomField.getScene().getWindow());
+        if (file != null) {
+            utilisateur.setPdpUrl(file.getAbsolutePath());
+            chargerPhoto(file.getAbsolutePath());
+            if (photoPathLabel != null) photoPathLabel.setText(file.getName());
+        }
     }
 
     @FXML
@@ -56,6 +97,7 @@ public class ModifierUserController implements Initializable {
         utilisateur.setEmail(email);
         utilisateur.setRole(role);
         utilisateur.setStatus(status);
+        // pdp_url déjà mis à jour dans handleChangerPhoto si l'utilisateur a changé la photo
 
         service.modifier(utilisateur);
 

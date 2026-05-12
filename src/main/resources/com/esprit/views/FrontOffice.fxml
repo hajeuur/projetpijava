@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
@@ -31,6 +33,22 @@
 
             <!-- Message bienvenue -->
             <HBox spacing="40" alignment="CENTER_LEFT">
+
+                <!-- Photo de profil circulaire -->
+                <VBox spacing="8" alignment="CENTER">
+                    <StackPane>
+                        <Circle fx:id="photoClip" radius="55" fill="#e0e0e0"/>
+                        <ImageView fx:id="photoView"
+                                   fitWidth="110" fitHeight="110"
+                                   preserveRatio="true"/>
+                    </StackPane>
+                    <Button text="✏️ Modifier ma photo"
+                            onAction="#handleModifierPhoto"
+                            style="-fx-background-color: #3498db; -fx-text-fill: white;
+                                   -fx-background-radius: 20; -fx-padding: 5 12;
+                                   -fx-font-size: 11; -fx-cursor: hand;"/>
+                </VBox>
+
                 <VBox spacing="15" HBox.hgrow="ALWAYS">
                     <Label fx:id="welcomeLabel"
                            style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #1a2a4a;"/>

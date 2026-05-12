@@ -540,13 +540,20 @@ public class MainController {
 
             edu.connection3a36.entities.Utilisateur eduUser = SessionManager.getCurrentUser();
             if (eduUser != null) {
-                com.esprit.models.Utilisateur u = new com.esprit.models.Utilisateur();
-                u.setId(eduUser.getId());
-                u.setNom(eduUser.getNom());
-                u.setPrenom(eduUser.getPrenom());
-                u.setEmail(eduUser.getEmail());
-                u.setRole(eduUser.getRole());
-                u.setStatus("actif"); // Par défaut
+                // Récupérer l'utilisateur complet depuis la base pour avoir pdp_url
+                com.esprit.services.UtilisateurService espritService =
+                        new com.esprit.services.UtilisateurService();
+                com.esprit.models.Utilisateur u = espritService.findByEmail(eduUser.getEmail());
+                if (u == null) {
+                    // Fallback si l'email n'existe pas dans la table com.esprit
+                    u = new com.esprit.models.Utilisateur();
+                    u.setId(eduUser.getId());
+                    u.setNom(eduUser.getNom());
+                    u.setPrenom(eduUser.getPrenom());
+                    u.setEmail(eduUser.getEmail());
+                    u.setRole(eduUser.getRole());
+                    u.setStatus("actif");
+                }
                 ctrl.setUtilisateur(u);
             }
             contentArea.getChildren().setAll(view);
