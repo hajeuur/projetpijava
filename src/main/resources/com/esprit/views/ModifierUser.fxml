@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx"
@@ -14,6 +15,23 @@
         <Label text="Modifier utilisateur"
                style="-fx-text-fill: white; -fx-font-size: 18; -fx-font-weight: bold;"/>
     </VBox>
+
+    <!-- Photo de profil -->
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <ImageView fx:id="photoView"
+                   fitWidth="80" fitHeight="80"
+                   preserveRatio="true"
+                   style="-fx-border-color: #cccccc;"/>
+        <VBox spacing="6">
+            <Label text="Photo de profil" style="-fx-font-weight: bold;"/>
+            <Button text="📷 Changer la photo"
+                    onAction="#handleChangerPhoto"
+                    style="-fx-background-color: #3498db; -fx-text-fill: white;
+                           -fx-background-radius: 6; -fx-padding: 8 14; -fx-cursor: hand;"/>
+            <Label fx:id="photoPathLabel" text=""
+                   style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+        </VBox>
+    </HBox>
 
     <!-- Formulaire -->
     <HBox spacing="15">

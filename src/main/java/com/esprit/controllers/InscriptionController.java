@@ -8,8 +8,12 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -25,6 +29,10 @@ public class InscriptionController implements Initializable {
     @FXML private Label errorLabel;
     @FXML private Label successLabel;
     @FXML private Button googleSignupButton;
+    @FXML private ImageView photoPreview;
+    @FXML private Label photoPathLabel;
+
+    private String selectedPhotoPath = null;
 
     private final UtilisateurService service = new UtilisateurService();
     private BackOfficeController backOfficeController;
@@ -63,6 +71,7 @@ public class InscriptionController implements Initializable {
         }
 
         Utilisateur u = new Utilisateur(nom, prenom, email, service.hashPassword(mdp), role);
+        u.setPdpUrl(selectedPhotoPath);
         service.ajouter(u);
         successLabel.setText("Utilisateur créé avec succès !");
 
@@ -129,9 +138,30 @@ public class InscriptionController implements Initializable {
     }
 
     @FXML
+    public void handleChoisirPhoto() {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Choisir une photo de profil");
+        fc.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Images", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp"));
+        File file = fc.showOpenDialog((Stage) nomField.getScene().getWindow());
+        if (file != null) {
+            selectedPhotoPath = file.getAbsolutePath();
+            if (photoPathLabel != null) photoPathLabel.setText(file.getName());
+            if (photoPreview != null) {
+                try {
+                    photoPreview.setImage(new Image(file.toURI().toString()));
+                } catch (Exception ignored) {}
+            }
+        }
+    }
+
+    @FXML
     public void handleEffacer() {
         prenomField.clear(); nomField.clear(); emailField.clear();
         mdpField.clear(); roleCombo.setValue(null); errorLabel.setText("");
+        selectedPhotoPath = null;
+        if (photoPreview != null) photoPreview.setImage(null);
+        if (photoPathLabel != null) photoPathLabel.setText("Aucune photo choisie");
     }
 
     @FXML
