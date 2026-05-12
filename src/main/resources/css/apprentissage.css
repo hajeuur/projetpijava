@@ -1,109 +1,161 @@
-/* ═══════════════════════════════════════════════════════════
-   apprentissage.css – Service Center UI
-   ═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   apprentissage.css  —  Service Center redesigned to match Feedback premium style
+   Palette : navy #102c59  |  accent red #d52e28  |  page bg #f5f7fa
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-.root-pane {
-    -fx-background-color: linear-gradient(to bottom, #0f2849, #1e3a5f);
-    -fx-font-family: "Segoe UI", system-ui, sans-serif;
+/* ── 1. Root / Page background ─────────────────────────────────────────── */
+.app-root {
+    -fx-background-color: #f5f7fa;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
-.main-scroll {
+/* ── 2. ScrollPane ─────────────────────────────────────────────────────── */
+.app-scroll {
     -fx-background-color: transparent;
     -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
 }
-
-.main-scroll > .viewport {
+.app-scroll > .viewport {
     -fx-background-color: transparent;
 }
 
-/* ── Search Bar ── */
-.search-container {
-    -fx-padding: 20 0 10 0;
+/* ── 3. Header banner — matches Feedback's #102c59 top bar ──────────────── */
+.app-header {
+    -fx-background-color: #102c59;
 }
-
-.search-field {
-    -fx-background-color: rgba(255, 255, 255, 0.1);
-    -fx-background-radius: 20;
-    -fx-border-color: rgba(255, 255, 255, 0.2);
-    -fx-border-radius: 20;
+.header-title {
     -fx-text-fill: white;
-    -fx-prompt-text-fill: rgba(255, 255, 255, 0.5);
-    -fx-padding: 10 20;
-    -fx-font-size: 14px;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+.header-subtitle {
+    -fx-text-fill: #9dbbce;
+    -fx-font-size: 13px;
 }
 
-.search-field:focused {
-    -fx-background-color: rgba(255, 255, 255, 0.15);
-    -fx-border-color: #2a5298;
-}
-
-/* ── Section Titles ── */
-.section-title {
+/* ── 4. Search field inside header ─────────────────────────────────────── */
+.app-search-field {
+    -fx-background-color: rgba(255,255,255,0.10);
+    -fx-background-radius: 50;
+    -fx-border-color: rgba(255,255,255,0.22);
+    -fx-border-radius: 50;
     -fx-text-fill: white;
-    -fx-font-size: 18px;
-    -fx-font-weight: bold;
-    -fx-padding: 30 0 15 0;
+    -fx-prompt-text-fill: rgba(255,255,255,0.50);
+    -fx-padding: 9 18 9 18;
+    -fx-font-size: 13px;
+}
+.app-search-field:focused {
+    -fx-background-color: rgba(255,255,255,0.16);
+    -fx-border-color: #d52e28;
+    -fx-effect: dropshadow(gaussian, rgba(213,46,40,0.30), 6, 0, 0, 0);
 }
 
-.category-title {
-    -fx-text-fill: rgba(255, 255, 255, 0.8);
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
-    -fx-padding: 20 0 10 0;
-}
-
-/* ── Service Card ── */
-.service-card {
-    -fx-background-color: rgba(255, 255, 255, 0.95);
-    -fx-background-radius: 15;
-    -fx-padding: 20;
-    -fx-spacing: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 4);
-    -fx-transition: all 0.3s ease;
-}
-
-.service-card:hover {
+/* ── 5. Section panels (white card containers) ─────────────────────────── */
+.section-panel {
     -fx-background-color: white;
-    -fx-scale-x: 1.02;
-    -fx-scale-y: 1.02;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 6);
+    -fx-background-radius: 10;
+    -fx-padding: 20 22 22 22;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 6, 0, 0, 2);
+}
+.section-panel:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 10, 0, 0, 3);
 }
 
-.card-title {
-    -fx-text-fill: #0f2849;
+/* ── 6. Section header row with left accent bar ─────────────────────────── */
+.section-header {
+    -fx-border-color: #d52e28 transparent transparent transparent;
+    -fx-border-width: 0 0 0 4;
+    -fx-padding: 0 0 0 12;
+}
+
+/* ── 7. Section title typography ────────────────────────────────────────── */
+.section-title {
+    -fx-text-fill: #102c59;
     -fx-font-size: 16px;
     -fx-font-weight: bold;
 }
+.category-title {
+    -fx-text-fill: #102c59;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.category-icon {
+    -fx-font-size: 18px;
+}
 
+/* ── 8. Horizontal card row ─────────────────────────────────────────────── */
+.h-card-row {
+    -fx-padding: 4 0 4 0;
+}
+
+/* ── 9. Service cards — built dynamically by controller ────────────────── */
+/*
+   The controller adds styleClass "service-card", "card-title",
+   "card-description", and "btn-open" programmatically.
+   These rules style those classes.
+*/
+.service-card {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 10;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 18 18 16 18;
+    -fx-spacing: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 4, 0, 0, 1);
+    -fx-cursor: default;
+}
+.service-card:hover {
+    -fx-background-color: white;
+    -fx-border-color: #cbd5e1;
+    -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.13), 10, 0, 0, 3);
+    -fx-scale-x: 1.015;
+    -fx-scale-y: 1.015;
+}
+
+.card-title {
+    -fx-text-fill: #102c59;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
 .card-description {
     -fx-text-fill: #64748b;
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
     -fx-line-spacing: 2;
 }
 
-/* ── Buttons ── */
+/* ── 10. Card open button — pill shape matching Feedback ─────────────────── */
 .btn-open {
-    -fx-background-color: #2a5298;
+    -fx-background-color: #102c59;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 12px;
-    -fx-background-radius: 8;
-    -fx-padding: 8 16;
+    -fx-background-radius: 50;
+    -fx-padding: 8 20 8 20;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.28), 4, 0, 0, 1);
 }
-
 .btn-open:hover {
-    -fx-background-color: #1e3d7a;
+    -fx-background-color: #0d2247;
+    -fx-effect: dropshadow(gaussian, rgba(16,44,89,0.40), 7, 0, 0, 2);
+}
+.btn-open:pressed {
+    -fx-background-color: #091b38;
 }
 
-/* ── Grid/Container Spacing ── */
+/* ── 11. FlowPane grid ──────────────────────────────────────────────────── */
+.card-grid {
+    -fx-padding: 4 0 0 0;
+}
+
+/* ── 12. Grid/container legacy aliases (safety net) ────────────────────── */
 .horizontal-container {
-    -fx-spacing: 20;
-    -fx-padding: 5 5 15 5;
+    -fx-spacing: 16;
+    -fx-padding: 4 0 4 0;
 }
-
 .grid-container {
-    -fx-hgap: 20;
-    -fx-vgap: 20;
-    -fx-padding: 5;
+    -fx-hgap: 16;
+    -fx-vgap: 16;
+    -fx-padding: 4 0 0 0;
 }

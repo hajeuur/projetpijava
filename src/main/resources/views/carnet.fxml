@@ -9,121 +9,144 @@
             fx:controller="com.mentorai.controllers.CarnetController"
             stylesheets="@/css/carnet.css">
 
-    <!-- LEFT -->
+    <!-- ═══════════════════════════════════════════════════════════
+         TOP  —  navy banner matching Feedback's #102c59 bar
+         ═══════════════════════════════════════════════════════════ -->
+    <top>
+        <HBox styleClass="carnet-header" alignment="CENTER_LEFT" spacing="16">
+            <padding><Insets top="18" right="24" bottom="18" left="24"/></padding>
+            <VBox spacing="3" HBox.hgrow="ALWAYS">
+                <Label text="📓  Carnet de notes" styleClass="carnet-header-title" />
+                <Label text="Rédigez, organisez et retrouvez vos notes en un instant"
+                       styleClass="carnet-header-sub" />
+            </VBox>
+        </HBox>
+    </top>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LEFT  —  sidebar: search + filter + notes list
+         ═══════════════════════════════════════════════════════════ -->
     <left>
-        <VBox spacing="10" prefWidth="280" styleClass="left-panel">
-            <padding>
-                <Insets top="15" right="10" bottom="15" left="10"/>
-            </padding>
+        <VBox styleClass="sidebar-panel" spacing="10" prefWidth="280">
+            <padding><Insets top="16" right="12" bottom="16" left="12"/></padding>
 
+            <!-- Search -->
             <TextField fx:id="searchField"
-                       promptText="Rechercher..."
-                       styleClass="search-field"/>
+                       promptText="🔍  Rechercher une note..."
+                       styleClass="sidebar-search" />
 
-            <!-- FILTER -->
-            <HBox spacing="10">
-                <Label text="Afficher :" />
-                <ComboBox fx:id="filterCombo"/>
+            <!-- Filter row -->
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="Afficher :" styleClass="filter-label" />
+                <ComboBox fx:id="filterCombo" styleClass="filter-combo"
+                          HBox.hgrow="ALWAYS" maxWidth="Infinity" />
             </HBox>
 
+            <!-- Divider -->
+            <Separator styleClass="sidebar-divider" />
+
+            <!-- Notes list -->
             <ListView fx:id="notesListView"
                       VBox.vgrow="ALWAYS"
-                      styleClass="notes-list"/>
+                      styleClass="notes-list" />
 
-            <Label fx:id="noteCountLabel"/>
+            <!-- Count badge -->
+            <Label fx:id="noteCountLabel" styleClass="note-count-badge" />
         </VBox>
     </left>
 
-    <!-- CENTER -->
+    <!-- ═══════════════════════════════════════════════════════════
+         CENTER  —  note editor panel
+         ═══════════════════════════════════════════════════════════ -->
     <center>
-        <VBox spacing="10" styleClass="right-panel">
-            <padding>
-                <Insets top="15" right="15" bottom="15" left="15"/>
-            </padding>
+        <VBox styleClass="editor-panel" spacing="0">
 
-            <!-- TITLE -->
-            <TextField fx:id="titreField"
-                       promptText="Titre"
-                       styleClass="title-field"/>
+            <!-- ── Editor top bar ── -->
+            <HBox styleClass="editor-topbar" alignment="CENTER_LEFT" spacing="12">
+                <padding><Insets top="12" right="20" bottom="12" left="20"/></padding>
 
-            <!-- 🔴 ERROR TITRE -->
-            <Label fx:id="titreError"
-                   textFill="red"
-                   visible="false"
-                   managed="false"/>
+                <!-- Title field -->
+                <TextField fx:id="titreField"
+                           promptText="Titre de la note"
+                           styleClass="editor-title-field"
+                           HBox.hgrow="ALWAYS" />
 
-            <!-- COLOR + VISIBILITY -->
-            <HBox spacing="10">
-
-                <ColorPicker fx:id="colorPicker"/>
-
-                <ComboBox fx:id="visibiliteCombo"/>
-
+                <!-- Color + Visibility row inline -->
+                <ColorPicker fx:id="colorPicker" styleClass="note-color-picker" />
+                <ComboBox fx:id="visibiliteCombo" styleClass="visibility-combo"
+                          prefWidth="110" />
             </HBox>
 
-            <!-- 🔴 ERROR VISIBILITE -->
-            <Label fx:id="visibiliteError"
-                   textFill="red"
-                   visible="false"
-                   managed="false"/>
+            <!-- Validation errors for titre and visibilite -->
+            <VBox styleClass="validation-row" spacing="4">
+                <padding><Insets top="0" right="20" bottom="0" left="20"/></padding>
+                <Label fx:id="titreError"
+                       styleClass="field-error"
+                       visible="false" managed="false" />
+                <Label fx:id="visibiliteError"
+                       styleClass="field-error"
+                       visible="false" managed="false" />
+            </VBox>
 
-            <!-- CONTENT -->
+            <!-- ── Content editor ── -->
             <TextArea fx:id="contenuEditor"
                       wrapText="true"
                       VBox.vgrow="ALWAYS"
                       promptText="Écrire votre note ici..."
-                      styleClass="html-editor"/>
+                      styleClass="note-editor" />
 
-            <!-- 🔴 ERROR CONTENU -->
-            <Label fx:id="contenuError"
-                   textFill="red"
-                   visible="false"
-                   managed="false"/>
+            <!-- Contenu validation error -->
+            <VBox styleClass="validation-row" spacing="0">
+                <padding><Insets top="0" right="20" bottom="0" left="20"/></padding>
+                <Label fx:id="contenuError"
+                       styleClass="field-error"
+                       visible="false" managed="false" />
+            </VBox>
 
-            <!-- GENERAL ERROR -->
+            <!-- General error banner -->
             <Label fx:id="errorLabel"
-                   visible="false"
-                   managed="false"
-                   styleClass="error-label"/>
+                   visible="false" managed="false"
+                   styleClass="error-banner" />
 
-            <!-- BUTTONS -->
-            <HBox spacing="10">
+            <!-- ── Footer: action buttons ── -->
+            <HBox styleClass="editor-footer-bar" alignment="CENTER_LEFT" spacing="10">
+                <padding><Insets top="12" right="20" bottom="12" left="20"/></padding>
 
                 <Button fx:id="btnAjouter"
-                        text="Ajouter"
+                        text="➕  Ajouter"
                         onAction="#handleAjouter"
-                        styleClass="btn-primary"/>
+                        styleClass="btn-primary-pill" />
 
                 <Button fx:id="btnModifier"
-                        text="Modifier"
+                        text="✏️  Modifier"
                         onAction="#handleModifier"
-                        styleClass="btn-secondary"/>
+                        styleClass="btn-outline-pill" />
 
                 <Button fx:id="btnSupprimer"
-                        text="Supprimer"
+                        text="🗑  Supprimer"
                         onAction="#handleSupprimer"
-                        styleClass="btn-danger"/>
+                        styleClass="btn-danger-pill" />
 
-                <Button text="Enregistrer"
+                <Button text="💾  Enregistrer"
                         onAction="#handleEnregistrer"
-                        styleClass="btn-save"/>
+                        styleClass="btn-save-pill" />
 
                 <Button fx:id="btnAnnuler"
                         text="Annuler"
                         onAction="#handleAnnuler"
-                        styleClass="btn-outline"
-                        visible="false"
-                        managed="false"/>
+                        styleClass="btn-ghost-pill"
+                        visible="false" managed="false" />
 
                 <Button fx:id="btnLierPlanning"
-                        text="📅 Lier à un planning"
+                        text="📅  Lier à un planning"
                         onAction="#handleLierPlanning"
-                        styleClass="btn-outline"
-                        visible="false"
-                        managed="false"/>
-            </HBox>
+                        styleClass="btn-ghost-pill"
+                        visible="false" managed="false" />
 
-            <Label fx:id="editorStatusLabel"/>
+                <Region HBox.hgrow="ALWAYS" />
+
+                <Label fx:id="editorStatusLabel" styleClass="editor-status-label" />
+            </HBox>
 
         </VBox>
     </center>

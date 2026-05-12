@@ -7,75 +7,106 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.mentorai.controllers.ApprentissageController"
-            styleClass="root-pane"
+            styleClass="app-root"
             stylesheets="@../css/apprentissage.css">
 
+    <!-- ═══════════════════════════════════════════════════════════
+         HEADER  —  navy banner matching Feedback's #102c59 bar
+         ═══════════════════════════════════════════════════════════ -->
     <top>
-        <VBox styleClass="header" spacing="10">
-            <padding><Insets top="30" right="40" bottom="20" left="40"/></padding>
+        <VBox styleClass="app-header">
             <HBox alignment="CENTER_LEFT" spacing="20">
-                <VBox>
-                    <Label text="Centre d'apprentissage" styleClass="header-subtitle" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" />
-                    <Label text="Explorez vos outils d'apprentissage personnalisés" styleClass="header-greeting" style="-fx-text-fill: rgba(255,255,255,0.6);" />
+                <padding><Insets top="22" right="28" bottom="22" left="28"/></padding>
+
+                <!-- Title block -->
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label text="Centre d'apprentissage"
+                           styleClass="header-title" />
+                    <Label text="Explorez vos outils d'apprentissage personnalisés"
+                           styleClass="header-subtitle" />
                 </VBox>
-                <HBox HBox.hgrow="ALWAYS" />
-                <VBox alignment="CENTER_RIGHT" prefWidth="350" styleClass="search-container">
-                    <TextField fx:id="searchField" promptText="Rechercher un service..." styleClass="search-field" onKeyReleased="#handleSearch" />
-                </VBox>
+
+                <!-- Search field -->
+                <TextField fx:id="searchField"
+                           promptText="🔍  Rechercher un service..."
+                           styleClass="app-search-field"
+                           onKeyReleased="#handleSearch"
+                           prefWidth="280" />
             </HBox>
         </VBox>
     </top>
 
+    <!-- ═══════════════════════════════════════════════════════════
+         CENTER  —  scrollable content panels
+         ═══════════════════════════════════════════════════════════ -->
     <center>
-        <ScrollPane fitToWidth="true" styleClass="main-scroll">
-            <VBox spacing="30">
-                <padding><Insets top="20" right="40" bottom="40" left="40"/></padding>
+        <ScrollPane fitToWidth="true" styleClass="app-scroll">
+            <VBox spacing="28">
+                <padding><Insets top="24" right="28" bottom="32" left="28"/></padding>
 
-                <!-- Recommended Section -->
-                <VBox spacing="15">
-                    <Label text="Recommandés pour vous" styleClass="section-title" />
-                    <HBox fx:id="recommendedContainer" styleClass="horizontal-container" />
+                <!-- ── Recommandés ─────────────────────────────────────── -->
+                <VBox styleClass="section-panel" spacing="14">
+                    <!-- Section header with left accent border -->
+                    <HBox styleClass="section-header" alignment="CENTER_LEFT">
+                        <padding><Insets top="0" right="0" bottom="0" left="0"/></padding>
+                        <Label text="⭐  Recommandés pour vous" styleClass="section-title" />
+                    </HBox>
+                    <HBox fx:id="recommendedContainer" styleClass="h-card-row" spacing="16" />
                 </VBox>
 
-                <!-- Recent Section -->
-                <VBox spacing="15">
-                    <Label text="Services récents" styleClass="section-title" />
-                    <HBox fx:id="recentContainer" styleClass="horizontal-container" />
+                <!-- ── Récents ──────────────────────────────────────────── -->
+                <VBox styleClass="section-panel" spacing="14">
+                    <HBox styleClass="section-header" alignment="CENTER_LEFT">
+                        <Label text="🕐  Services récents" styleClass="section-title" />
+                    </HBox>
+                    <HBox fx:id="recentContainer" styleClass="h-card-row" spacing="16" />
                 </VBox>
 
-                <!-- Categories -->
-                <VBox fx:id="categoriesContainer" spacing="40">
-                    <!-- Dynamic categories will be injected here or defined statically below -->
-                    
-                    <!-- Content Generation -->
-                    <VBox spacing="15">
-                        <Label text="Génération de contenu" styleClass="category-title" />
-                        <FlowPane fx:id="contentGenGrid" hgap="20" vgap="20" styleClass="grid-container" />
+                <!-- ── Catégories ──────────────────────────────────────── -->
+                <VBox fx:id="categoriesContainer" spacing="24">
+
+                    <!-- Génération de contenu -->
+                    <VBox styleClass="section-panel" spacing="14">
+                        <HBox styleClass="section-header" alignment="CENTER_LEFT" spacing="10">
+                            <Label text="✨" styleClass="category-icon" />
+                            <Label text="Génération de contenu" styleClass="category-title" />
+                        </HBox>
+                        <FlowPane fx:id="contentGenGrid" hgap="16" vgap="16" styleClass="card-grid" />
                     </VBox>
 
-                    <!-- Analysis & Intelligence -->
-                    <VBox spacing="15">
-                        <Label text="Analyse &amp; Intelligence" styleClass="category-title" />
-                        <FlowPane fx:id="analysisGrid" hgap="20" vgap="20" styleClass="grid-container" />
+                    <!-- Analyse &amp; Intelligence -->
+                    <VBox styleClass="section-panel" spacing="14">
+                        <HBox styleClass="section-header" alignment="CENTER_LEFT" spacing="10">
+                            <Label text="🧠" styleClass="category-icon" />
+                            <Label text="Analyse &amp; Intelligence" styleClass="category-title" />
+                        </HBox>
+                        <FlowPane fx:id="analysisGrid" hgap="16" vgap="16" styleClass="card-grid" />
                     </VBox>
 
-                    <!-- Productivity & Planning -->
-                    <VBox spacing="15">
-                        <Label text="Productivité &amp; Planification" styleClass="category-title" />
-                        <FlowPane fx:id="productivityGrid" hgap="20" vgap="20" styleClass="grid-container" />
+                    <!-- Productivité &amp; Planification -->
+                    <VBox styleClass="section-panel" spacing="14">
+                        <HBox styleClass="section-header" alignment="CENTER_LEFT" spacing="10">
+                            <Label text="📅" styleClass="category-icon" />
+                            <Label text="Productivité &amp; Planification" styleClass="category-title" />
+                        </HBox>
+                        <FlowPane fx:id="productivityGrid" hgap="16" vgap="16" styleClass="card-grid" />
                     </VBox>
 
-                    <!-- Resource Finder -->
-                    <VBox spacing="15">
-                        <Label text="Ressources" styleClass="category-title" />
-                        <FlowPane fx:id="resourcesGrid" hgap="20" vgap="20" styleClass="grid-container" />
+                    <!-- Ressources -->
+                    <VBox styleClass="section-panel" spacing="14">
+                        <HBox styleClass="section-header" alignment="CENTER_LEFT" spacing="10">
+                            <Label text="📚" styleClass="category-icon" />
+                            <Label text="Ressources" styleClass="category-title" />
+                        </HBox>
+                        <FlowPane fx:id="resourcesGrid" hgap="16" vgap="16" styleClass="card-grid" />
                     </VBox>
+
                 </VBox>
             </VBox>
         </ScrollPane>
