@@ -56,6 +56,11 @@ public class CareerDashboardController implements Initializable {
                         updateUI(result.predictions);
                     } else {
                         if (lblTopJob != null) lblTopJob.setText("Erreur IA");
+                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                        alert.setTitle("Détail Erreur IA");
+                        alert.setHeaderText("La prédiction a échoué");
+                        alert.setContentText(result.error);
+                        alert.show();
                     }
                 });
 
