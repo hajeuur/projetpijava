@@ -2,6 +2,7 @@ package edu.connection3a36.controllers;
 
 import edu.connection3a36.entities.Parcours;
 import edu.connection3a36.services.ParcoursService;
+import edu.connection3a36.tools.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -66,6 +67,9 @@ public class AjouterParcoursController implements Initializable {
         if (!isValid) return;
 
         Parcours p = new Parcours();
+        if (SessionManager.getCurrentUser() != null) {
+            p.setUtilisateurId(SessionManager.getCurrentUser().getId());
+        }
         p.setTypeParcours(cbTypeParcours.getValue());
         p.setTitre(txtTitre.getText().trim());
         p.setDateDebut(dpDateDebut.getValue());

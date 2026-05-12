@@ -20,8 +20,8 @@ public class ParcoursService implements IService<Parcours> {
             throw new SQLException("Un parcours avec ce titre existe déjà.");
         }
         String req = "INSERT INTO parcours (type_parcours, titre, date_debut, date_fin, description, " +
-                "etablissement, diplome, specialite, entreprise, poste, type_contrat, date_creation) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "etablissement, diplome, specialite, entreprise, poste, type_contrat, date_creation, utilisateur_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement pst = cnx.prepareStatement(req);
         pst.setString(1, parcours.getTypeParcours());
         pst.setString(2, parcours.getTitre());
@@ -35,6 +35,11 @@ public class ParcoursService implements IService<Parcours> {
         pst.setString(10, parcours.getPoste());
         pst.setString(11, parcours.getTypeContrat());
         pst.setDate(12, Date.valueOf(LocalDate.now()));
+        if (parcours.getUtilisateurId() > 0) {
+            pst.setInt(13, parcours.getUtilisateurId());
+        } else {
+            pst.setNull(13, Types.INTEGER);
+        }
         pst.executeUpdate();
         System.out.println("Parcours ajouté avec succès.");
     }
@@ -64,7 +69,7 @@ public class ParcoursService implements IService<Parcours> {
         }
         String req = "UPDATE parcours SET type_parcours=?, titre=?, date_debut=?, date_fin=?, " +
                 "description=?, etablissement=?, diplome=?, specialite=?, entreprise=?, " +
-                "poste=?, type_contrat=?, date_modification=? WHERE id=?";
+                "poste=?, type_contrat=?, date_modification=?, utilisateur_id=? WHERE id=?";
         PreparedStatement pst = cnx.prepareStatement(req);
         pst.setString(1, parcours.getTypeParcours());
         pst.setString(2, parcours.getTitre());
@@ -78,7 +83,12 @@ public class ParcoursService implements IService<Parcours> {
         pst.setString(10, parcours.getPoste());
         pst.setString(11, parcours.getTypeContrat());
         pst.setDate(12, Date.valueOf(LocalDate.now()));
-        pst.setInt(13, id);
+        if (parcours.getUtilisateurId() > 0) {
+            pst.setInt(13, parcours.getUtilisateurId());
+        } else {
+            pst.setNull(13, Types.INTEGER);
+        }
+        pst.setInt(14, id);
         pst.executeUpdate();
         System.out.println("Parcours modifié.");
     }
@@ -190,6 +200,7 @@ public class ParcoursService implements IService<Parcours> {
         Date dm = rs.getDate("date_modification");
         if (dm != null)
             p.setDateModification(dm.toLocalDate());
+        p.setUtilisateurId(rs.getInt("utilisateur_id"));
         return p;
     }
 }

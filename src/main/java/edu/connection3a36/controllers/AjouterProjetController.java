@@ -4,6 +4,7 @@ import edu.connection3a36.entities.Parcours;
 import edu.connection3a36.entities.Projet;
 import edu.connection3a36.services.ParcoursService;
 import edu.connection3a36.services.ProjetService;
+import edu.connection3a36.tools.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -62,6 +63,9 @@ public class AjouterProjetController implements Initializable {
         }
 
         Projet p = new Projet();
+        if (SessionManager.getCurrentUser() != null) {
+            p.setUtilisateurId(SessionManager.getCurrentUser().getId());
+        }
         p.setTitre(txtTitre.getText().trim());
         p.setType(txtType.getText().trim());
         p.setDescription(taDescription.getText().trim());

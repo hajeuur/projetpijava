@@ -19,9 +19,9 @@ public class ProjetService implements IService<Projet> {
         if (existsByTitreAndParcours(projet.getTitre(), projet.getParcoursId())) {
             throw new SQLException("Un projet avec ce titre existe déjà dans ce parcours.");
         }
-        String req = "INSERT INTO projet (titre, type, description, technologies, date_debut, date_fin, date_creation, parcours_id) "
+        String req = "INSERT INTO projet (titre, type, description, technologies, date_debut, date_fin, date_creation, parcours_id, utilisateur_id) "
                 +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement pst = cnx.prepareStatement(req);
         pst.setString(1, projet.getTitre());
         pst.setString(2, projet.getType());
@@ -34,6 +34,11 @@ public class ProjetService implements IService<Projet> {
             pst.setInt(8, projet.getParcoursId());
         } else {
             pst.setNull(8, Types.INTEGER);
+        }
+        if (projet.getUtilisateurId() > 0) {
+            pst.setInt(9, projet.getUtilisateurId());
+        } else {
+            pst.setNull(9, Types.INTEGER);
         }
         pst.executeUpdate();
         System.out.println("Projet ajouté avec succès.");
@@ -60,7 +65,7 @@ public class ProjetService implements IService<Projet> {
     @Override
     public void updateEntity(int id, Projet projet) throws SQLException {
         String req = "UPDATE projet SET titre=?, type=?, description=?, technologies=?, " +
-                "date_debut=?, date_fin=?, date_modification=?, parcours_id=? WHERE id=?";
+                "date_debut=?, date_fin=?, date_modification=?, parcours_id=?, utilisateur_id=? WHERE id=?";
         PreparedStatement pst = cnx.prepareStatement(req);
         pst.setString(1, projet.getTitre());
         pst.setString(2, projet.getType());
@@ -74,7 +79,12 @@ public class ProjetService implements IService<Projet> {
         } else {
             pst.setNull(8, Types.INTEGER);
         }
-        pst.setInt(9, id);
+        if (projet.getUtilisateurId() > 0) {
+            pst.setInt(9, projet.getUtilisateurId());
+        } else {
+            pst.setNull(9, Types.INTEGER);
+        }
+        pst.setInt(10, id);
         pst.executeUpdate();
         System.out.println("Projet modifié.");
     }
@@ -155,6 +165,7 @@ public class ProjetService implements IService<Projet> {
         if (dm != null)
             p.setDateModification(dm.toLocalDate());
         p.setParcoursId(rs.getInt("parcours_id"));
+        p.setUtilisateurId(rs.getInt("utilisateur_id"));
         return p;
     }
 }

@@ -15,6 +15,7 @@ public class Projet {
     private LocalDate dateCreation;
     private LocalDate dateModification;
     private int parcoursId; // FK
+    private int utilisateurId; // FK
 
     public Projet() {}
 
@@ -28,6 +29,7 @@ public class Projet {
         this.dateFin = dateFin;
         this.parcoursId = parcoursId;
         this.dateCreation = LocalDate.now();
+        // L'utilisateur ID sera défini par le setter dans les contrôleurs
     }
 
     // Getters & Setters
@@ -60,6 +62,9 @@ public class Projet {
 
     public int getParcoursId() { return parcoursId; }
     public void setParcoursId(int parcoursId) { this.parcoursId = parcoursId; }
+
+    public int getUtilisateurId() { return utilisateurId; }
+    public void setUtilisateurId(int utilisateurId) { this.utilisateurId = utilisateurId; }
 
     @Override
     public String toString() {

@@ -5,6 +5,7 @@ import edu.connection3a36.entities.Projet;
 import edu.connection3a36.services.ProjetService;
 import edu.connection3a36.services.WikipediaService;
 import edu.connection3a36.services.VoiceRecorderService;
+import edu.connection3a36.tools.SessionManager;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -400,6 +401,9 @@ public class AfficherProjetsController implements Initializable {
             Parcours linkedP = cbParcours.getValue();
             if (selectedProjet == null) {
                 Projet p = new Projet(titre, type, desc, tech, dd, df, linkedP != null ? linkedP.getId() : 0);
+                if (SessionManager.getCurrentUser() != null) {
+                    p.setUtilisateurId(SessionManager.getCurrentUser().getId());
+                }
                 projetService.addEntity(p);
                 afficherInfo("Succès", "Le projet a été créé.");
             } else {

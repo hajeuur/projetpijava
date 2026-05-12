@@ -19,6 +19,7 @@ public class Parcours {
     private String typeContrat;
     private LocalDate dateCreation;
     private LocalDate dateModification;
+    private int utilisateurId;
 
     public Parcours() {}
 
@@ -37,6 +38,7 @@ public class Parcours {
         this.poste = poste;
         this.typeContrat = typeContrat;
         this.dateCreation = LocalDate.now();
+        // L'utilisateur ID sera défini par le setter dans les contrôleurs
     }
 
     // Getters & Setters
@@ -81,6 +83,9 @@ public class Parcours {
 
     public LocalDate getDateModification() { return dateModification; }
     public void setDateModification(LocalDate dateModification) { this.dateModification = dateModification; }
+
+    public int getUtilisateurId() { return utilisateurId; }
+    public void setUtilisateurId(int utilisateurId) { this.utilisateurId = utilisateurId; }
 
     @Override
     public String toString() {

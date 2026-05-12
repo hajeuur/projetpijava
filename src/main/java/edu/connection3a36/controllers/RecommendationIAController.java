@@ -62,28 +62,54 @@ public class RecommendationIAController implements Initializable {
                 }
                 
                 String query = userTechs.isEmpty() ? "développeur" : String.join(" ", userTechs.stream().limit(2).toArray(String[]::new));
-                String urlAdzuna = String.format("https://api.adzuna.com/v1/api/jobs/fr/search/1?app_id=%s&app_key=%s&what=%s&results_per_page=12",
-                        APP_ID, APP_KEY, URLEncoder.encode(query, StandardCharsets.UTF_8));
+                JSONArray results = fetchJobs(query);
 
-                HttpClient client = HttpClient.newHttpClient();
-                HttpRequest request = HttpRequest.newBuilder().uri(java.net.URI.create(urlAdzuna)).build();
-                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                // Fallback: si aucun résultat, on tente une recherche plus large
+                if (results.length() == 0 && !userTechs.isEmpty()) {
+                    query = "développeur " + userTechs.iterator().next(); // On ne prend que la 1ère tech
+                    results = fetchJobs(query);
+                }
+                
+                // Second Fallback: recherche générique
+                if (results.length() == 0) {
+                    query = "développeur informatique";
+                    results = fetchJobs(query);
+                }
 
-                JSONObject json = new JSONObject(response.body());
-                JSONArray results = json.getJSONArray("results");
+                final String finalQuery = query;
+                final JSONArray finalResults = results;
 
                 Platform.runLater(() -> {
                     paneLoading.setVisible(false);
                     paneLoading.setManaged(false);
-                    for (int i = 0; i < results.length(); i++) {
-                        JSONObject job = results.getJSONObject(i);
-                        double score = calculateMatchingScore(job, userParcours, userProjets, userTechs);
-                        ajouterCardJob(job, score);
+                    
+                    if (finalResults.length() == 0) {
+                        Label lblNoResult = new Label("Aucune offre trouvée, même en recherche élargie.");
+                        lblNoResult.setStyle("-fx-text-fill: #64748b; -fx-font-size: 16px;");
+                        flowResults.getChildren().add(lblNoResult);
+                    } else {
+                        for (int i = 0; i < finalResults.length(); i++) {
+                            JSONObject job = finalResults.getJSONObject(i);
+                            double score = calculateMatchingScore(job, userParcours, userProjets, userTechs);
+                            ajouterCardJob(job, score);
+                        }
                     }
                 });
             } catch (Exception e) {
                 e.printStackTrace();
-                Platform.runLater(() -> paneLoading.setVisible(false));
+                Platform.runLater(() -> {
+                    paneLoading.setVisible(false);
+                    paneLoading.setManaged(false);
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Erreur de Connexion");
+                    alert.setHeaderText("Impossible de contacter le serveur d'offres d'emploi");
+                    alert.setContentText("Vérifiez votre connexion internet ou vos clés API.\n\nDétail : " + e.getMessage());
+                    alert.show();
+                    
+                    Label lblRetry = new Label("Vérifiez votre connexion et réessayez.");
+                    lblRetry.setStyle("-fx-text-fill: #ef4444;");
+                    flowResults.getChildren().add(lblRetry);
+                });
             }
         }).start();
     }
@@ -97,6 +123,16 @@ public class RecommendationIAController implements Initializable {
             Parent view = loader.load();
             MainController.getInstance().loadInContentArea(view);
         } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    private JSONArray fetchJobs(String query) throws Exception {
+        String urlAdzuna = String.format("https://api.adzuna.com/v1/api/jobs/fr/search/1?app_id=%s&app_key=%s&what=%s&results_per_page=12",
+                APP_ID, APP_KEY, URLEncoder.encode(query, StandardCharsets.UTF_8));
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder().uri(java.net.URI.create(urlAdzuna)).build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        JSONObject json = new JSONObject(response.body());
+        return json.getJSONArray("results");
     }
 
     private double calculateMatchingScore(JSONObject job, List<Parcours> parcours, List<Projet> projets, Set<String> userTechs) {
