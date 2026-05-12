@@ -15,6 +15,7 @@ import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -620,7 +621,11 @@ public class ProgrammeDetailController {
         fc.setInitialFileName(objectif.getTitre().replaceAll("[^a-zA-Z0-9]", "_") + ".xlsx");
         File file = fc.showSaveDialog(vboxTaches.getScene().getWindow());
         if (file != null) {
-            try { ExportUtil.exporterExcel(file.getAbsolutePath(), objectif, programme, taches); ToastNotification.showSuccess("Export Excel réussi", file.getName() + " sauvegardé."); }
+            try {
+                ExportUtil.exporterExcel(file.getAbsolutePath(), objectif, programme, taches);
+                ToastNotification.showSuccess("Export Excel réussi", file.getName() + " sauvegardé.");
+                ExportUtil.ouvrirFichier(file.getAbsolutePath());
+            }
             catch (Exception e) { ToastNotification.showError("Erreur export Excel", e.getMessage()); }
         }
     }
@@ -632,7 +637,11 @@ public class ProgrammeDetailController {
         fc.setInitialFileName(objectif.getTitre().replaceAll("[^a-zA-Z0-9]", "_") + ".docx");
         File file = fc.showSaveDialog(vboxTaches.getScene().getWindow());
         if (file != null) {
-            try { ExportUtil.exporterWord(file.getAbsolutePath(), objectif, programme, taches); ToastNotification.showSuccess("Export Word réussi", file.getName() + " sauvegardé."); }
+            try {
+                ExportUtil.exporterWord(file.getAbsolutePath(), objectif, programme, taches);
+                ToastNotification.showSuccess("Export Word réussi", file.getName() + " sauvegardé.");
+                ExportUtil.ouvrirFichier(file.getAbsolutePath());
+            }
             catch (Exception e) { ToastNotification.showError("Erreur export Word", e.getMessage()); }
         }
     }
@@ -656,9 +665,13 @@ public class ProgrammeDetailController {
             }
         };
         task.setOnSucceeded(e -> Platform.runLater(() -> {
-            afficherResume(task.getValue());
+            ResumeService.ResumeResultat r = task.getValue();
+            // 1. Afficher dans la card existante (comportement inchangé)
+            afficherResume(r);
             if (progressResume != null) { progressResume.setVisible(false); progressResume.setManaged(false); }
             if (btnGenererRapport != null) btnGenererRapport.setDisable(false);
+            // 2. Ouvrir le popup avec les mêmes informations
+            afficherPopupRapport(r);
         }));
         task.setOnFailed(e -> Platform.runLater(() -> {
             if (lblResumeTexte != null) lblResumeTexte.setText("Ollama indisponible.");
@@ -667,6 +680,106 @@ public class ProgrammeDetailController {
             ToastNotification.showWarning("Ollama indisponible", "Impossible de générer le rapport IA.");
         }));
         new Thread(task).start();
+    }
+
+    /**
+     * Affiche un popup (Dialog) avec le contenu du rapport IA.
+     * Reprend exactement les mêmes informations que la card afficherResume().
+     */
+    private void afficherPopupRapport(ResumeService.ResumeResultat r) {
+        // Créer le contenu du popup
+        VBox contenu = new VBox(18);
+        contenu.setPadding(new Insets(24, 28, 24, 28));
+        contenu.setStyle("-fx-background-color: #f8fafc;");
+        contenu.setPrefWidth(480);
+
+        // ── En-tête ───────────────────────────────────────────────────────────
+        HBox header = new HBox(10);
+        header.setAlignment(Pos.CENTER_LEFT);
+        Label iconRapport = new Label("📊");
+        iconRapport.setStyle("-fx-font-size: 26px;");
+        VBox titreBox = new VBox(2);
+        Label lblTitrePopup = new Label("Rapport d'avancement IA");
+        lblTitrePopup.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #102c59;");
+        Label lblObjectifPopup = new Label(objectif.getTitre());
+        lblObjectifPopup.setStyle("-fx-font-size: 12px; -fx-text-fill: #888;");
+        titreBox.getChildren().addAll(lblTitrePopup, lblObjectifPopup);
+        header.getChildren().addAll(iconRapport, titreBox);
+
+        // ── Score ─────────────────────────────────────────────────────────────
+        HBox scoreBox = new HBox(12);
+        scoreBox.setAlignment(Pos.CENTER_LEFT);
+        scoreBox.setStyle("-fx-background-color: #eff6ff; -fx-background-radius: 10; -fx-padding: 12 16 12 16;");
+        Label lblScoreIcon = new Label("🎯");
+        lblScoreIcon.setStyle("-fx-font-size: 20px;");
+        VBox scoreInfo = new VBox(2);
+        Label lblScoreTitle = new Label("Score de progression");
+        lblScoreTitle.setStyle("-fx-font-size: 11px; -fx-text-fill: #888; -fx-font-weight: bold;");
+        Label lblScoreVal = new Label(programme.getScorePourcentage() + "%  " + ScoreService.emojiMedaille(programme.getMeilleureMedaille()));
+        lblScoreVal.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #102c59;");
+        scoreInfo.getChildren().addAll(lblScoreTitle, lblScoreVal);
+        scoreBox.getChildren().addAll(lblScoreIcon, scoreInfo);
+
+        // ── Résumé ────────────────────────────────────────────────────────────
+        VBox resumeBox = new VBox(6);
+        resumeBox.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 14 16 14 16;"
+                + "-fx-effect: dropshadow(gaussian, rgba(16,44,89,0.06), 6, 0, 0, 2);");
+        Label lblResumeTitle = new Label("📝 Résumé");
+        lblResumeTitle.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #102c59;");
+        Label lblResumeVal = new Label(r.resume);
+        lblResumeVal.setStyle("-fx-font-size: 13px; -fx-text-fill: #444; -fx-line-spacing: 3;");
+        lblResumeVal.setWrapText(true);
+        resumeBox.getChildren().addAll(lblResumeTitle, lblResumeVal);
+
+        // ── Point positif ─────────────────────────────────────────────────────
+        VBox positifBox = new VBox(6);
+        positifBox.setStyle("-fx-background-color: #f0fdf4; -fx-background-radius: 10; -fx-padding: 14 16 14 16;"
+                + "-fx-border-color: #22c55e; -fx-border-width: 0 0 0 4; -fx-border-radius: 10;");
+        Label lblPositifVal = new Label("✅ " + r.pointPositif);
+        lblPositifVal.setStyle("-fx-font-size: 13px; -fx-text-fill: #166534; -fx-font-weight: bold;");
+        lblPositifVal.setWrapText(true);
+        positifBox.getChildren().add(lblPositifVal);
+
+        // ── Conseil ───────────────────────────────────────────────────────────
+        VBox conseilBox = new VBox(6);
+        conseilBox.setStyle("-fx-background-color: #fefce8; -fx-background-radius: 10; -fx-padding: 14 16 14 16;"
+                + "-fx-border-color: #eab308; -fx-border-width: 0 0 0 4; -fx-border-radius: 10;");
+        Label lblConseilVal = new Label("💡 " + r.conseil);
+        lblConseilVal.setStyle("-fx-font-size: 13px; -fx-text-fill: #854d0e; -fx-font-weight: bold;");
+        lblConseilVal.setWrapText(true);
+        conseilBox.getChildren().add(lblConseilVal);
+
+        contenu.getChildren().addAll(header, scoreBox, resumeBox, positifBox, conseilBox);
+
+        // ── Créer et afficher le Dialog ───────────────────────────────────────
+        // Envelopper le contenu dans un ScrollPane pour pouvoir tout lire
+        ScrollPane scrollPane = new ScrollPane(contenu);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPrefHeight(500);
+        scrollPane.setMaxHeight(600);
+        scrollPane.setStyle("-fx-background-color: #f8fafc; -fx-background: #f8fafc;");
+
+        javafx.scene.control.Dialog<Void> dialog = new javafx.scene.control.Dialog<>();
+        dialog.setTitle("Rapport d'avancement — " + objectif.getTitre());
+        dialog.getDialogPane().setContent(scrollPane);
+        dialog.getDialogPane().setPrefWidth(520);
+        dialog.getDialogPane().setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 14;");
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+
+        // Styliser le bouton Fermer
+        Button btnFermer = (Button) dialog.getDialogPane().lookupButton(ButtonType.CLOSE);
+        if (btnFermer != null) {
+            btnFermer.setText("Fermer");
+            btnFermer.setStyle("-fx-background-color: #102c59; -fx-text-fill: white; "
+                    + "-fx-font-weight: bold; -fx-background-radius: 50; -fx-padding: 8 24 8 24; -fx-cursor: hand;");
+        }
+
+        // Positionner le dialog au centre de la fenêtre principale
+        if (vboxTaches.getScene() != null && vboxTaches.getScene().getWindow() != null) {
+            dialog.initOwner(vboxTaches.getScene().getWindow());
+        }
+
+        dialog.showAndWait();
     }
 
     private void afficherResume(ResumeService.ResumeResultat r) {

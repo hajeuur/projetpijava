@@ -276,4 +276,20 @@ public class ExportUtil {
     }
 
     private static String nvl(Object o) { return o != null ? o.toString() : "—"; }
+
+    /**
+     * Ouvre un fichier avec l'application par défaut du système.
+     * .xlsx → Excel, .docx → Word
+     * Ne plante pas si l'ouverture échoue.
+     */
+    public static void ouvrirFichier(String filePath) {
+        try {
+            java.io.File file = new java.io.File(filePath);
+            if (file.exists() && java.awt.Desktop.isDesktopSupported()) {
+                java.awt.Desktop.getDesktop().open(file);
+            }
+        } catch (Exception e) {
+            System.err.println("Impossible d'ouvrir le fichier automatiquement : " + e.getMessage());
+        }
+    }
 }
