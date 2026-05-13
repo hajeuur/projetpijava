@@ -109,27 +109,22 @@ public class ApprentissageController implements Initializable {
         Button openBtn = new Button("Ouvrir");
         openBtn.getStyleClass().add("btn-open");
         openBtn.setOnAction(e -> {
+            edu.connection3a36.controllers.MainController main =
+                    edu.connection3a36.controllers.MainController.getInstance();
             if ("Analyser mes performances".equals(item.getTitle())) {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/analyse.fxml"));
                     Parent root = loader.load();
-                    
-                    // Optionnel : passer l'ID utilisateur au contrôleur
-                    AnalyseController controller = loader.getController();
-                    // controller.setUserId(SessionManager.getCurrentUser().getId());
-                    
-                    openBtn.getScene().setRoot(root);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                    if (main != null) main.loadInContentArea(root);
+                    else openBtn.getScene().setRoot(root);
+                } catch (IOException ex) { ex.printStackTrace(); }
             } else if ("Pack d'étude intelligent".equals(item.getTitle())) {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/pack_etude.fxml"));
                     Parent root = loader.load();
-                    openBtn.getScene().setRoot(root);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                    if (main != null) main.loadInContentArea(root);
+                    else openBtn.getScene().setRoot(root);
+                } catch (IOException ex) { ex.printStackTrace(); }
             } else if ("Que réviser aujourd'hui ?".equals(item.getTitle())) {
                 showIntelligenceInsights();
             } else {

@@ -47,8 +47,10 @@ import java.util.concurrent.TimeUnit;
 public class PlanningController implements Initializable {
 
     // ── Constants ────────────────────────────────────────────────────────
-    private static final int ROW_HEIGHT = 56;          // px per hour
-    private static final int TOTAL_GRID_HEIGHT = ROW_HEIGHT * 24; // 1344
+    private static final int COL_WIDTH  = 60;   // px per hour (horizontal axis)
+    private static final int DAY_ROW_H  = 72;   // px per day row
+    private static final int AXIS_W     = 90;   // px for left day-label column
+    private static final int HEADER_H   = 36;   // px for top hour-header row
 
     // ── FXML injections ──────────────────────────────────────────────────
 
@@ -69,17 +71,12 @@ public class PlanningController implements Initializable {
     @FXML private Label      planningReminders;
     @FXML private ScrollPane weekScrollPane;
     @FXML private GridPane   weekGridPane;
-    @FXML private VBox       weekAxis;
-
-    // Day-header labels
-    @FXML private Label dayHeader0, dayHeader1, dayHeader2, dayHeader3,
-            dayHeader4, dayHeader5, dayHeader6;
-
-    // Day column Panes
-    @FXML private Pane dayCol0, dayCol1, dayCol2, dayCol3,
-            dayCol4, dayCol5, dayCol6;
 
     @FXML private Button personalityTestBtn;
+
+    // Transposed grid — built programmatically by buildWeekGrid()
+    private final Pane[]  dayRows   = new Pane[7];
+    private final Label[] dayLabels = new Label[7];
 
     // ── State ────────────────────────────────────────────────────────────
     private final PlanningService service    = new PlanningService();
@@ -108,9 +105,24 @@ public class PlanningController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        buildWeekGrid();
         updateAll();
         startReminderPoller();
         refreshPersonalityStatus();
+
+        // Auto-refresh: redraw week every 30 s so changes appear without navigation
+        javafx.animation.Timeline autoRefresh = new javafx.animation.Timeline(
+            new KeyFrame(Duration.seconds(30), e -> refreshWeek()));
+        autoRefresh.setCycleCount(javafx.animation.Animation.INDEFINITE);
+        autoRefresh.play();
+
+        // Scroll to show 08h area on open
+        Platform.runLater(() -> {
+            double fullW = COL_WIDTH * 24.0;
+            double viewW = weekScrollPane.getViewportBounds().getWidth();
+            double target = (8.0 * COL_WIDTH - 8) / Math.max(1, fullW - viewW);
+            weekScrollPane.setHvalue(Math.max(0, Math.min(1, target)));
+        });
     }
 
     // ════════════════════════════════════════════════════════════════════
@@ -193,44 +205,103 @@ public class PlanningController implements Initializable {
     // WEEK GRID  (right panel)
     // ════════════════════════════════════════════════════════════════════
 
+    // ════════════════════════════════════════════════════════════════════
+    // BUILD WEEK GRID  (transposed: days = rows, hours = columns)
+    // ════════════════════════════════════════════════════════════════════
+
+    private void buildWeekGrid() {
+        weekGridPane.getChildren().clear();
+        weekGridPane.getColumnConstraints().clear();
+        weekGridPane.getRowConstraints().clear();
+
+        // Col 0: left axis (day labels)
+        ColumnConstraints axisCol = new ColumnConstraints(AXIS_W, AXIS_W, AXIS_W);
+        weekGridPane.getColumnConstraints().add(axisCol);
+        // Cols 1-24: one per hour
+        for (int h = 0; h < 24; h++) {
+            ColumnConstraints cc = new ColumnConstraints(COL_WIDTH, COL_WIDTH, COL_WIDTH);
+            weekGridPane.getColumnConstraints().add(cc);
+        }
+
+        // Row 0: hour headers
+        RowConstraints hdrRow = new RowConstraints(HEADER_H, HEADER_H, HEADER_H);
+        weekGridPane.getRowConstraints().add(hdrRow);
+        // Rows 1-7: one per day
+        for (int d = 0; d < 7; d++) {
+            RowConstraints rc = new RowConstraints(DAY_ROW_H, DAY_ROW_H, DAY_ROW_H);
+            weekGridPane.getRowConstraints().add(rc);
+        }
+
+        // Corner cell
+        Pane corner = new Pane();
+        corner.getStyleClass().add("week-header-corner");
+        weekGridPane.add(corner, 0, 0);
+
+        // Hour header labels (row 0, cols 1-24)
+        for (int h = 0; h < 24; h++) {
+            Label lbl = new Label(String.format("%02dh", h));
+            lbl.setMaxWidth(Double.MAX_VALUE);
+            lbl.setMaxHeight(Double.MAX_VALUE);
+            lbl.setAlignment(Pos.CENTER);
+            lbl.getStyleClass().add("hour-header");
+            weekGridPane.add(lbl, h + 1, 0);
+        }
+
+        // Day rows (rows 1-7): label in col 0, Pane spanning cols 1-24
+        for (int d = 0; d < 7; d++) {
+            dayLabels[d] = new Label();
+            dayLabels[d].setMaxWidth(Double.MAX_VALUE);
+            dayLabels[d].setMaxHeight(Double.MAX_VALUE);
+            dayLabels[d].setAlignment(Pos.CENTER_LEFT);
+            dayLabels[d].setPadding(new Insets(0, 8, 0, 8));
+            dayLabels[d].getStyleClass().add("week-day-label");
+            weekGridPane.add(dayLabels[d], 0, d + 1);
+
+            dayRows[d] = new Pane();
+            dayRows[d].getStyleClass().add("week-day-row");
+            dayRows[d].setPrefWidth(COL_WIDTH * 24.0);
+            dayRows[d].setMinWidth(COL_WIDTH * 24.0);
+            dayRows[d].setPrefHeight(DAY_ROW_H);
+            dayRows[d].setMinHeight(DAY_ROW_H);
+            GridPane.setColumnSpan(dayRows[d], 24);
+            weekGridPane.add(dayRows[d], 1, d + 1);
+
+            final int idx = d;
+            dayRows[d].setOnMouseClicked(e -> {
+                if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY && e.getClickCount() == 2)
+                    openCreateDialog(dayRows[idx], e.getX());
+            });
+            dayRows[d].setOnMousePressed(e -> setupDragDrop(dayRows[idx]));
+        }
+    }
+
+    /** Update day-label texts and selected-day highlight. */
     private void renderWeekSkeleton() {
         LocalDate monday = weekStart(selectedDate);
-        Label[] dayHeaders = {dayHeader0, dayHeader1, dayHeader2, dayHeader3,
-                dayHeader4, dayHeader5, dayHeader6};
-        Pane[]  dayCols   = {dayCol0,    dayCol1,    dayCol2,    dayCol3,
-                dayCol4,    dayCol5,    dayCol6};
+        LocalDate sunday = monday.plusDays(6);
+        weekRange.setText(monday.format(DISPLAY_FMT) + " → " + sunday.format(DISPLAY_FMT));
 
         for (int i = 0; i < 7; i++) {
             LocalDate d = monday.plusDays(i);
-            dayHeaders[i].setText(d.format(DAY_FMT));
-            dayHeaders[i].setUserData(d);            // store date for click handler
-            dayHeaders[i].getStyleClass().removeAll("week-day-header-selected");
-            if (d.equals(selectedDate)) {
-                dayHeaders[i].getStyleClass().add("week-day-header-selected");
-            }
-            // click on header selects that day
-            dayHeaders[i].setOnMouseClicked(e -> {
-                selectedDate = d;
-                updateAll();
-            });
-            dayHeaders[i].setCursor(Cursor.HAND);
+            if (dayLabels[i] == null) continue;
+            dayLabels[i].setText(d.format(DAY_FMT));
+            dayLabels[i].setUserData(d);
+            dayLabels[i].getStyleClass().removeAll("week-day-label-selected");
+            if (d.equals(selectedDate)) dayLabels[i].getStyleClass().add("week-day-label-selected");
 
-            // Tag column with date string
-            dayCols[i].setUserData(d);
-            dayCols[i].setPrefHeight(TOTAL_GRID_HEIGHT);
-            dayCols[i].setMinHeight(TOTAL_GRID_HEIGHT);
+            dayRows[i].setUserData(d);
+
+            // click on label selects that day
+            final LocalDate fd = d;
+            dayLabels[i].setOnMouseClicked(e -> { selectedDate = fd; updateAll(); });
+            dayLabels[i].setCursor(Cursor.HAND);
         }
-
-        // Week range label
-        LocalDate sunday = monday.plusDays(6);
-        weekRange.setText(monday.format(DISPLAY_FMT) + " → " + sunday.format(DISPLAY_FMT));
     }
 
-    /** Remove all activity cards from all day columns. */
+    /** Remove all activity cards from all day rows. */
     private void clearActivityCards() {
-        Pane[] cols = {dayCol0, dayCol1, dayCol2, dayCol3, dayCol4, dayCol5, dayCol6};
-        for (Pane col : cols) {
-            col.getChildren().removeIf(n -> "activity-card".equals(n.getUserData()));
+        for (Pane row : dayRows) {
+            if (row != null) row.getChildren().removeIf(n -> "activity-card".equals(n.getUserData()));
         }
     }
 
@@ -241,33 +312,24 @@ public class PlanningController implements Initializable {
     private void paintActivities(List<PlanningEtude> activities) {
         clearActivityCards();
         LocalDate monday = weekStart(selectedDate);
-
-        // Split multi-day activities then group by day for lane assignment
         List<PlanningEtude> rendered = splitForRender(activities, monday);
+
         Map<LocalDate, List<PlanningEtude>> byDay = new LinkedHashMap<>();
-        for (LocalDate d = monday; !d.isAfter(monday.plusDays(6)); d = d.plusDays(1)) {
+        for (LocalDate d = monday; !d.isAfter(monday.plusDays(6)); d = d.plusDays(1))
             byDay.put(d, new ArrayList<>());
-        }
         for (PlanningEtude a : rendered) {
-            if (a.getDateSeance() != null && byDay.containsKey(a.getDateSeance())) {
-                if ("all".equals(activeTypeFilter) ||
-                        activeTypeFilter.equals(a.getTypeActivite())) {
+            if (a.getDateSeance() != null && byDay.containsKey(a.getDateSeance()))
+                if ("all".equals(activeTypeFilter) || activeTypeFilter.equals(a.getTypeActivite()))
                     byDay.get(a.getDateSeance()).add(a);
-                }
-            }
         }
 
-        // Render per day
-        Pane[] cols = {dayCol0, dayCol1, dayCol2, dayCol3, dayCol4, dayCol5, dayCol6};
         for (int i = 0; i < 7; i++) {
             LocalDate day = monday.plusDays(i);
             List<PlanningEtude> dayList = byDay.getOrDefault(day, Collections.emptyList());
             dayList.sort(Comparator.comparingInt(PlanningEtude::startMinutes));
             assignLanes(dayList);
-            for (PlanningEtude a : dayList) {
-                VBox card = buildActivityCard(a, cols[i]);
-                cols[i].getChildren().add(card);
-            }
+            for (PlanningEtude a : dayList)
+                dayRows[i].getChildren().add(buildActivityCard(a));
         }
     }
 
@@ -374,12 +436,9 @@ public class PlanningController implements Initializable {
         return 1;
     }
 
-    // ════════════════════════════════════════════════════════════════════
-    // ACTIVITY CARD BUILDER
-    // ════════════════════════════════════════════════════════════════════
-
-    private VBox buildActivityCard(PlanningEtude a, Pane column) {
-        VBox card = new VBox(2);
+    /** Build a horizontal activity card positioned by time on X-axis, lanes on Y-axis. */
+    private VBox buildActivityCard(PlanningEtude a) {
+        VBox card = new VBox(1);
         card.setUserData("activity-card");
         card.getStyleClass().add("activity-card");
 
@@ -391,55 +450,45 @@ public class PlanningController implements Initializable {
         try {
             Color base = Color.web(hex);
             card.setBackground(new Background(new BackgroundFill(
-                    base.deriveColor(0, 1, 1, 0.55), new CornerRadii(8), Insets.EMPTY)));
+                    base.deriveColor(0, 1, 1, 0.55), new CornerRadii(6), Insets.EMPTY)));
             card.setBorder(new Border(new BorderStroke(
                     base.deriveColor(0, 1, 0.8, 1), BorderStrokeStyle.SOLID,
-                    new CornerRadii(8), new BorderWidths(2))));
+                    new CornerRadii(6), new BorderWidths(2))));
         } catch (Exception ignored) {}
 
-        // Position & size
-        int startMin  = a.startMinutes();
-        int duration  = a.getDureePrevue() != null ? a.getDureePrevue() : 30;
-        double topPx  = (startMin / 60.0) * ROW_HEIGHT;
-        double heightPx = (duration / 60.0) * ROW_HEIGHT;
+        // Horizontal position: X = startMinutes / 60 * COL_WIDTH
+        int startMin = a.startMinutes();
+        int duration = a.getDureePrevue() != null ? a.getDureePrevue() : 30;
+        double leftPx  = (startMin  / 60.0) * COL_WIDTH;
+        double widthPx = (duration  / 60.0) * COL_WIDTH;
+        card.setLayoutX(leftPx);
+        card.setPrefWidth(Math.max(widthPx - 3, 14));
 
-        card.setLayoutY(topPx);
-        card.setPrefHeight(Math.max(heightPx, 20));
-
+        // Vertical lanes within the day row
         int lane  = laneOf(a);
         int total = laneTotalOf(a);
-        double pct = 100.0 / total;
-        double gap = 8.0;
-        // setLayoutX and prefWidth set after column width is known → bind to column width
-        column.widthProperty().addListener((obs, ov, nv) -> {
-            double w = nv.doubleValue();
-            card.setLayoutX(pct / 100.0 * lane * w + gap / 2.0);
-            card.setPrefWidth(pct / 100.0 * w - gap);
-        });
-        // Initial set
-        double colW = column.getWidth() > 0 ? column.getWidth() : 160;
-        card.setLayoutX(pct / 100.0 * lane * colW + gap / 2.0);
-        card.setPrefWidth(pct / 100.0 * colW - gap);
+        double laneH = (DAY_ROW_H - 4.0) / Math.max(1, total);
+        card.setLayoutY(lane * laneH + 2);
+        card.setPrefHeight(Math.max(laneH - 4, 16));
 
-        card.setPadding(new Insets(4, 6, 4, 6));
+        card.setPadding(new Insets(2, 4, 2, 4));
 
         Label titleLbl = new Label(a.getTitreP());
         titleLbl.getStyleClass().add("activity-title");
-        titleLbl.setWrapText(true);
+        titleLbl.setWrapText(false);          // horizontal card: clip rather than wrap
+        titleLbl.setEllipsisString("…");
         if ("done".equals(a.getEtat())) titleLbl.setStyle("-fx-strikethrough: true;");
 
-        Label metaLbl = new Label(a.durationLabel() + "  " +
-                (a.getHeureDebut() != null ? a.getHeureDebut().toString().substring(0, 5) : ""));
+        Label metaLbl = new Label(
+                (a.getHeureDebut() != null ? a.getHeureDebut().toString().substring(0, 5) : "")
+                + "  " + a.durationLabel());
         metaLbl.getStyleClass().add("activity-meta");
 
         card.getChildren().addAll(titleLbl, metaLbl);
         card.setCursor(Cursor.HAND);
-
-        // Store activity id for event handlers
         card.setId("activity-" + a.getId());
-        int activityId = a.getId();
 
-        // Single click → toggle done
+        int activityId = a.getId();
         card.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 1) {
                 if (!"skipped".equals(a.getEtat())) toggleActivity(activityId, card);
@@ -451,7 +500,6 @@ public class PlanningController implements Initializable {
             }
         });
 
-        // Drag & drop (source)
         card.setOnDragDetected(e -> {
             dragActivityId = activityId;
             dragOffsetY    = e.getY();
@@ -466,74 +514,21 @@ public class PlanningController implements Initializable {
     }
 
     // ════════════════════════════════════════════════════════════════════
-    // DAY COLUMN EVENTS  (double-click create / drag-drop target)
+    // DAY ROW EVENTS  (drag-drop target / xToTime helper)
     // ════════════════════════════════════════════════════════════════════
 
-    @FXML private void onDayColClick(javafx.scene.input.MouseEvent e) {
-        if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2) {
-            Pane col = (Pane) e.getSource();
-            openCreateDialog(col, e.getY());
-        }
-    }
-    @FXML
-    public void onRefaireTest() {
-        openPersonalityTest();
-    }
-
-    @FXML
-    private void onPersonalityTest() {
-        openPersonalityTest();
-    }
-
-    private void refreshPersonalityStatus() {
-        Utilisateur user = SessionManager.getCurrentUser();
-        if (user == null) return;
-
-        String typePers = null;
-        try (Connection conn = MyConnection.getInstance();
-             PreparedStatement ps = conn.prepareStatement("SELECT type_pers FROM profil_apprentissage WHERE utilisateur_id = ?")) {
-            ps.setInt(1, user.getId());
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) typePers = rs.getString("type_pers");
-            }
-        } catch (SQLException e) { e.printStackTrace(); }
-
-        if (typePers != null && !typePers.isEmpty()) {
-            personalityTestBtn.setText(typePers);
-            personalityTestBtn.setStyle("-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold;");
-        } else {
-            personalityTestBtn.setText("Test de personnalité");
-            personalityTestBtn.setStyle("");
-        }
-    }
-
-    private void openPersonalityTest() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/personality.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("MentorAI - Test de Personnalité");
-            stage.setScene(new Scene(root));
-            stage.setOnHidden(e -> refreshPersonalityStatus());
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML private void onDayColMousePressed(javafx.scene.input.MouseEvent e) {
-        // Accept drag-over
-        Pane col = (Pane) e.getSource();
-        col.setOnDragOver(ev -> {
+    /** Wire drag-over and drag-dropped on a day row Pane. */
+    private void setupDragDrop(Pane row) {
+        row.setOnDragOver(ev -> {
             if (ev.getDragboard().hasString()) ev.acceptTransferModes(TransferMode.MOVE);
             ev.consume();
         });
-        col.setOnDragDropped(ev -> {
+        row.setOnDragDropped(ev -> {
             Dragboard db = ev.getDragboard();
             if (db.hasString()) {
                 int id = Integer.parseInt(db.getString());
-                LocalDate targetDate = (LocalDate) col.getUserData();
-                LocalTime targetTime = yToTime(ev.getY());
+                LocalDate targetDate = (LocalDate) row.getUserData();
+                LocalTime targetTime = xToTime(ev.getX());
                 moveActivity(id, targetDate, targetTime);
             }
             ev.setDropCompleted(true);
@@ -541,8 +536,9 @@ public class PlanningController implements Initializable {
         });
     }
 
-    private LocalTime yToTime(double y) {
-        int totalMinutes = (int) Math.max(0, Math.min(1439, (y / ROW_HEIGHT) * 60));
+    /** Convert an X pixel offset within a day-row Pane to a LocalTime. */
+    private LocalTime xToTime(double x) {
+        int totalMinutes = (int) Math.max(0, Math.min(1439, (x / COL_WIDTH) * 60));
         return LocalTime.of(totalMinutes / 60, totalMinutes % 60);
     }
 
@@ -589,10 +585,10 @@ public class PlanningController implements Initializable {
     // DIALOGS  (Create / Edit / Delete)
     // ════════════════════════════════════════════════════════════════════
 
-    /** Opens the "create activity" dialog. */
-    private void openCreateDialog(Pane col, double clickY) {
-        LocalDate date = (LocalDate) col.getUserData();
-        LocalTime time = yToTime(clickY);
+    /** Opens the "create activity" dialog — clickX is the X offset within the day-row Pane. */
+    private void openCreateDialog(Pane row, double clickX) {
+        LocalDate date = (LocalDate) row.getUserData();
+        LocalTime time = xToTime(clickX);
 
         Dialog<PlanningEtude> dlg = buildActivityDialog(null, date, time);
         dlg.setTitle("Ajouter une activité");
@@ -606,6 +602,45 @@ public class PlanningController implements Initializable {
                 showErrors("Erreur base de données : " + ex.getMessage());
             }
         });
+    }
+
+    @FXML
+    public void onRefaireTest() { openPersonalityTest(); }
+
+    @FXML
+    private void onPersonalityTest() { openPersonalityTest(); }
+
+    private void refreshPersonalityStatus() {
+        Utilisateur user = SessionManager.getCurrentUser();
+        if (user == null) return;
+        String typePers = null;
+        try (Connection conn = MyConnection.getInstance();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT type_pers FROM profil_apprentissage WHERE utilisateur_id = ?")) {
+            ps.setInt(1, user.getId());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) typePers = rs.getString("type_pers");
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        if (typePers != null && !typePers.isEmpty()) {
+            personalityTestBtn.setText(typePers);
+            personalityTestBtn.setStyle("-fx-background-color: #102c59; -fx-text-fill: white; -fx-font-weight: bold;");
+        } else {
+            personalityTestBtn.setText("Test de personnalité");
+            personalityTestBtn.setStyle("");
+        }
+    }
+
+    private void openPersonalityTest() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/personality.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("MentorAI - Test de Personnalité");
+            stage.setScene(new Scene(root));
+            stage.setOnHidden(e -> refreshPersonalityStatus());
+            stage.show();
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     /** Opens a unified info dialog on double-click: shows activity info + linked notes + actions. */

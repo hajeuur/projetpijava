@@ -16,39 +16,33 @@
             styleClass="app-root"
             stylesheets="@../css/apprentissage.css">
 
-    <!-- ═══════════════════════════════════════════════════════════
-         HEADER  —  navy banner matching Feedback's #102c59 bar
-         ═══════════════════════════════════════════════════════════ -->
-    <top>
-        <VBox styleClass="app-header">
-            <HBox alignment="CENTER_LEFT" spacing="20">
-                <padding><Insets top="22" right="28" bottom="22" left="28"/></padding>
 
-                <!-- Title block -->
-                <VBox spacing="4" HBox.hgrow="ALWAYS">
-                    <Label text="Centre d'apprentissage"
-                           styleClass="header-title" />
-                    <Label text="Explorez vos outils d'apprentissage personnalisés"
-                           styleClass="header-subtitle" />
-                </VBox>
 
-                <!-- Search field -->
-                <TextField fx:id="searchField"
-                           promptText="🔍  Rechercher un service..."
-                           styleClass="app-search-field"
-                           onKeyReleased="#handleSearch"
-                           prefWidth="280" />
-            </HBox>
-        </VBox>
-    </top>
 
     <!-- ═══════════════════════════════════════════════════════════
          CENTER  —  scrollable content panels
          ═══════════════════════════════════════════════════════════ -->
     <center>
-        <ScrollPane fitToWidth="true" styleClass="app-scroll">
-            <VBox spacing="28">
-                <padding><Insets top="24" right="28" bottom="32" left="28"/></padding>
+        <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="app-scroll">
+            <VBox spacing="20">
+                <padding><Insets top="20" right="24" bottom="28" left="24"/></padding>
+
+                <!-- ── Compact page title + search bar ─────────────────── -->
+                <HBox alignment="CENTER_LEFT" spacing="16"
+                      style="-fx-background-color: linear-gradient(to right,#102c59,#1a3c78); -fx-background-radius:12; -fx-padding: 14 20 14 20;">
+                    <VBox spacing="2" HBox.hgrow="ALWAYS">
+                        <Label text="📚  Centre d'apprentissage"
+                               style="-fx-text-fill:white; -fx-font-size:17px; -fx-font-weight:bold;"/>
+                        <Label text="Explorez vos outils d'apprentissage personnalisés"
+                               style="-fx-text-fill:rgba(255,255,255,0.7); -fx-font-size:12px;"/>
+                    </VBox>
+                    <TextField fx:id="searchField"
+                               promptText="🔍  Rechercher…"
+                               styleClass="app-search-field"
+                               onKeyReleased="#handleSearch"
+                               prefWidth="240"
+                               style="-fx-background-color:rgba(255,255,255,0.15); -fx-text-fill:white; -fx-prompt-text-fill:rgba(255,255,255,0.6); -fx-border-color:rgba(255,255,255,0.3); -fx-border-radius:8; -fx-background-radius:8; -fx-padding:6 12 6 12;"/>
+                </HBox>
 
                 <!-- ── Recommandés ─────────────────────────────────────── -->
                 <VBox styleClass="section-panel" spacing="14">

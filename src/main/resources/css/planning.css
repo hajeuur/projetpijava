@@ -179,7 +179,7 @@
     -fx-border-width: 0 0 1 0;
 }
 
-/* ── Hour axis ── */
+/* ── Hour axis (old vertical layout kept for reference) ── */
 .week-axis {
     -fx-background-color: white;
     -fx-border-color: transparent #e2e8f0 transparent transparent;
@@ -192,6 +192,40 @@
     -fx-padding: 4 8 0 8;
     -fx-font-size: 11px;
     -fx-text-fill: #64748b;
+    -fx-border-color: transparent transparent #e2e8f0 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* ── Transposed layout: hour headers (top axis) ── */
+.hour-header {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: transparent #e2e8f0 #e2e8f0 transparent;
+    -fx-border-width: 0 1 1 0;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-padding: 4 2 4 2;
+    -fx-text-fill: #64748b;
+    -fx-alignment: center;
+}
+
+/* ── Transposed layout: left day-label column ── */
+.week-day-label {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: transparent #e2e8f0 #e2e8f0 transparent;
+    -fx-border-width: 0 1 1 0;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-padding: 4 8 4 8;
+    -fx-text-fill: #334155;
+}
+.week-day-label-selected {
+    -fx-background-color: linear-gradient(to bottom right, #102c59, #1a3c78);
+    -fx-text-fill: white;
+}
+
+/* ── Transposed layout: horizontal day row pane ── */
+.week-day-row {
+    -fx-background-color: white;
     -fx-border-color: transparent transparent #e2e8f0 transparent;
     -fx-border-width: 0 0 1 0;
 }
